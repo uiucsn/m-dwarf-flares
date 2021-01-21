@@ -29,7 +29,22 @@ flare_data = astropy.io.ascii.read('flare_data/apjaa8ea2t3_mrt.txt', quotechar="
 #Plotting points identified as flares.
 for flare in flare_data:
     if flare['KIC'] == int(KIC_ID):
-        plt.plot(lc.time, lc.flux, linestyle='-', marker='o')
-        plt.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
-        plt.xlim([flare['St-BKJD']-0.5,flare['End-BKJD']+0.5])
+        fig, (ax1, ax2) = plt.subplots(2)
+        fig.suptitle('Flare from ' + str(flare['St-BKJD']) + ' to ' + str(flare['End-BKJD']))
+
+        # Full light curve plot
+        ax1.plot(lc.time, lc.flux)
+        ax1.set_ylabel('Relative flux')
+        ax1.set_xlim([flare['St-BKJD']-200,flare['End-BKJD']+200])
+        ax1.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
+        ax1.set_title('LC for KIC ' + str(KIC_ID))
+
+        # Light curve of the flare
+        ax2.plot(lc.time, lc.flux, linestyle='-', marker='.')
+        ax2.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
+        ax2.set_xlabel('Time BKJD')
+        ax2.set_ylabel('Relative flux')
+        ax2.set_xlim([flare['St-BKJD']-2,flare['End-BKJD']+2])
+        ax2.set_title('Flare Area: '+str(flare['Area']))
+
         plt.show()
