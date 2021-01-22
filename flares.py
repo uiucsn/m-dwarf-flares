@@ -7,31 +7,34 @@ import os.path
 import pandas as pd
 import csv
 import numpy as np
-# KIC 892376
+
+LC_DATA_PATH = 'lc_data/KIC-{}.csv'
+FLARE_DATA_PATH = 'flare_data/apjaa8ea2t3_mrt.txt'
+FLARE_INSTANCES_PATH = 'flare_instances/KIC-{}/'
+FLARE_INSTANCE = 'flare_instances/KIC-{kic}/{start}-{end}.csv'
 
 def loadLightCurve(KIC_ID):
-    KIC = "KIC " + KIC_ID
-    if os.path.isfile("lc_data/KIC-" + KIC_ID + '.csv'):
+    KIC = "KIC {}".format(KIC_ID)
+    if os.path.isfile(LC_DATA_PATH.format(KIC_ID)):
         print("Loading local light curve data ...")
-        df = pd.read_csv("lc_data/KIC-" + KIC_ID + '.csv')
+        df = pd.read_csv(LC_DATA_PATH.format(KIC_ID))
         lc = lk.LightCurve(time = df['time'], flux = df['flux'], flux_err = df['flux_err'])
-        return lc
     else:
         print('Downloading light curve data ...')
         lcf = search_lightcurvefile(KIC).download_all()
         lc = lcf.SAP_FLUX.stitch()
-        lc.to_csv("lc_data/KIC-" + KIC_ID + '.csv')
-        return lc
+        lc.to_csv(LC_DATA_PATH.format(KIC_ID))
+    return lc
 
-def plotFlares(lc):
+def plotFlares(lc, KIC_ID):
     # Reading flare data file.
-    flare_data = astropy.io.ascii.read('flare_data/apjaa8ea2t3_mrt.txt', quotechar="\s")
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
 
     #Plotting points identified as flares.
     for flare in flare_data:
         if flare['KIC'] == int(KIC_ID):
             fig, (ax1, ax2, ax3) = plt.subplots(3)
-            fig.suptitle('Flare from ' + str(flare['St-BKJD']) + ' to ' + str(flare['End-BKJD']))
+            fig.suptitle('Flare from {start} to {end}'.format(start = str(flare['St-BKJD']), end = str(flare['End-BKJD'])))
 
             start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
             end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
@@ -50,7 +53,7 @@ def plotFlares(lc):
             ax1.set_ylabel('Relative flux')
             ax1.set_xlim([flare['St-BKJD']-200,flare['End-BKJD']+200])
             ax1.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
-            ax1.set_title('LC for KIC ' + str(KIC_ID))
+            ax1.set_title('LC for KIC {}'.format(str(KIC_ID)))
 
             # Light curve of the flare
             ax2.plot(lc.time, lc.flux, linestyle='-', marker='.')
@@ -58,16 +61,16 @@ def plotFlares(lc):
             ax2.set_xlabel('Time BKJD')
             ax2.set_ylabel('Relative flux')
             ax2.set_xlim([flare['St-BKJD']-2,flare['End-BKJD']+2])
-            ax2.set_title('Flare Area: '+str(flare['Area']))
+            ax2.set_title('Flare Area: {}'.format(str(flare['Area'])))
 
             ax3.plot(flare_lc.time, flare_lc.flux, linestyle='-', marker='.')
             ax3.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
 
             plt.show()
 
-def saveFlareData(lc):
+def saveFlareData(lc, KIC_ID):
     # Reading flare data file.
-    flare_data = astropy.io.ascii.read('flare_data/apjaa8ea2t3_mrt.txt', quotechar="\s")
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
 
     #Plotting points identified as flares.
     index = 0
@@ -86,12 +89,8 @@ def saveFlareData(lc):
 
             flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
 
-            if not os.path.isdir("flare_instances/KIC-" + KIC_ID + '/'):
-                os.mkdir("flare_instances/KIC-" + KIC_ID + '/')
+            if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
+                os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
 
-            flare_lc.to_csv("flare_instances/KIC-" + KIC_ID + '/' + str(flare['St-BKJD']) + '-' + str(flare['St-BKJD']) + '.csv')
+            flare_lc.to_csv(FLARE_INSTANCE.format(kic = KIC_ID, start = str(flare['St-BKJD']), end = str(flare['St-BKJD'])))
             
-KIC_ID = input("Enter the KIC ID: ")
-lc = loadLightCurve(KIC_ID)
-#plotFlares(lc)
-saveFlareData(lc)
