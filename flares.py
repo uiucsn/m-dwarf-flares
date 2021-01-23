@@ -14,7 +14,20 @@ FLARE_DATA_PATH = 'flare_data/apjaa8ea2t3_mrt.txt'
 FLARE_INSTANCES_PATH = 'flare_instances/KIC-{}/'
 FLARE_INSTANCE = 'flare_instances/KIC-{kic}/{start}-{end}.csv'
 
+
 def loadLightCurve(KIC_ID):
+    """
+    Function for loading light curve data and constructing a kepler light curve.
+    This function uses local data to construct the LightCurve, if possible. If 
+    not, the data is loaded using lightkurve and a local copy is saved in csv form.
+
+    Args:
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+
+    Returns:
+        Kepler Light Curve: A light curve for the object from Kepler.
+    """
+
     KIC = "KIC {}".format(KIC_ID)
     if os.path.isfile(LC_DATA_PATH.format(KIC_ID)):
         print("Loading local light curve data ...")
@@ -28,6 +41,15 @@ def loadLightCurve(KIC_ID):
     return lc
 
 def plotFlares(lc, KIC_ID):
+    """
+    This function plots the flares for a given object from the Kepler Input Catalog.
+    It looks at flare instances from the apjaa8ea2t3_mrt.txt file.  
+
+    Args:
+        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+    """
+
     # Reading flare data file.
     flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
 
@@ -70,6 +92,15 @@ def plotFlares(lc, KIC_ID):
             plt.show()
 
 def saveFlareData(lc, KIC_ID):
+    """
+    This function saves every instance of a flare for a given Kepler Input Catalog 
+    object in csv form.  It looks at flare instances from the apjaa8ea2t3_mrt.txt file.
+
+    Args:
+        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+    """
+
     # Reading flare data file.
     flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
 
@@ -77,6 +108,7 @@ def saveFlareData(lc, KIC_ID):
     for flare in flare_data:
         if flare['KIC'] == int(KIC_ID):
             
+            # Obtaining start and end indices for flare instances
             start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
             end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
 
@@ -92,9 +124,19 @@ def saveFlareData(lc, KIC_ID):
             if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
                 os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
 
+            # Saving indiviual flare instances as csv files
             flare_lc.to_csv(FLARE_INSTANCE.format(kic = KIC_ID, start = str(flare['St-BKJD']), end = str(flare['St-BKJD'])))
 
 def getFlareStats(lc, KIC_ID):
+    """
+    This function plots histograms for flare duration, area and amplitude for
+    a given Kelper Input Catalog Object. It also saves the plots. It looks at 
+    flare instances from the apjaa8ea2t3_mrt.txt file.
+
+    Args:
+        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+    """
 
     flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
     
@@ -123,6 +165,7 @@ def getFlareStats(lc, KIC_ID):
     fig.suptitle('Flare Statistics for KIC {}'.format(KIC_ID))
     num_bins = 10
 
+    # Plotting histograms for flare duration, area and amplitude
     N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(amplitude, bins=num_bins) 
     ax1.set_title('Normalized Amplitude distribution')
     ax1.set_xlabel('Amplitude')
@@ -138,6 +181,7 @@ def getFlareStats(lc, KIC_ID):
     ax3.set_xlabel('Flare Area')
     ax3.set_ylabel('Number of flares')
 
+    # Plotting cummulative histograms for flare duration, area and amplitude
     N_amplitude_c, bins_amplitude_c, patches_amplitude_c = ax4.hist(amplitude, bins=num_bins, cumulative = True) 
     ax4.set_title('Normalized Amplitude distribution (Cumulative)')
     ax4.set_xlabel('Amplitude')
@@ -154,6 +198,3 @@ def getFlareStats(lc, KIC_ID):
     ax6.set_ylabel('Number of flares')
 
     plt.savefig('obj_stats/KIC-{}'.format(KIC_ID))
-
-
-
