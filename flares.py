@@ -3,6 +3,7 @@ from astropy.io import ascii
 import lightkurve as lk
 from lightkurve import search_lightcurvefile
 import matplotlib.pyplot as plt
+from matplotlib.ticker import PercentFormatter
 import os.path
 import pandas as pd
 import csv
@@ -73,7 +74,6 @@ def saveFlareData(lc, KIC_ID):
     flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
 
     #Plotting points identified as flares.
-    index = 0
     for flare in flare_data:
         if flare['KIC'] == int(KIC_ID):
             
@@ -93,4 +93,67 @@ def saveFlareData(lc, KIC_ID):
                 os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
 
             flare_lc.to_csv(FLARE_INSTANCE.format(kic = KIC_ID, start = str(flare['St-BKJD']), end = str(flare['St-BKJD'])))
-            
+
+def getFlareStats(lc, KIC_ID):
+
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
+    
+    duration = []
+    flareArea = []
+    amplitude = []
+
+    for flare in flare_data:
+        if flare['KIC'] == int(KIC_ID):
+
+            start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
+            end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
+
+            flare_flux = lc.flux[start_index:end_index]
+            flare_time = lc.time[start_index:end_index]
+
+            min_flux = np.amin(flare_flux)
+            flare_flux = [flux - min_flux for flux in flare_flux]
+            amp = np.amax(flare_flux)
+
+            duration.append(flare['End-BKJD'] - flare['St-BKJD'])
+            flareArea.append(flare['Area'])
+            amplitude.append(amp)
+
+    fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(2,3,figsize=(15, 12))
+    fig.suptitle('Flare Statistics for KIC {}'.format(KIC_ID))
+    num_bins = 10
+
+    N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(amplitude, bins=num_bins) 
+    ax1.set_title('Normalized Amplitude distribution')
+    ax1.set_xlabel('Amplitude')
+    ax1.set_ylabel('Number of flares')
+
+    N_duration, bins_duration, patches_duration = ax2.hist(duration, bins=num_bins) 
+    ax2.set_title('Flare Duration distribution')
+    ax2.set_xlabel('Duration in BKJD')
+    ax2.set_ylabel('Number of flares')
+
+    N_area, bins_area, patches_area = ax3.hist(flareArea, bins=num_bins) 
+    ax3.set_title('Flare Area Distribution')
+    ax3.set_xlabel('Flare Area')
+    ax3.set_ylabel('Number of flares')
+
+    N_amplitude_c, bins_amplitude_c, patches_amplitude_c = ax4.hist(amplitude, bins=num_bins, cumulative = True) 
+    ax4.set_title('Normalized Amplitude distribution (Cumulative)')
+    ax4.set_xlabel('Amplitude')
+    ax4.set_ylabel('Number of flares')
+
+    N_duration_c, bins_duration_c, patches_duration_c = ax5.hist(duration, bins=num_bins, cumulative = True) 
+    ax5.set_title('Flare Duration distribution (Cumulative)')
+    ax5.set_xlabel('Duration in BKJD')
+    ax5.set_ylabel('Number of flares')
+
+    N_area_c, bins_area_c, patches_area_c = ax6.hist(flareArea, bins=num_bins, cumulative = True) 
+    ax6.set_title('Flare Area Distribution (Cumulative)')
+    ax6.set_xlabel('Flare Area')
+    ax6.set_ylabel('Number of flares')
+
+    plt.savefig('obj_stats/KIC-{}'.format(KIC_ID))
+
+
+
