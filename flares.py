@@ -161,40 +161,59 @@ def getFlareStats(lc, KIC_ID):
             flareArea.append(flare['Area'])
             amplitude.append(amp)
 
-    fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(2,3,figsize=(15, 12))
-    fig.suptitle('Flare Statistics for KIC {}'.format(KIC_ID))
     num_bins = 10
 
-    # Plotting histograms for flare duration, area and amplitude
-    N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(amplitude, bins=num_bins) 
+    # Plotting flare amplitude stats.
+    fig1, (ax1, ax4) = plt.subplots(2,1,figsize=(15, 12))
+    fig1.suptitle('Flare Amplitude Statistics for KIC {}'.format(KIC_ID))
+
+    N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(amplitude, bins=num_bins, alpha = 0.5) 
     ax1.set_title('Normalized Amplitude distribution')
     ax1.set_xlabel('Amplitude')
     ax1.set_ylabel('Number of flares')
 
-    N_duration, bins_duration, patches_duration = ax2.hist(duration, bins=num_bins) 
+    N_amplitude_c, bins_amplitude_c, patches_amplitude_c = ax4.hist(amplitude, bins=num_bins, cumulative = True, color = 'red', alpha=0.5) 
+    ax4.set_title('Normalized Amplitude distribution (Cumulative)')
+    ax4.set_xlabel('Amplitude')
+    ax4.set_ylabel('Number of flares')
+    ax4.invert_xaxis()
+    ax4.grid()
+
+    # Plotting flare duration stats.
+    fig2, (ax2, ax5) = plt.subplots(2,1,figsize=(15, 12))
+    fig2.suptitle('Flare Duration Statistics for KIC {}'.format(KIC_ID))
+
+    N_duration, bins_duration, patches_duration = ax2.hist(duration, bins=num_bins, alpha = 0.5) 
     ax2.set_title('Flare Duration distribution')
-    ax2.set_xlabel('Duration in BKJD')
+    ax2.set_xlabel('Duration in days')
     ax2.set_ylabel('Number of flares')
 
-    N_area, bins_area, patches_area = ax3.hist(flareArea, bins=num_bins) 
+    N_duration_c, bins_duration_c, patches_duration_c = ax5.hist(duration, bins=num_bins, cumulative = True, color = 'red', alpha=0.5) 
+    ax5.set_title('Flare Duration distribution (Cumulative)')
+    ax5.set_xlabel('Duration in days')
+    ax5.set_ylabel('Number of flares')
+    ax5.invert_xaxis()
+    ax5.grid()
+
+    # Plotting flare area stats.
+    fig3, (ax3, ax6) = plt.subplots(2,1,figsize=(15, 12))
+    fig3.suptitle('Flare Area Statistics for KIC {}'.format(KIC_ID))
+
+    N_area, bins_area, patches_area = ax3.hist(flareArea, bins=num_bins, alpha=0.5) 
     ax3.set_title('Flare Area Distribution')
     ax3.set_xlabel('Flare Area')
     ax3.set_ylabel('Number of flares')
 
-    # Plotting cummulative histograms for flare duration, area and amplitude
-    N_amplitude_c, bins_amplitude_c, patches_amplitude_c = ax4.hist(amplitude, bins=num_bins, cumulative = True) 
-    ax4.set_title('Normalized Amplitude distribution (Cumulative)')
-    ax4.set_xlabel('Amplitude')
-    ax4.set_ylabel('Number of flares')
-
-    N_duration_c, bins_duration_c, patches_duration_c = ax5.hist(duration, bins=num_bins, cumulative = True) 
-    ax5.set_title('Flare Duration distribution (Cumulative)')
-    ax5.set_xlabel('Duration in BKJD')
-    ax5.set_ylabel('Number of flares')
-
-    N_area_c, bins_area_c, patches_area_c = ax6.hist(flareArea, bins=num_bins, cumulative = True) 
+    N_area_c, bins_area_c, patches_area_c = ax6.hist(flareArea, bins=num_bins, cumulative = True, color = 'red', alpha=0.5) 
     ax6.set_title('Flare Area Distribution (Cumulative)')
     ax6.set_xlabel('Flare Area')
     ax6.set_ylabel('Number of flares')
+    ax6.invert_xaxis()
+    ax6.grid()
 
-    plt.savefig('obj_stats/KIC-{}'.format(KIC_ID))
+    if not os.path.isdir('obj_stats/KIC-{}/'.format(KIC_ID)):
+        os.mkdir('obj_stats/KIC-{}/'.format(KIC_ID))
+
+    fig1.savefig('obj_stats/KIC-{}/amplitude'.format(KIC_ID))
+    fig2.savefig('obj_stats/KIC-{}/duration'.format(KIC_ID))
+    fig3.savefig('obj_stats/KIC-{}/area'.format(KIC_ID))
