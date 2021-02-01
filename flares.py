@@ -15,7 +15,7 @@ FLARE_INSTANCES_PATH = 'flare_instances/KIC-{}/'
 FLARE_INSTANCE = 'flare_instances/KIC-{kic}/{start}-{end}.csv'
 
 
-def loadLightCurve(KIC_ID):
+def load_light_curve(KIC_ID):
     """
     Function for loading light curve data and constructing a kepler light curve.
     This function uses local data to construct the LightCurve, if possible. If 
@@ -40,7 +40,7 @@ def loadLightCurve(KIC_ID):
         lc.to_csv(LC_DATA_PATH.format(KIC_ID))
     return lc
 
-def plotFlares(lc, KIC_ID):
+def get_flare_plots(lc, KIC_ID):
     """
     This function plots the flares for a given object from the Kepler Input Catalog.
     It looks at flare instances from the apjaa8ea2t3_mrt.txt file.  
@@ -55,43 +55,46 @@ def plotFlares(lc, KIC_ID):
 
     #Plotting points identified as flares.
     for flare in flare_data:
-        if flare['KIC'] == int(KIC_ID):
-            fig, (ax1, ax2, ax3) = plt.subplots(3)
-            fig.suptitle('Flare from {start} to {end}'.format(start = str(flare['St-BKJD']), end = str(flare['End-BKJD'])))
 
-            start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
-            end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
+        if flare['KIC'] != int(KIC_ID):
+            continue
+        fig, (ax1, ax2, ax3) = plt.subplots(3)
+        fig.suptitle('Flare from {start} to {end}'.format(start = str(flare['St-BKJD']), end = str(flare['End-BKJD'])))
 
-            flare_time = lc.time[start_index:end_index]
-            flare_flux = lc.flux[start_index:end_index]
-            flare_err = lc.flux_err[start_index:end_index]
+        start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
+        end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
 
-            min_flux = np.amin(flare_flux)
-            flare_flux = [flux - min_flux for flux in flare_flux]
+        flare_time = lc.time[start_index:end_index]
+        flare_flux = lc.flux[start_index:end_index]
+        flare_err = lc.flux_err[start_index:end_index]
 
-            flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err)
-  
-            # Full light curve plot
-            ax1.plot(lc.time, lc.flux)
-            ax1.set_ylabel('Relative flux')
-            ax1.set_xlim([flare['St-BKJD']-200,flare['End-BKJD']+200])
-            ax1.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
-            ax1.set_title('LC for KIC {}'.format(str(KIC_ID)))
+        min_flux = np.amin(flare_flux)
+        # Use numpy instead 
+        flare_flux = [flux - min_flux for flux in flare_flux]
 
-            # Light curve of the flare
-            ax2.plot(lc.time, lc.flux, linestyle='-', marker='.')
-            ax2.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
-            ax2.set_xlabel('Time BKJD')
-            ax2.set_ylabel('Relative flux')
-            ax2.set_xlim([flare['St-BKJD']-2,flare['End-BKJD']+2])
-            ax2.set_title('Flare Area: {}'.format(str(flare['Area'])))
+        flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err)
 
-            ax3.plot(flare_lc.time, flare_lc.flux, linestyle='-', marker='.')
-            ax3.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
+        # Full light curve plot
+        ax1.plot(lc.time, lc.flux)
+        ax1.set_ylabel('Relative flux')
+        ax1.set_xlim([flare['St-BKJD']-200,flare['End-BKJD']+200])
+        ax1.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
+        ax1.set_title('LC for KIC {}'.format(str(KIC_ID)))
 
-            plt.show()
+        # Light curve of the flare
+        ax2.plot(lc.time, lc.flux, linestyle='-', marker='.')
+        ax2.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
+        ax2.set_xlabel('Time BKJD')
+        ax2.set_ylabel('Relative flux')
+        ax2.set_xlim([flare['St-BKJD']-2,flare['End-BKJD']+2])
+        ax2.set_title('Flare Area: {}'.format(str(flare['Area'])))
 
-def saveFlareData(lc, KIC_ID):
+        ax3.plot(flare_lc.time, flare_lc.flux, linestyle='-', marker='.')
+        ax3.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
+
+        plt.show()
+
+def save_flare_instances(lc, KIC_ID):
     """
     This function saves every instance of a flare for a given Kepler Input Catalog 
     object in csv form.  It looks at flare instances from the apjaa8ea2t3_mrt.txt file.
@@ -106,28 +109,32 @@ def saveFlareData(lc, KIC_ID):
 
     #Plotting points identified as flares.
     for flare in flare_data:
-        if flare['KIC'] == int(KIC_ID):
+        if flare['KIC'] != int(KIC_ID):
+            continue
+
+        # Make this part a function that takes the KIC and the start and end date and run the function in parallel to save all the flare instances faster.
             
-            # Obtaining start and end indices for flare instances
-            start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
-            end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
+        # Obtaining start and end indices for flare instances
+        start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
+        end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
 
-            flare_time = lc.time[start_index:end_index]
-            flare_flux = lc.flux[start_index:end_index]
-            flare_err = lc.flux_err[start_index:end_index]
+        flare_time = lc.time[start_index:end_index]
+        flare_flux = lc.flux[start_index:end_index]
+        flare_err = lc.flux_err[start_index:end_index]
 
-            min_flux = np.amin(flare_flux)
-            flare_flux = [flux - min_flux for flux in flare_flux]
+        min_flux = np.amin(flare_flux)
+        flare_flux = [flux - min_flux for flux in flare_flux]
 
-            flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+        flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+        flare_lc.plot()
 
-            if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
-                os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
+        if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
+            os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
 
-            # Saving indiviual flare instances as csv files
-            flare_lc.to_csv(FLARE_INSTANCE.format(kic = KIC_ID, start = str(flare['St-BKJD']), end = str(flare['St-BKJD'])))
+        # Saving indiviual flare instances as csv files
+        flare_lc.to_csv(FLARE_INSTANCE.format(kic = KIC_ID, start = str(flare['St-BKJD']), end = str(flare['St-BKJD'])))
 
-def getFlareStats(lc, KIC_ID):
+def save_flare_stats(lc, KIC_ID):
     """
     This function plots histograms for flare duration, area and amplitude for
     a given Kelper Input Catalog Object. It also saves the plots. It looks at 
@@ -145,21 +152,22 @@ def getFlareStats(lc, KIC_ID):
     amplitude = []
 
     for flare in flare_data:
-        if flare['KIC'] == int(KIC_ID):
+        if flare['KIC'] != int(KIC_ID):
+            continue
 
-            start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
-            end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
+        start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
+        end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
 
-            flare_flux = lc.flux[start_index:end_index]
-            flare_time = lc.time[start_index:end_index]
+        flare_flux = lc.flux[start_index:end_index]
+        flare_time = lc.time[start_index:end_index]
 
-            min_flux = np.amin(flare_flux)
-            flare_flux = [flux - min_flux for flux in flare_flux]
-            amp = np.amax(flare_flux)
+        min_flux = np.amin(flare_flux)
+        flare_flux = [flux - min_flux for flux in flare_flux]
+        amp = np.amax(flare_flux)
 
-            duration.append(flare['End-BKJD'] - flare['St-BKJD'])
-            flareArea.append(flare['Area'])
-            amplitude.append(amp)
+        duration.append(flare['End-BKJD'] - flare['St-BKJD'])
+        flareArea.append(flare['Area'])
+        amplitude.append(amp)
 
     num_bins = 10
 
@@ -172,12 +180,12 @@ def getFlareStats(lc, KIC_ID):
     ax1.set_xlabel('Amplitude')
     ax1.set_ylabel('Number of flares')
 
-    N_amplitude_c, bins_amplitude_c, patches_amplitude_c = ax4.hist(amplitude, bins=num_bins, cumulative = True, color = 'red', alpha=0.5) 
+    amplitude = np.sort(amplitude)
+    cumulativeAmp = np.arange(amplitude.size, 0, -1)
+    ax4.plot(amplitude, cumulativeAmp)
     ax4.set_title('Normalized Amplitude distribution (Cumulative)')
     ax4.set_xlabel('Amplitude')
-    ax4.set_ylabel('Number of flares')
-    ax4.invert_xaxis()
-    ax4.grid()
+    ax4.set_ylabel('Number of flares with amplitude less than')
 
     # Plotting flare duration stats.
     fig2, (ax2, ax5) = plt.subplots(2,1,figsize=(15, 12))
@@ -188,12 +196,13 @@ def getFlareStats(lc, KIC_ID):
     ax2.set_xlabel('Duration in days')
     ax2.set_ylabel('Number of flares')
 
-    N_duration_c, bins_duration_c, patches_duration_c = ax5.hist(duration, bins=num_bins, cumulative = True, color = 'red', alpha=0.5) 
+    duration = np.sort(duration)
+    cumulativeDuration = np.arange(duration.size, 0, -1)
+    ax5.plot(duration, cumulativeDuration) 
     ax5.set_title('Flare Duration distribution (Cumulative)')
     ax5.set_xlabel('Duration in days')
-    ax5.set_ylabel('Number of flares')
-    ax5.invert_xaxis()
-    ax5.grid()
+    ax5.set_ylabel('Number of flares with duration less than')
+
 
     # Plotting flare area stats.
     fig3, (ax3, ax6) = plt.subplots(2,1,figsize=(15, 12))
@@ -204,12 +213,12 @@ def getFlareStats(lc, KIC_ID):
     ax3.set_xlabel('Flare Area')
     ax3.set_ylabel('Number of flares')
 
-    N_area_c, bins_area_c, patches_area_c = ax6.hist(flareArea, bins=num_bins, cumulative = True, color = 'red', alpha=0.5) 
+    flareArea = np.sort(flareArea)
+    cumulativeArea = np.arange(flareArea.size, 0, -1)
+    ax6.plot(amplitude, cumulativeArea)
     ax6.set_title('Flare Area Distribution (Cumulative)')
     ax6.set_xlabel('Flare Area')
-    ax6.set_ylabel('Number of flares')
-    ax6.invert_xaxis()
-    ax6.grid()
+    ax6.set_ylabel('Number of flares with area less than')
 
     if not os.path.isdir('obj_stats/KIC-{}/'.format(KIC_ID)):
         os.mkdir('obj_stats/KIC-{}/'.format(KIC_ID))

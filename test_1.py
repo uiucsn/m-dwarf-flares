@@ -9,7 +9,7 @@ from flares import *
 
 
 KIC_ID = input("Enter the KIC ID: ")
-lc = loadLightCurve(KIC_ID)
-#plotFlares(lc, KIC_ID)
-saveFlareData(lc, KIC_ID)
-getFlareStats(lc, KIC_ID)
+lc = load_light_curve(KIC_ID)
+#get_flare_plots(lc, KIC_ID)
+save_flare_instances(lc, KIC_ID)
+save_flare_stats(lc, KIC_ID)
