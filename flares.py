@@ -1,3 +1,4 @@
+
 import astropy
 from astropy.io import ascii
 import lightkurve as lk
@@ -8,7 +9,6 @@ import os.path
 import pandas as pd
 import csv
 import numpy as np
-import multiprocessing
 
 LC_DATA_PATH = 'lc_data/KIC-{}.csv'
 FLARE_DATA_PATH = 'flare_data/apjaa8ea2t3_mrt.txt'
@@ -21,10 +21,8 @@ def load_light_curve(KIC_ID):
     Function for loading light curve data and constructing a kepler light curve.
     This function uses local data to construct the LightCurve, if possible. If 
     not, the data is loaded using lightkurve and a local copy is saved in csv form.
-
     Args:
         KIC_ID (int): The ID for the object from the Kepler survey. 
-
     Returns:
         Kepler Light Curve: A light curve for the object from Kepler.
     """
@@ -45,7 +43,6 @@ def get_flare_plots(lc, KIC_ID):
     """
     This function plots the flares for a given object from the Kepler Input Catalog.
     It looks at flare instances from the apjaa8ea2t3_mrt.txt file.  
-
     Args:
         lc (Kepler Light Curve Object): A light curve for the object from Kepler.
         KIC_ID (int): The ID for the object from the Kepler survey. 
@@ -99,7 +96,6 @@ def save_flare_instances(lc, KIC_ID):
     """
     This function saves every instance of a flare for a given Kepler Input Catalog 
     object in csv form.  It looks at flare instances from the apjaa8ea2t3_mrt.txt file.
-
     Args:
         lc (Kepler Light Curve Object): A light curve for the object from Kepler.
         KIC_ID (int): The ID for the object from the Kepler survey. 
@@ -109,23 +105,34 @@ def save_flare_instances(lc, KIC_ID):
     flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
 
     #Plotting points identified as flares.
-    processes = []
     for flare in flare_data:
-        if flare['KIC'] == int(KIC_ID):
-            p = multiprocessing.Process(target = flare_to_csv, args = (lc, flare, KIC_ID))
-            p.start()
-            processes.append(p)
-    
-    for process in processes:
-        process.join()
-    
-def save_flare_stats(lc, KIC_ID):
+        if flare['KIC'] != int(KIC_ID):
+            continue
+            
+        # Obtaining start and end indices for flare instances
+        start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
+        end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
 
+        flare_time = lc.time[start_index:end_index]
+        flare_flux = lc.flux[start_index:end_index]
+        flare_err = lc.flux_err[start_index:end_index]
+
+        min_flux = np.amin(flare_flux)
+        flare_flux = [flux - min_flux for flux in flare_flux]
+
+        flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+
+        if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
+            os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
+
+        # Saving indiviual flare instances as csv files
+        flare_lc.to_csv(FLARE_INSTANCE.format(kic = KIC_ID, start = str(flare['St-BKJD']), end = str(flare['St-BKJD'])))
+
+def save_flare_stats(lc, KIC_ID):
     """
     This function plots histograms for flare duration, area and amplitude for
     a given Kelper Input Catalog Object. It also saves the plots. It looks at 
     flare instances from the apjaa8ea2t3_mrt.txt file.
-
     Args:
         lc (Kepler Light Curve Object): A light curve for the object from Kepler.
         KIC_ID (int): The ID for the object from the Kepler survey. 
@@ -212,25 +219,3 @@ def save_flare_stats(lc, KIC_ID):
     fig1.savefig('obj_stats/KIC-{}/amplitude'.format(KIC_ID))
     fig2.savefig('obj_stats/KIC-{}/duration'.format(KIC_ID))
     fig3.savefig('obj_stats/KIC-{}/area'.format(KIC_ID))
-
-def flare_to_csv(lc, flare, KIC_ID):
-    
-    start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
-    end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
-
-    flare_time = lc.time[start_index:end_index]
-    flare_flux = lc.flux[start_index:end_index]
-    flare_err = lc.flux_err[start_index:end_index]
-
-    min_flux = np.amin(flare_flux)
-    flare_flux = [flux - min_flux for flux in flare_flux]
-    print(start_index, end_index)
-
-    flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
-
-    if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
-        os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
-
-    # Saving indiviual flare instances as csv files
-    flare_lc.to_csv(FLARE_INSTANCE.format(kic = KIC_ID, start = str(flare['St-BKJD']), end = str(flare['St-BKJD'])))
-
