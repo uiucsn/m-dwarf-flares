@@ -1,4 +1,3 @@
-
 import astropy
 from astropy.io import ascii
 import lightkurve as lk
@@ -9,6 +8,7 @@ import os.path
 import pandas as pd
 import csv
 import numpy as np
+import math
 
 LC_DATA_PATH = 'lc_data/KIC-{}.csv'
 FLARE_DATA_PATH = 'flare_data/apjaa8ea2t3_mrt.txt'
@@ -39,7 +39,7 @@ def load_light_curve(KIC_ID):
         lc.to_csv(LC_DATA_PATH.format(KIC_ID))
     return lc
 
-def get_flare_plots(lc, KIC_ID):
+def display_flare_plots(lc, KIC_ID):
     """
     This function plots the flares for a given object from the Kepler Input Catalog.
     It looks at flare instances from the apjaa8ea2t3_mrt.txt file.  
@@ -59,18 +59,7 @@ def get_flare_plots(lc, KIC_ID):
         fig, (ax1, ax2, ax3) = plt.subplots(3)
         fig.suptitle('Flare from {start} to {end}'.format(start = str(flare['St-BKJD']), end = str(flare['End-BKJD'])))
 
-        start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
-        end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
-
-        flare_time = lc.time[start_index:end_index]
-        flare_flux = lc.flux[start_index:end_index]
-        flare_err = lc.flux_err[start_index:end_index]
-
-        min_flux = np.amin(flare_flux)
-        # Use numpy instead 
-        flare_flux = [flux - min_flux for flux in flare_flux]
-
-        flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err)
+        flare_lc = get_flare_lc(lc,flare)
 
         # Full light curve plot
         ax1.plot(lc.time, lc.flux)
@@ -110,17 +99,7 @@ def save_flare_instances(lc, KIC_ID):
             continue
             
         # Obtaining start and end indices for flare instances
-        start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
-        end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
-
-        flare_time = lc.time[start_index:end_index]
-        flare_flux = lc.flux[start_index:end_index]
-        flare_err = lc.flux_err[start_index:end_index]
-
-        min_flux = np.amin(flare_flux)
-        flare_flux = [flux - min_flux for flux in flare_flux]
-
-        flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+        flare_lc = get_flare_lc(lc,flare)
 
         if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
             os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
@@ -148,15 +127,8 @@ def save_flare_stats(lc, KIC_ID):
         if flare['KIC'] != int(KIC_ID):
             continue
 
-        start_index = np.searchsorted(lc.time, flare['St-BKJD']) - 2
-        end_index = np.searchsorted(lc.time, flare['End-BKJD']) + 1
-
-        flare_flux = lc.flux[start_index:end_index]
-        flare_time = lc.time[start_index:end_index]
-
-        min_flux = np.amin(flare_flux)
-        flare_flux = [flux - min_flux for flux in flare_flux]
-        amp = np.amax(flare_flux)
+        flare_lc = get_flare_lc(lc,flare)
+        amp = np.amax(flare_lc.flux)
 
         duration.append(flare['End-BKJD'] - flare['St-BKJD'])
         flareArea.append(flare['Area'])
@@ -219,3 +191,53 @@ def save_flare_stats(lc, KIC_ID):
     fig1.savefig('obj_stats/KIC-{}/amplitude'.format(KIC_ID))
     fig2.savefig('obj_stats/KIC-{}/duration'.format(KIC_ID))
     fig3.savefig('obj_stats/KIC-{}/area'.format(KIC_ID))
+
+def get_flare_lc(lc, flare):
+    """
+    This function takes the Light Curve for a KIC object along with a flare instance
+    and returns a normalized light curve containing just the flare with one point prior
+    to and after it.
+
+    Args:
+        lc (Kepler light Curve object): A light curve for the object from Kepler.
+        flare (flare instance): A flare instances from the apjaa8ea2t3_mrt.txt file
+
+    Returns:
+        Kepler light curve object: A normalized light curve of the flare followed by a 
+        trailing and leading observation
+    """
+    start_index = find_nearest_index(lc.time, flare['St-BKJD']) - 1
+    end_index = find_nearest_index(lc.time, flare['End-BKJD']) + 2
+
+    flare_time = lc.time[start_index:end_index]
+    flare_flux = lc.flux[start_index:end_index]
+    flare_err = lc.flux_err[start_index:end_index]
+
+    min_flux = np.amin(flare_flux)
+    flare_flux = [flux - min_flux for flux in flare_flux]
+
+    flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+    return flare_lc
+
+
+def find_nearest_index(lc_time, value):
+    """
+    This function takes a sorted array and a value and returns the index where
+    the value is found. If it can't find the value in the array, it returns the index of 
+    a neigbour value which is closest to it's magnitude (in absolute terms).
+
+    Args:
+        lc_time (numpy array): The array where the index for the value is to be found
+        value (float): The value to be found in the array
+
+    Returns:
+        int : Index of the value in the array or the index of it's closes neigbour.
+    """
+    index = np.searchsorted(lc_time, value, side="left")
+
+    if index > 0 and index == len(lc_time):
+        return index - 1
+    if index > 0 and value - lc_time[index-1] < lc_time[index] - value:
+        return index - 1
+    else:
+        return index

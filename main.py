@@ -8,7 +8,7 @@ start = time.perf_counter()
 
 def compute(KIC_ID):
     lc = load_light_curve(KIC_ID)
-    #get_flare_plots(lc, KIC_ID)
+    # display_flare_plots(lc, KIC_ID)
     save_flare_instances(lc, KIC_ID)
     save_flare_stats(lc, KIC_ID)
 
