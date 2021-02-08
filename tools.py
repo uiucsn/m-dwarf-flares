@@ -1,5 +1,7 @@
 import astropy
 from astropy.io import ascii
+from astropy.modeling import models
+from astropy import units as u
 import lightkurve as lk
 from lightkurve import search_lightcurvefile
 import matplotlib.pyplot as plt
@@ -191,6 +193,53 @@ def save_flare_stats(lc, KIC_ID):
     fig1.savefig('obj_stats/KIC-{}/amplitude'.format(KIC_ID))
     fig2.savefig('obj_stats/KIC-{}/duration'.format(KIC_ID))
     fig3.savefig('obj_stats/KIC-{}/area'.format(KIC_ID))
+
+def get_spectra_data(lc, KIC_ID):
+        # Reading flare data file.
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
+
+    #Plotting points identified as flares.
+    for flare in flare_data:
+        if flare['KIC'] != int(KIC_ID):
+            continue
+            
+        # Obtaining start and end indices for flare instances
+        flare_lc = get_flare_lc(lc,flare)
+
+        bb = models.BlackBody(temperature=10000*u.K) 
+
+        kepler_wav = np.arange(4183.66,	9050.23) * u.AA
+        kepler_flux = bb(kepler_wav)
+        kepler_flux_mean = np.mean(kepler_flux)
+
+        lsst_wav_u = np.arange(3060.00,	4080.00	) * u.AA
+        lsst_flux_u = bb(lsst_wav_u)
+        lsst_flux_u_mean = np.mean(lsst_flux_u)
+
+        lsst_wav_r = np.arange(5375.02,	7054.98	) * u.AA
+        lsst_flux_r = bb(lsst_wav_r)
+        lsst_flux_r_mean = np.mean(lsst_flux_r)
+
+        percentage_change_u = (lsst_flux_u_mean - kepler_flux_mean) / kepler_flux_mean
+        percentage_change_r = (lsst_flux_r_mean - kepler_flux_mean) / kepler_flux_mean
+        
+        u_band = [(1 + percentage_change_u) * flux for flux in flare_lc.flux]
+        r_band = [(1 + percentage_change_r) * flux for flux in flare_lc.flux]
+
+        plt.plot(flare_lc.time, flare_lc.flux, color = 'black')
+        plt.plot(flare_lc.time, u_band, color = 'purple')
+        plt.plot(flare_lc.time, r_band, color = 'red')
+        plt.show()
+
+        # Find how much higher or lower the flux is at any passband range compared to the kepler flux range.
+        # Based on this, increase/decrease the flux for the various passbands
+
+        if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
+            os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
+
+        # Saving indiviual flare instances as csv files
+
+
 
 def get_flare_lc(lc, flare):
     """
