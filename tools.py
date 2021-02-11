@@ -162,7 +162,7 @@ def save_flare_stats(lc, KIC_ID):
     ax2.set_title('Flare Duration distribution')
     ax2.set_xlabel('Duration in days')
     ax2.set_ylabel('Number of flares')
-
+    
     duration = np.sort(duration)
     cumulativeDuration = np.arange(duration.size, 0, -1)
     ax5.plot(duration, cumulativeDuration) 
@@ -195,9 +195,27 @@ def save_flare_stats(lc, KIC_ID):
     fig3.savefig('obj_stats/KIC-{}/area'.format(KIC_ID))
 
 def get_spectra_data(lc, KIC_ID):
-        # Reading flare data file.
+    # Reading flare data file.
     flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
+    bb_model = models.BlackBody(temperature=5000*u.K) 
 
+    wavelenghts = {
+        'kepler_min': 4183.66,
+        'kepler_max': 9050.23,
+        'lsst_u_min': 3060.00,
+        'lsst_u_max': 4080.00,
+        'lsst_g_min': 3869.99,
+        'lsst_g_max': 5665.01,
+        'lsst_r_min': 5375.02,
+        'lsst_r_max': 7054.98,
+        'lsst_i_min': 6764.99,
+        'lsst_i_max': 8325.01,
+        'lsst_z_min': 8034.99,
+        'lsst_z_max': 9380.01,
+        'lsst_y_min': 9090.18,
+        'lsst_y_max': 10999.99,
+
+    }
     #Plotting points identified as flares.
     for flare in flare_data:
         if flare['KIC'] != int(KIC_ID):
@@ -206,40 +224,121 @@ def get_spectra_data(lc, KIC_ID):
         # Obtaining start and end indices for flare instances
         flare_lc = get_flare_lc(lc,flare)
 
-        bb = models.BlackBody(temperature=10000*u.K) 
+        kepler_flux_mean = compute_mean_flux(wavelenghts['kepler_min'], wavelenghts['kepler_max'], bb_model)
 
-        kepler_wav = np.arange(4183.66,	9050.23) * u.AA
-        kepler_flux = bb(kepler_wav)
-        kepler_flux_mean = np.mean(kepler_flux)
-
-        lsst_wav_u = np.arange(3060.00,	4080.00	) * u.AA
-        lsst_flux_u = bb(lsst_wav_u)
-        lsst_flux_u_mean = np.mean(lsst_flux_u)
-
-        lsst_wav_r = np.arange(5375.02,	7054.98	) * u.AA
-        lsst_flux_r = bb(lsst_wav_r)
-        lsst_flux_r_mean = np.mean(lsst_flux_r)
+        lsst_flux_u_mean = compute_mean_flux(wavelenghts['lsst_u_min'], wavelenghts['lsst_u_max'], bb_model)
+        lsst_flux_g_mean = compute_mean_flux(wavelenghts['lsst_g_min'], wavelenghts['lsst_g_max'], bb_model)
+        lsst_flux_r_mean = compute_mean_flux(wavelenghts['lsst_r_min'], wavelenghts['lsst_r_max'], bb_model)
+        lsst_flux_i_mean = compute_mean_flux(wavelenghts['lsst_i_min'], wavelenghts['lsst_i_max'], bb_model)
+        lsst_flux_z_mean = compute_mean_flux(wavelenghts['lsst_z_min'], wavelenghts['lsst_z_max'], bb_model)
+        lsst_flux_y_mean = compute_mean_flux(wavelenghts['lsst_y_min'], wavelenghts['lsst_y_max'], bb_model)
 
         percentage_change_u = (lsst_flux_u_mean - kepler_flux_mean) / kepler_flux_mean
+        percentage_change_g = (lsst_flux_g_mean - kepler_flux_mean) / kepler_flux_mean
         percentage_change_r = (lsst_flux_r_mean - kepler_flux_mean) / kepler_flux_mean
+        percentage_change_i = (lsst_flux_i_mean - kepler_flux_mean) / kepler_flux_mean
+        percentage_change_z = (lsst_flux_z_mean - kepler_flux_mean) / kepler_flux_mean
+        percentage_change_y = (lsst_flux_y_mean - kepler_flux_mean) / kepler_flux_mean
         
         u_band = [(1 + percentage_change_u) * flux for flux in flare_lc.flux]
+        g_band = [(1 + percentage_change_g) * flux for flux in flare_lc.flux]
         r_band = [(1 + percentage_change_r) * flux for flux in flare_lc.flux]
+        i_band = [(1 + percentage_change_i) * flux for flux in flare_lc.flux]
+        z_band = [(1 + percentage_change_z) * flux for flux in flare_lc.flux]
+        y_band = [(1 + percentage_change_y) * flux for flux in flare_lc.flux]
 
-        plt.plot(flare_lc.time, flare_lc.flux, color = 'black')
-        plt.plot(flare_lc.time, u_band, color = 'purple')
-        plt.plot(flare_lc.time, r_band, color = 'red')
+        plt.plot(flare_lc.time, flare_lc.flux, color = 'black', label = 'Kepler', linestyle='-', marker='.')
+        plt.plot(flare_lc.time, u_band, color = 'purple', label = 'Lsst u band', linestyle='-', marker='.')
+        plt.plot(flare_lc.time, g_band, color = 'green', label = 'Lsst g band', linestyle='-', marker='.')
+        plt.plot(flare_lc.time, r_band, color = 'orange', label = 'Lsst r band', linestyle='-', marker='.')
+        plt.plot(flare_lc.time, i_band, color = 'red', label = 'Lsst i band', linestyle='-', marker='.')
+        plt.plot(flare_lc.time, z_band, color = 'grey', label = 'Lsst z band', linestyle='-', marker='.')
+        plt.plot(flare_lc.time, y_band, color = 'brown', label = 'Lsst y band', linestyle='-', marker='.')
+        plt.legend()
         plt.show()
 
         # Find how much higher or lower the flux is at any passband range compared to the kepler flux range.
         # Based on this, increase/decrease the flux for the various passbands
 
-        if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
-            os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
+def plot_all_flare_stats(amplitude, duration, area, num_bins):
 
-        # Saving indiviual flare instances as csv files
+    # Plotting flare amplitude stats.
+    fig1, (ax1, ax4) = plt.subplots(2,1,figsize=(15, 12))
+
+    amplitude = np.array(amplitude)
+    amplitude = np.sort(amplitude)
+
+    N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(amplitude, bins=num_bins, alpha = 0.5) 
+    ax1.set_title('Normalized Amplitude distribution')
+    ax1.set_xlabel('Amplitude')
+    ax1.set_ylabel('Number of flares')
 
 
+    cumulativeAmp = np.arange(amplitude.size, 0, -1)
+    ax4.plot(amplitude, cumulativeAmp)
+    ax4.set_title('Normalized Amplitude distribution (Cumulative)')
+    ax4.set_xlabel('Amplitude')
+    ax4.set_ylabel('Number of flares with amplitude less than')
+
+    # Plotting flare duration stats.
+    fig2, (ax2, ax5) = plt.subplots(2,1,figsize=(15, 12))
+
+    duration = np.array(duration)
+    duration = np.sort(duration)
+
+    N_duration, bins_duration, patches_duration = ax2.hist(duration, bins=num_bins, alpha = 0.5) 
+    ax2.set_title('Flare Duration distribution')
+    ax2.set_xlabel('Duration in days')
+    ax2.set_ylabel('Number of flares')
+
+
+    cumulativeDuration = np.arange(duration.size, 0, -1)
+    ax5.plot(duration, cumulativeDuration) 
+    ax5.set_title('Flare Duration distribution (Cumulative)')
+    ax5.set_xlabel('Duration in days')
+    ax5.set_ylabel('Number of flares with duration less than')
+
+
+    # Plotting flare area stats.
+    fig3, (ax3, ax6) = plt.subplots(2,1,figsize=(15, 12))
+
+    area = np.array(area)
+    area = np.sort(area)
+
+    N_area, bins_area, patches_area = ax3.hist(area, bins=num_bins, alpha=0.5) 
+    ax3.set_title('Flare Area Distribution')
+    ax3.set_xlabel('Flare Area')
+    ax3.set_ylabel('Number of flares')
+
+    cumulativeArea = np.arange(area.size, 0, -1)
+    ax6.plot(amplitude, cumulativeArea)
+    ax6.set_title('Flare Area Distribution (Cumulative)')
+    ax6.set_xlabel('Flare Area')
+    ax6.set_ylabel('Number of flares with area less than')
+
+    fig1.savefig('amplitude')
+    fig2.savefig('duration')
+    fig3.savefig('area')
+
+def all_flare_stats(lc, KIC_ID):
+
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
+    duration = []
+    area = []
+    amplitude = []
+    for flare in flare_data:
+        if flare['KIC'] != int(KIC_ID):
+            continue
+
+        flare_lc = get_flare_lc(lc,flare)
+        flux_arr = [flux - np.amin(flare_lc.flux) for flux in flare_lc.flux]
+
+        amp = np.amax(flux_arr)
+
+        duration.append(flare['End-BKJD'] - flare['St-BKJD'])
+        area.append(flare['Area'])
+        amplitude.append(amp)
+    return amplitude, area, duration
 
 def get_flare_lc(lc, flare):
     """
@@ -261,9 +360,6 @@ def get_flare_lc(lc, flare):
     flare_time = lc.time[start_index:end_index]
     flare_flux = lc.flux[start_index:end_index]
     flare_err = lc.flux_err[start_index:end_index]
-
-    min_flux = np.amin(flare_flux)
-    flare_flux = [flux - min_flux for flux in flare_flux]
 
     flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
     return flare_lc
@@ -290,3 +386,10 @@ def find_nearest_index(lc_time, value):
         return index - 1
     else:
         return index
+
+def compute_mean_flux(min_wav_len, max_wav_len, bb_model):
+
+    wavlengths = np.arange(min_wav_len,	max_wav_len) * u.AA
+    kepler_flux = bb_model(wavlengths)
+    kepler_flux_mean = np.mean(kepler_flux)
+    return kepler_flux_mean
