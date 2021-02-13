@@ -4,6 +4,7 @@ from astropy.modeling import models
 from astropy import units as u
 import lightkurve as lk
 from lightkurve import search_lightcurvefile
+from lightkurve import LightCurveFileCollection
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 import os.path
@@ -31,13 +32,14 @@ def load_light_curve(KIC_ID):
 
     KIC = "KIC {}".format(KIC_ID)
     if os.path.isfile(LC_DATA_PATH.format(KIC_ID)):
-        print("Loading local light curve data ...")
+        print("Loading local light curve data ... " + str(KIC))
         df = pd.read_csv(LC_DATA_PATH.format(KIC_ID))
         lc = lk.LightCurve(time = df['time'], flux = df['flux'], flux_err = df['flux_err'])
     else:
-        print('Downloading light curve data ...')
-        lcf = search_lightcurvefile(KIC).download_all()
-        lc = lcf.SAP_FLUX.stitch()
+        print('Downloading light curve data ... ' + str(KIC))
+        lcf = search_lightcurvefile(KIC, mission = 'Kepler').download_all()
+        new_lcf =  LightCurveFileCollection([x for x in lcf if x.targetid == int(KIC_ID)])
+        lc = new_lcf.SAP_FLUX.stitch()
         lc.to_csv(LC_DATA_PATH.format(KIC_ID))
     return lc
 
@@ -345,17 +347,19 @@ def get_flare_lc(lc, flare):
     This function takes the Light Curve for a KIC object along with a flare instance
     and returns a normalized light curve containing just the flare with one point prior
     to and after it.
-
     Args:
         lc (Kepler light Curve object): A light curve for the object from Kepler.
         flare (flare instance): A flare instances from the apjaa8ea2t3_mrt.txt file
-
     Returns:
         Kepler light curve object: A normalized light curve of the flare followed by a 
         trailing and leading observation
     """
     start_index = find_nearest_index(lc.time, flare['St-BKJD']) - 1
     end_index = find_nearest_index(lc.time, flare['End-BKJD']) + 2
+    
+    if(start_index < 0):
+        start_index = 0
+    
 
     flare_time = lc.time[start_index:end_index]
     flare_flux = lc.flux[start_index:end_index]
@@ -370,11 +374,9 @@ def find_nearest_index(lc_time, value):
     This function takes a sorted array and a value and returns the index where
     the value is found. If it can't find the value in the array, it returns the index of 
     a neigbour value which is closest to it's magnitude (in absolute terms).
-
     Args:
         lc_time (numpy array): The array where the index for the value is to be found
         value (float): The value to be found in the array
-
     Returns:
         int : Index of the value in the array or the index of it's closes neigbour.
     """

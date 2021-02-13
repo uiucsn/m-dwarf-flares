@@ -31,7 +31,9 @@ with concurrent.futures.ProcessPoolExecutor() as executor:
         area = area + result[1]
         duration = duration + result[2]
 
+
 end = time.perf_counter()
 
-plot_all_flare_stats(amplitude, duration, area, 100)
+plot_all_flare_stats(amplitude, duration, area, 10)
+print('Analysed ' , len(list) , 'KIC objects and found ' , len(amplitude) , ' flare instances')
 print('Took '+str(end-start)+'s')
