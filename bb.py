@@ -1,4 +1,6 @@
-from tools import *
+
+from lc_tools import *
+from spectra_tools import *
 import matplotlib.pyplot as plt
 # KIC 892376
 # KIC 1572802
