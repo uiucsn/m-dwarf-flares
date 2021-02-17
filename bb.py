@@ -13,4 +13,4 @@ import matplotlib.pyplot as plt
 
 KIC_ID = input("Enter the KIC ID: ")
 lc = load_light_curve(KIC_ID)
-get_spectra_data(lc, KIC_ID)
+get_spectra_data(lc, KIC_ID, 5000)
