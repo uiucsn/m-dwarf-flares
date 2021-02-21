@@ -253,7 +253,7 @@ def plot_all_flare_stats(amplitude, duration, area, num_bins):
 
     cumulativeAmp = np.arange(amplitude.size, 0, -1)
     ax4.plot(amplitude, cumulativeAmp)
-    ax4.set_yscale('log')
+    #ax4.set_yscale('log')
     ax4.set_title('Normalized Amplitude distribution (Cumulative)')
     ax4.set_xlabel('Amplitude')
     ax4.set_ylabel('Number of flares with amplitude less than')
@@ -292,7 +292,7 @@ def plot_all_flare_stats(amplitude, duration, area, num_bins):
     ax3.set_ylabel('Number of flares')
 
     cumulativeArea = np.arange(area.size, 0, -1)
-    ax6.plot(amplitude, cumulativeArea)
+    #ax6.plot(amplitude, cumulativeArea)
     ax6.set_yscale('log')
     ax6.set_title('Flare Area Distribution (Cumulative)')
     ax6.set_xlabel('Flare Area')

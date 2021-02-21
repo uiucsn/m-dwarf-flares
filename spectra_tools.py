@@ -67,7 +67,7 @@ def get_spectra_data(lc, KIC_ID, temp):
         fig1, (ax1, ax2) = plt.subplots(2,1,figsize=(15, 12))
         fig1.suptitle('KIC {id} at {temp} K: Flare from {start} to {end}'.format(start = str(flare['St-BKJD']), end = str(flare['End-BKJD']), id = str(KIC_ID), temp = str(temp)))
 
-        ax1.plot(flare_lc.time, flare_lc.flux, color = 'black', label = 'Kepler', linestyle='-', marker='.')
+        ax1.plot(flare_lc.time, flare_lc.flux, color = 'black', label = 'Kepler K band', linestyle='-', marker='.')
         ax1.plot(flare_lc.time, u_band, color = 'purple', label = 'Lsst u band', linestyle='-', marker='.')
         ax1.plot(flare_lc.time, g_band, color = 'green', label = 'Lsst g band', linestyle='-', marker='.')
         ax1.plot(flare_lc.time, r_band, color = 'orange', label = 'Lsst r band', linestyle='-', marker='.')
@@ -80,7 +80,7 @@ def get_spectra_data(lc, KIC_ID, temp):
 
         ax1.legend()
 
-        ax2.plot(flare_lc.time, flare_lc.flux,color = 'black', label = 'Kepler', linestyle='-', marker='.')
+        ax2.plot(flare_lc.time, flare_lc.flux,color = 'black', label = 'Kepler K band', linestyle='-', marker='.')
         ax2.legend()
         ax2.set_ylabel("Relative Flux")
         ax2.set_xlabel("Time")
