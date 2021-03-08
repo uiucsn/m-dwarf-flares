@@ -1,4 +1,4 @@
-from tools import *
+from lc_tools import *
 import matplotlib.pyplot as plt
 # KIC 892376
 # KIC 1572802
@@ -11,6 +11,6 @@ import matplotlib.pyplot as plt
 
 KIC_ID = input("Enter the KIC ID: ")
 lc = load_light_curve(KIC_ID)
-#display_flare_plots(lc, KIC_ID)
-save_flare_instances(lc, KIC_ID)
-save_flare_stats(lc, KIC_ID)
+display_flare_plots(lc, KIC_ID)
+#save_flare_instances(lc, KIC_ID)
+#save_flare_stats(lc, KIC_ID)

@@ -330,6 +330,55 @@ def get_flare_lc(lc, flare):
     flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
     return flare_lc
 
+def get_flare_lc_from_time(lc, start_time, end_time):
+    """
+    This function takes the Light Curve for a KIC object along with a flare instance
+    and returns a normalized light curve containing just the flare with one point prior
+    to and after it.
+    Args:
+        lc (Kepler light Curve object): A light curve for the object from Kepler.
+        flare (flare instance): A flare instances from the apjaa8ea2t3_mrt.txt file
+    Returns:
+        Kepler light curve object: A normalized light curve of the flare followed by a 
+        trailing and leading observation
+    """
+    start_index = find_nearest_index(lc.time, start_time) - 1
+    end_index = find_nearest_index(lc.time, end_time) + 2
+    
+    if(start_index < 0):
+        start_index = 0
+    
+
+    flare_time = lc.time[start_index:end_index]
+    flare_flux = lc.flux[start_index:end_index]
+    flare_err = lc.flux_err[start_index:end_index]
+
+    flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+    return flare_lc
+
+def get_normalized_lc(lc):
+    """
+    This function takes the Light Curve for a KIC object along with a flare instance
+    and returns a normalized light curve containing just the flare with one point prior
+    to and after it.
+    Args:
+        lc (Kepler light Curve object): A light curve for the object from Kepler.
+        flare (flare instance): A flare instances from the apjaa8ea2t3_mrt.txt file
+    Returns:
+        Kepler light curve object: A normalized light curve of the flare followed by a 
+        trailing and leading observation
+    """
+
+    flare_time = lc.time
+    flare_flux = lc.flux
+    flare_err = lc.flux_err
+    
+    min_flux = np.amin(flare_flux)
+    flare_flux = [flux - min_flux for flux in flare_flux]
+
+    flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+    return flare_lc
+
 def find_nearest_index(lc_time, value):
     """
     This function takes a sorted array and a value and returns the index where
