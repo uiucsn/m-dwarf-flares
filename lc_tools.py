@@ -125,20 +125,20 @@ def display_flare_plots(lc, KIC_ID):
         # Full light curve plot
         ax1.plot(lc.time, lc.flux)
         ax1.set_ylabel('Relative flux')
-        ax1.set_xlim([flare['St-BKJD']-200,flare['End-BKJD']+200])
+        ax1.set_xlim([flare['St-BKJD']-50,flare['End-BKJD']+50])
         ax1.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
         ax1.set_title('LC for KIC {}'.format(str(KIC_ID)))
 
         # Light curve of the flare
         ax2.plot(lc.time, lc.flux, linestyle='-', marker='.')
         ax2.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
-        ax2.set_xlabel('Time BKJD')
         ax2.set_ylabel('Relative flux')
         ax2.set_xlim([flare['St-BKJD']-2,flare['End-BKJD']+2])
-        ax2.set_title('Flare Area: {}'.format(str(flare['Area'])))
 
         ax3.plot(flare_lc.time, flare_lc.flux, linestyle='-', marker='.')
         ax3.axvspan(flare['St-BKJD'], flare['End-BKJD'], color='red', alpha=0.2)
+        ax3.set_xlabel('Time BKJD')
+        ax3.set_ylabel('Relative flux')
 
         plt.show()
 
@@ -239,7 +239,7 @@ def plot_all_flare_stats(amplitude, duration, area, num_bins):
         num_bins (int): Number of bins for the histograms.
     """
     # Plotting flare amplitude stats.
-    fig1, (ax1, ax4) = plt.subplots(2,1,figsize=(15, 12))
+    fig1, ax1 = plt.subplots(1,figsize=(15, 12))
 
     amplitude = np.array(amplitude)
     amplitude = np.sort(amplitude)
@@ -250,13 +250,6 @@ def plot_all_flare_stats(amplitude, duration, area, num_bins):
     ax1.set_xlabel('Amplitude')
     ax1.set_ylabel('Number of flares')
 
-
-    cumulativeAmp = np.arange(amplitude.size, 0, -1)
-    ax4.plot(amplitude, cumulativeAmp)
-    #ax4.set_yscale('log')
-    ax4.set_title('Normalized Amplitude distribution (Cumulative)')
-    ax4.set_xlabel('Amplitude')
-    ax4.set_ylabel('Number of flares with amplitude less than')
 
     # Plotting flare duration stats.
     fig2, (ax2, ax5) = plt.subplots(2,1,figsize=(15, 12))
