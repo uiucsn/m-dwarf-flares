@@ -41,19 +41,13 @@ def get_baseline_luminosity_in_lsst_passband(flare_lc, KIC_ID, temp, luminosity)
     intensity_z = compute_band_intensity("z", temp)
     intensity_y = compute_band_intensity("y", temp)
 
-    relative_change_u = (intensity_u - intensityKepler)/intensityKepler
-    relative_change_g = (intensity_g - intensityKepler)/intensityKepler
-    relative_change_r = (intensity_r - intensityKepler)/intensityKepler
-    relative_change_i = (intensity_i - intensityKepler)/intensityKepler
-    relative_change_z = (intensity_z - intensityKepler)/intensityKepler
-    relative_change_y = (intensity_y - intensityKepler)/intensityKepler
-
-    u_band = (1+relative_change_u) * luminosity.value
-    g_band = (1+relative_change_g) * luminosity.value 
-    r_band = (1+relative_change_r) * luminosity.value
-    i_band = (1+relative_change_i) * luminosity.value
-    z_band = (1+relative_change_z) * luminosity.value
-    y_band = (1+relative_change_y) * luminosity.value
+    kep_band = luminosity.value
+    u_band = luminosity.value * (intensity_u / intensityKepler)
+    g_band = luminosity.value * (intensity_g / intensityKepler)
+    r_band = luminosity.value * (intensity_r / intensityKepler)
+    i_band = luminosity.value * (intensity_i / intensityKepler)
+    z_band = luminosity.value * (intensity_z / intensityKepler)
+    y_band = luminosity.value * (intensity_y / intensityKepler)
     
 
     dict = {
@@ -80,19 +74,12 @@ def get_spectra_data(flare_lc, KIC_ID, temp):
     intensity_z = compute_band_intensity("z", temp)
     intensity_y = compute_band_intensity("y", temp)
 
-    relative_change_u = (intensity_u - intensityKepler)/intensityKepler
-    relative_change_g = (intensity_g - intensityKepler)/intensityKepler
-    relative_change_r = (intensity_r - intensityKepler)/intensityKepler
-    relative_change_i = (intensity_i - intensityKepler)/intensityKepler
-    relative_change_z = (intensity_z - intensityKepler)/intensityKepler
-    relative_change_y = (intensity_y - intensityKepler)/intensityKepler
-
-    u_band = [(1+relative_change_u) * flux for flux in flare_lc.flux]
-    g_band = [(1+relative_change_g) * flux for flux in flare_lc.flux]
-    r_band = [(1+relative_change_r) * flux for flux in flare_lc.flux]
-    i_band = [(1+relative_change_i) * flux for flux in flare_lc.flux]
-    z_band = [(1+relative_change_z) * flux for flux in flare_lc.flux]
-    y_band = [(1+relative_change_y) * flux for flux in flare_lc.flux]
+    u_band = flare_lc.flux * (intensity_u / intensityKepler)
+    g_band = flare_lc.flux * (intensity_g / intensityKepler)
+    r_band = flare_lc.flux * (intensity_r / intensityKepler)
+    i_band = flare_lc.flux * (intensity_i / intensityKepler)
+    z_band = flare_lc.flux * (intensity_z / intensityKepler)
+    y_band = flare_lc.flux * (intensity_y / intensityKepler)
 
     fig1, (ax1, ax2) = plt.subplots(2,1,figsize=(15, 12))
     #fig1.suptitle('KIC {id} at {temp} K: Flare from {start} to {end}'.format(start = str(flare['St-BKJD']), end = str(flare['End-BKJD']), id = str(KIC_ID), temp = str(temp)))
@@ -130,21 +117,13 @@ def get_flare_luminosities_in_lsst_passbands(flare_lc, KIC_ID, temp, luminosity)
     intensity_z = compute_band_intensity("z", temp)
     intensity_y = compute_band_intensity("y", temp)
 
-    
-    relative_change_u = (intensity_u - intensityKepler)/intensityKepler
-    relative_change_g = (intensity_g - intensityKepler)/intensityKepler
-    relative_change_r = (intensity_r - intensityKepler)/intensityKepler
-    relative_change_i = (intensity_i - intensityKepler)/intensityKepler
-    relative_change_z = (intensity_z - intensityKepler)/intensityKepler
-    relative_change_y = (intensity_y - intensityKepler)/intensityKepler
-
-    kep_band = [flux * luminosity.value for flux in flare_lc.flux]
-    u_band = [(1+relative_change_u) * flux * luminosity.value for flux in flare_lc.flux]
-    g_band = [(1+relative_change_g) * flux * luminosity.value for flux in flare_lc.flux]
-    r_band = [(1+relative_change_r) * flux * luminosity.value for flux in flare_lc.flux]
-    i_band = [(1+relative_change_i) * flux * luminosity.value for flux in flare_lc.flux]
-    z_band = [(1+relative_change_z) * flux * luminosity.value for flux in flare_lc.flux]
-    y_band = [(1+relative_change_y) * flux * luminosity.value for flux in flare_lc.flux]
+    kep_band = flare_lc.flux * luminosity.value
+    u_band = flare_lc.flux * luminosity.value * (intensity_u / intensityKepler)
+    g_band = flare_lc.flux * luminosity.value * (intensity_g / intensityKepler)
+    r_band = flare_lc.flux * luminosity.value * (intensity_r / intensityKepler)
+    i_band = flare_lc.flux * luminosity.value * (intensity_i / intensityKepler)
+    z_band = flare_lc.flux * luminosity.value * (intensity_z / intensityKepler)
+    y_band = flare_lc.flux * luminosity.value * (intensity_y / intensityKepler)
 
     fig1, (ax1, ax2) = plt.subplots(2,1,figsize=(15, 12))
     #fig1.suptitle('KIC {id} at {temp} K: Flare from {start} to {end}'.format(start = str(flare['St-BKJD']), end = str(flare['End-BKJD']), id = str(KIC_ID), temp = str(temp)))
@@ -184,13 +163,13 @@ def fit_flare_on_base(flare, base):
 
     # Reading flare data file.
 
-    u_band = [(luminosity + base['u']) for luminosity in flare['u'].flux]
-    g_band = [(luminosity + base['g']) for luminosity in flare['g'].flux]
-    r_band = [(luminosity + base['r']) for luminosity in flare['r'].flux]
-    i_band = [(luminosity + base['i']) for luminosity in flare['i'].flux]
-    z_band = [(luminosity + base['z']) for luminosity in flare['z'].flux]
-    y_band = [(luminosity + base['y']) for luminosity in flare['y'].flux]
-    kep_band = y_band = [(luminosity + base['kep']) for luminosity in flare['kep'].flux]
+    u_band = flare['u'].flux + base['u']
+    g_band = flare['g'].flux + base['g']
+    r_band = flare['r'].flux + base['r']
+    i_band = flare['i'].flux + base['i']
+    z_band = flare['z'].flux + base['z']
+    y_band = flare['y'].flux + base['y']
+    kep_band = flare['kep'].flux + base['kep']
 
     fig1, (ax1, ax2) = plt.subplots(2,1,figsize=(15, 12))
     #fig1.suptitle('KIC {id} at {temp} K: Flare from {start} to {end}'.format(start = str(flare['St-BKJD']), end = str(flare['End-BKJD']), id = str(KIC_ID), temp = str(temp)))

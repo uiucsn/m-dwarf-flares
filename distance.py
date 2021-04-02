@@ -42,13 +42,13 @@ def get_luminosity_with_magnitude(KIC):
 
 def get_fluxes_in_lsst_passbands(lsst_luminosities, distance):
 
-    u_band = [(luminosity / (4 * math.pi * (distance ** 2))) for luminosity in lsst_luminosities['u'].flux]
-    g_band = [(luminosity / (4 * math.pi * (distance ** 2)))for luminosity in lsst_luminosities['g'].flux]
-    r_band = [(luminosity / (4 * math.pi * (distance ** 2))) for luminosity in lsst_luminosities['r'].flux]
-    i_band = [(luminosity / (4 * math.pi * (distance ** 2))) for luminosity in lsst_luminosities['i'].flux]
-    z_band = [(luminosity / (4 * math.pi * (distance ** 2)))for luminosity in lsst_luminosities['z'].flux]
-    y_band = [(luminosity / (4 * math.pi * (distance ** 2)))for luminosity in lsst_luminosities['y'].flux]
-    kep_band = y_band = [(luminosity / (4 * math.pi * (distance ** 2))) for luminosity in lsst_luminosities['kep'].flux]
+    u_band = lsst_luminosities['u'].flux / (4 * math.pi * (distance ** 2))
+    g_band = lsst_luminosities['g'].flux / (4 * math.pi * (distance ** 2))
+    r_band = lsst_luminosities['r'].flux / (4 * math.pi * (distance ** 2))
+    i_band = lsst_luminosities['i'].flux / (4 * math.pi * (distance ** 2))
+    z_band = lsst_luminosities['z'].flux / (4 * math.pi * (distance ** 2))
+    y_band = lsst_luminosities['y'].flux / (4 * math.pi * (distance ** 2))
+    kep_band = y_band = lsst_luminosities['kep'].flux / (4 * math.pi * (distance ** 2))
 
     dict = {
         'u': lk.LightCurve(time = lsst_luminosities['u'].time, flux = u_band),
@@ -59,6 +59,6 @@ def get_fluxes_in_lsst_passbands(lsst_luminosities, distance):
         'y': lk.LightCurve(time = lsst_luminosities['y'].time, flux = y_band),
         'kep': lk.LightCurve(time = lsst_luminosities['kep'].time, flux = kep_band),
     }
-    
+
     return dict
     

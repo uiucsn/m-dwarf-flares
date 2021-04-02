@@ -29,15 +29,18 @@ for i in range(len(df)):
             table.write('mag.csv', format = 'ascii.csv') """
 
 def generate_flare_file(KIC_ID, temperature, start_time, end_time):
+
     lc = load_light_curve(KIC_ID)
     flare_lc = get_flare_lc_from_time(lc, start_time, end_time)
     new_lc = get_normalized_lc(flare_lc)
-    get_spectra_data(new_lc, KIC_ID, temperature)
     luminosity = get_luminosity_with_magnitude(KIC_ID).si
+    # Data modelling
     flare_luminosities = get_flare_luminosities_in_lsst_passbands(new_lc, KIC_ID, temperature, luminosity)
+    
     baseline_luminosities = get_baseline_luminosity_in_lsst_passband(new_lc, KIC_ID, 2000, luminosity)
     final_luminosities = fit_flare_on_base(flare_luminosities, baseline_luminosities)
-    final_fluxes = get_fluxes_in_lsst_passbands(final_luminosities, 1000)
-    
+
+    model_fluxes = get_fluxes_in_lsst_passbands(final_luminosities, 1000)
+
 KIC_ID = input("Enter the KIC ID: ")
 generate_flare_file(KIC_ID, 10000, 909.013, 909.115)
