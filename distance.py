@@ -39,3 +39,26 @@ def get_luminosity_with_magnitude(KIC):
     flux = (10 ** (-ab_magnitude / 2.5)) * 3630.7805 * astropy.units.Jy
     luminosity = flux * 4 * math.pi * (distance * astropy.units.pc) ** 2
     return luminosity
+
+def get_fluxes_in_lsst_passbands(lsst_luminosities, distance):
+
+    u_band = [(luminosity / (4 * math.pi * (distance ** 2))) for luminosity in lsst_luminosities['u'].flux]
+    g_band = [(luminosity / (4 * math.pi * (distance ** 2)))for luminosity in lsst_luminosities['g'].flux]
+    r_band = [(luminosity / (4 * math.pi * (distance ** 2))) for luminosity in lsst_luminosities['r'].flux]
+    i_band = [(luminosity / (4 * math.pi * (distance ** 2))) for luminosity in lsst_luminosities['i'].flux]
+    z_band = [(luminosity / (4 * math.pi * (distance ** 2)))for luminosity in lsst_luminosities['z'].flux]
+    y_band = [(luminosity / (4 * math.pi * (distance ** 2)))for luminosity in lsst_luminosities['y'].flux]
+    kep_band = y_band = [(luminosity / (4 * math.pi * (distance ** 2))) for luminosity in lsst_luminosities['kep'].flux]
+
+    dict = {
+        'u': lk.LightCurve(time = lsst_luminosities['u'].time, flux = u_band),
+        'g': lk.LightCurve(time = lsst_luminosities['g'].time, flux = g_band),
+        'r': lk.LightCurve(time = lsst_luminosities['r'].time, flux = r_band),
+        'i': lk.LightCurve(time = lsst_luminosities['i'].time, flux = i_band),
+        'z': lk.LightCurve(time = lsst_luminosities['z'].time, flux = z_band),
+        'y': lk.LightCurve(time = lsst_luminosities['y'].time, flux = y_band),
+        'kep': lk.LightCurve(time = lsst_luminosities['kep'].time, flux = kep_band),
+    }
+    
+    return dict
+    

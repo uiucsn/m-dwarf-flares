@@ -36,6 +36,8 @@ def generate_flare_file(KIC_ID, temperature, start_time, end_time):
     luminosity = get_luminosity_with_magnitude(KIC_ID).si
     flare_luminosities = get_flare_luminosities_in_lsst_passbands(new_lc, KIC_ID, temperature, luminosity)
     baseline_luminosities = get_baseline_luminosity_in_lsst_passband(new_lc, KIC_ID, 2000, luminosity)
-    fit_flare_on_base(flare_luminosities, baseline_luminosities)
+    final_luminosities = fit_flare_on_base(flare_luminosities, baseline_luminosities)
+    final_fluxes = get_fluxes_in_lsst_passbands(final_luminosities, 1000)
+    
 KIC_ID = input("Enter the KIC ID: ")
 generate_flare_file(KIC_ID, 10000, 909.013, 909.115)

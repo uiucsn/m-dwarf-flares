@@ -67,7 +67,6 @@ def get_baseline_luminosity_in_lsst_passband(flare_lc, KIC_ID, temp, luminosity)
     }
     return dict
 
-
 def get_spectra_data(flare_lc, KIC_ID, temp):
     # Reading flare data file.
     T = temp * u.K
