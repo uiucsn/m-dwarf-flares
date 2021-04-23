@@ -19,10 +19,20 @@ import math
 from lc_tools import *
 #from spectra_tools import get_kepler_transmission, compute_band_intensity
 
-dist_data = astropy.io.ascii.read('dist.csv')
+dist_data = astropy.io.ascii.read('dist_new.csv')
 mag_data = astropy.io.ascii.read('mag.csv')
 
 def get_luminosity_with_magnitude(KIC):
+    """
+    Computes the luminosity of a KIC object based on distance data from Gaia
+    DR3 and Kepler band magnitude.
+
+    Args:
+        KIC (Kepler): Kepler ID for which luminosity needs to be found.
+
+    Returns:
+        luminosity: Estimated luminosity value based on Kepler and Gaia Data.
+    """
 
     for row in dist_data:
         if row['KIC ID'] == int(KIC):
@@ -40,25 +50,37 @@ def get_luminosity_with_magnitude(KIC):
     luminosity = flux * 4 * math.pi * (distance * astropy.units.pc) ** 2
     return luminosity
 
-def get_fluxes_in_lsst_passbands(lsst_luminosities, distance):
+def get_mags_in_lsst_passbands(model_luminosities, distance):
+    """
+    Converts a dictionary of luminosity time sequences in lsst and kepler passbands to their
+    magnitude values based on the distance.
 
-    u_band = lsst_luminosities['u'].flux / (4 * math.pi * (distance ** 2))
-    g_band = lsst_luminosities['g'].flux / (4 * math.pi * (distance ** 2))
-    r_band = lsst_luminosities['r'].flux / (4 * math.pi * (distance ** 2))
-    i_band = lsst_luminosities['i'].flux / (4 * math.pi * (distance ** 2))
-    z_band = lsst_luminosities['z'].flux / (4 * math.pi * (distance ** 2))
-    y_band = lsst_luminosities['y'].flux / (4 * math.pi * (distance ** 2))
-    kep_band = y_band = lsst_luminosities['kep'].flux / (4 * math.pi * (distance ** 2))
+    Args:
+        model_luminosities (dictionary of light cruves): A dictionary of luminosity time sequences
+        in all 6 lsst passbands and the Kepler passbands.
+
+        distance (parsec): Distance values in parsec which is used to compute the magnitude.
+
+    Returns:
+        magnitudes: A dictionary of magnitude time sequences in lsst and kepler passbands.
+    """
+
+    u_band = [((lum * u.Watt * u.s)/ (4 * math.pi * (distance * u.pc)**2)).si.to(u.ABmag).value for lum in model_luminosities['u'].flux]
+    g_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance * u.pc)**2)).si.to(u.ABmag).value for lum in model_luminosities['g'].flux]
+    r_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance * u.pc)**2)).si.to(u.ABmag).value for lum in model_luminosities['r'].flux]
+    i_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance * u.pc)**2)).si.to(u.ABmag).value for lum in model_luminosities['i'].flux]
+    z_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance * u.pc)**2)).si.to(u.ABmag).value for lum in model_luminosities['z'].flux]
+    y_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance * u.pc)**2)).si.to(u.ABmag).value for lum in model_luminosities['y'].flux]
+    kep_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance * u.pc)**2)).si.to(u.ABmag).value for lum in model_luminosities['kep'].flux]
 
     dict = {
-        'u': lk.LightCurve(time = lsst_luminosities['u'].time, flux = u_band),
-        'g': lk.LightCurve(time = lsst_luminosities['g'].time, flux = g_band),
-        'r': lk.LightCurve(time = lsst_luminosities['r'].time, flux = r_band),
-        'i': lk.LightCurve(time = lsst_luminosities['i'].time, flux = i_band),
-        'z': lk.LightCurve(time = lsst_luminosities['z'].time, flux = z_band),
-        'y': lk.LightCurve(time = lsst_luminosities['y'].time, flux = y_band),
-        'kep': lk.LightCurve(time = lsst_luminosities['kep'].time, flux = kep_band),
+        'u': lk.LightCurve(time = model_luminosities['u'].time, flux = u_band),
+        'g': lk.LightCurve(time = model_luminosities['g'].time, flux = g_band),
+        'r': lk.LightCurve(time = model_luminosities['r'].time, flux = r_band),
+        'i': lk.LightCurve(time = model_luminosities['i'].time, flux = i_band),
+        'z': lk.LightCurve(time = model_luminosities['z'].time, flux = z_band),
+        'y': lk.LightCurve(time = model_luminosities['y'].time, flux = y_band),
+        'kep': lk.LightCurve(time = model_luminosities['kep'].time, flux = kep_band),
     }
 
     return dict
-    

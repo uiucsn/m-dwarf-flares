@@ -29,7 +29,21 @@ passband_props = dict(
 bands = tuple(passband_props)
 
 def get_baseline_luminosity_in_lsst_passband(flare_lc, KIC_ID, temp, luminosity):
-    # Reading flare data file.
+    """
+    Returns the baseline luminosities for all six LSST passbands and the Kepler band based 
+    on distance data from Gaia DR3, magnitude data in the Kepler band, and spectrum data
+    modelled after a simple black body.
+
+    Args:
+        flare_lc (flare light curve): The light kurve object of the flare.
+        KIC_ID (Kepler ID): The Kepler Input Catalogue building.
+        temp (float): The temperature of the star in Kelvin
+        luminosity (float): The baseline luminosity in the Kepler band.
+
+    Returns:
+        Dictionary : A dictionary with baseline luminosity values in all 6 LSST passbands
+        and the Kepler passband.
+    """
     T = temp * u.K
     lmbd, t = get_kepler_transmission()
     intensityKepler = simps(x=lmbd, y=bb(lmbd * u.AA, T).value * t) / simps(x=lmbd, y=t)
@@ -62,7 +76,7 @@ def get_baseline_luminosity_in_lsst_passband(flare_lc, KIC_ID, temp, luminosity)
     return dict
 
 def get_spectra_data(flare_lc, KIC_ID, temp):
-    # Reading flare data file.
+
     T = temp * u.K
     lmbd, t = get_kepler_transmission()
     intensityKepler = simps(x=lmbd, y=bb(lmbd * u.AA, T).value * t) / simps(x=lmbd, y=t)
@@ -81,31 +95,34 @@ def get_spectra_data(flare_lc, KIC_ID, temp):
     z_band = flare_lc.flux * (intensity_z / intensityKepler)
     y_band = flare_lc.flux * (intensity_y / intensityKepler)
 
-    fig1, (ax1, ax2) = plt.subplots(2,1,figsize=(15, 12))
-    #fig1.suptitle('KIC {id} at {temp} K: Flare from {start} to {end}'.format(start = str(flare['St-BKJD']), end = str(flare['End-BKJD']), id = str(KIC_ID), temp = str(temp)))
-
-    ax1.plot(flare_lc.time, flare_lc.flux, color = 'black', label = 'Kepler K band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, u_band, color = 'purple', label = 'Lsst u band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, g_band, color = 'green', label = 'Lsst g band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, r_band, color = 'orange', label = 'Lsst r band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, i_band, color = 'red', label = 'Lsst i band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, z_band, color = 'grey', label = 'Lsst z band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, y_band, color = 'brown', label = 'Lsst y band', linestyle='-', marker='.')
-    
-    ax1.set_ylabel("Relative Flux")
-    ax1.set_xlabel("Time in BKJD days")
-
-    ax1.legend()
-
-    ax2.plot(flare_lc.time, flare_lc.flux,color = 'black', label = 'Kepler K band', linestyle='-', marker='.')
-    ax2.legend()
-    ax2.set_ylabel("Relative Flux")
-    ax2.set_xlabel("Time in BKJD days")
-
-    plt.show()
+    dict = {
+        'u': lk.LightCurve(time = flare_lc.time, flux = u_band, flux_err = flare_lc.flux_err),
+        'g': lk.LightCurve(time = flare_lc.time, flux = g_band, flux_err = flare_lc.flux_err),
+        'r': lk.LightCurve(time = flare_lc.time, flux = r_band, flux_err = flare_lc.flux_err),
+        'i': lk.LightCurve(time = flare_lc.time, flux = i_band, flux_err = flare_lc.flux_err),
+        'z': lk.LightCurve(time = flare_lc.time, flux = z_band, flux_err = flare_lc.flux_err),
+        'y': lk.LightCurve(time = flare_lc.time, flux = y_band, flux_err = flare_lc.flux_err),
+        'kep': flare_lc,
+    }
+    return dict
 
 def get_flare_luminosities_in_lsst_passbands(flare_lc, KIC_ID, temp, luminosity):
-    # Reading flare data file.
+    """
+    Returns the flare luminosities for all six LSST passbands and the Kepler band based 
+    on distance data from Gaia DR3, magnitude data in the Kepler band, and spectrum data
+    modelled after a simple black body.
+
+    Args:
+        flare_lc (flare light curve): The light kurve object of the flare.
+        KIC_ID (Kepler ID): The Kepler Input Catalogue building.
+        temp (float): The temperature of the star in Kelvin
+        luminosity (float): The baseline luminosity in the Kepler band.
+
+    Returns:
+        Dictionary : A dictionary with flare luminosity values in all 6 LSST passbands
+        and the Kepler passband.
+    """
+
     T = temp * u.K
     lmbd, t = get_kepler_transmission()
     intensityKepler = simps(x=lmbd, y=bb(lmbd * u.AA, T).value * t) / simps(x=lmbd, y=t)
@@ -125,29 +142,6 @@ def get_flare_luminosities_in_lsst_passbands(flare_lc, KIC_ID, temp, luminosity)
     z_band = flare_lc.flux * luminosity.value * (intensity_z / intensityKepler)
     y_band = flare_lc.flux * luminosity.value * (intensity_y / intensityKepler)
 
-    fig1, (ax1, ax2) = plt.subplots(2,1,figsize=(15, 12))
-    #fig1.suptitle('KIC {id} at {temp} K: Flare from {start} to {end}'.format(start = str(flare['St-BKJD']), end = str(flare['End-BKJD']), id = str(KIC_ID), temp = str(temp)))
-
-    ax1.plot(flare_lc.time, kep_band, color = 'black', label = 'Kepler K band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, u_band, color = 'purple', label = 'Lsst u band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, g_band, color = 'green', label = 'Lsst g band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, r_band, color = 'orange', label = 'Lsst r band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, i_band, color = 'red', label = 'Lsst i band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, z_band, color = 'grey', label = 'Lsst z band', linestyle='-', marker='.')
-    ax1.plot(flare_lc.time, y_band, color = 'brown', label = 'Lsst y band', linestyle='-', marker='.')
-    
-    ax1.set_ylabel("Luminosity in Watts / Hz")
-    ax1.set_xlabel("Time in BKJD days")
-
-    ax1.legend()
-
-    ax2.plot(flare_lc.time, kep_band,color = 'black', label = 'Kepler K band', linestyle='-', marker='.')
-    ax2.legend()
-    ax2.set_ylabel("Luminosity in Watts / Hz")
-    ax2.set_xlabel("Time in BKJD days")
-
-    plt.show()
-
     dict = {
         'u': lk.LightCurve(time = flare_lc.time, flux = u_band, flux_err = flare_lc.flux_err),
         'g': lk.LightCurve(time = flare_lc.time, flux = g_band, flux_err = flare_lc.flux_err),
@@ -160,9 +154,18 @@ def get_flare_luminosities_in_lsst_passbands(flare_lc, KIC_ID, temp, luminosity)
     return dict
 
 def fit_flare_on_base(flare, base):
+    """
+    Retuns a dictionary of luminosities in all LSST passbands and the Kepler passband with the 
+    the flare luminosities fitted on top of the baseline luminosities. 
 
-    # Reading flare data file.
+    Args:
+        flare (Dictionary of light kurves): Flare luminosities in all 6 lsst passbands and kepler passband
+        base ([Dictionary of numbers]): Base luminosities in all 6 lsst passbands and the kepler passband
 
+    Returns:
+        Dictionary of luminosities: Light kurves objects in all lsst passbands and the kepler passband with 
+        the flare fitted on top of the baseline luminosities.
+    """
     u_band = flare['u'].flux + base['u']
     g_band = flare['g'].flux + base['g']
     r_band = flare['r'].flux + base['r']
@@ -170,30 +173,6 @@ def fit_flare_on_base(flare, base):
     z_band = flare['z'].flux + base['z']
     y_band = flare['y'].flux + base['y']
     kep_band = flare['kep'].flux + base['kep']
-
-    fig1, (ax1, ax2) = plt.subplots(2,1,figsize=(15, 12))
-    #fig1.suptitle('KIC {id} at {temp} K: Flare from {start} to {end}'.format(start = str(flare['St-BKJD']), end = str(flare['End-BKJD']), id = str(KIC_ID), temp = str(temp)))
-
-    ax1.plot(flare['kep'].time, kep_band, color = 'black', label = 'Kepler K band', linestyle='-', marker='.')
-    ax1.plot(flare['u'].time, u_band, color = 'purple', label = 'Lsst u band', linestyle='-', marker='.')
-    ax1.plot(flare['g'].time, g_band, color = 'green', label = 'Lsst g band', linestyle='-', marker='.')
-    ax1.plot(flare['r'].time, r_band, color = 'orange', label = 'Lsst r band', linestyle='-', marker='.')
-    ax1.plot(flare['i'].time, i_band, color = 'red', label = 'Lsst i band', linestyle='-', marker='.')
-    ax1.plot(flare['z'].time, z_band, color = 'grey', label = 'Lsst z band', linestyle='-', marker='.')
-    ax1.plot(flare['y'].time, y_band, color = 'brown', label = 'Lsst y band', linestyle='-', marker='.')
-    
-    ax1.set_ylabel("Luminosity in Watts / Hz")
-    ax1.set_xlabel("Time in BKJD days")
-
-    ax1.legend()
-
-
-    ax2.plot(flare['kep'].time, kep_band,color = 'black', label = 'Kepler K band', linestyle='-', marker='.')
-    ax2.legend()
-    ax2.set_ylabel("Luminosity in Watts / Hz")
-    ax2.set_xlabel("Time in BKJD days")
-
-    plt.show()
 
     dict = {
         'u': lk.LightCurve(time = flare['u'].time, flux = u_band),
@@ -207,15 +186,41 @@ def fit_flare_on_base(flare, base):
     return dict
     
 def compute_band_intensity(band, temp):
+    """
+    Computes the intensity in a particular lsst passband at a certain temperature, 
+    modelled after a black body.
+
+    Args:
+        band (char): Letter corresponding to an lsst passband
+        temp (temperature): Temperature of the black body at a given temperature.
+
+    Returns:
+        Intensity: Internsity in the given passband at the given temperature.
+    """
     T = temp * u.K
     lmbd, t = get_transmission(band)
     intensity = simps(x=lmbd, y=bb(lmbd * u.AA, T).value * t) / simps(x=lmbd, y=t)
     return intensity
 
 def get_transmission(band):
+    """
+    Returns the transmission for a given lsst passband.
+
+    Args:
+        band (char): Letter corresponding to an lsst passband.
+
+    Returns:
+        [type]: [description]
+    """
     lmbd, t = np.genfromtxt(f'filters/LSST_LSST.{band}.dat', unpack=True)
     return lmbd, t
 
 def get_kepler_transmission():
+    """
+    Returns the transmission for the kepler passband.
+
+    Returns:
+        [type]: [description]
+    """
     lmbd, t = np.genfromtxt('filters/Kepler_Kepler.K.dat', unpack=True)
     return lmbd, t
