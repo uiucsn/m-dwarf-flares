@@ -392,3 +392,42 @@ def find_nearest_index(lc_time, value):
     else:
         return index
 
+def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, flare_temp, star_temp, distance, start_time, end_time, mags):
+    """
+    Function to write generated model magnitudes to lclib entries.
+
+    Args:
+        index ([type]): [description]
+        ra ([type]): [description]
+        dec ([type]): [description]
+        KIC_ID ([type]): [description]
+        flare_temp ([type]): [description]
+        star_temp ([type]): [description]
+        distance ([type]): [description]
+        start_time ([type]): [description]
+        end_time ([type]): [description]
+        mags ([type]): [description]
+    """
+    event_marker = "#------------------------------\n"
+    data = "START_EVENT: {}\n".format(index)
+    nrow = "NROW: {nrow} RA: {ra} DEC: {dec}\n".format(nrow = 0, ra = ra, dec = dec)
+    parameters = "PARVAL: {KIC_ID} {f_temp} {s_temp} {dist} {start} {end}\n".format(KIC_ID = KIC_ID, f_temp = flare_temp, s_temp = star_temp, dist = distance, start = start_time, end = end_time)
+    readings = ""
+
+    for i in range(len(mags['kep'].flux)):
+        readings = readings + "{time} {kep} {u} {g} {r} {i} {z} {y}\n".format(time = mags['kep'].time[i], kep = mags['kep'].flux[i], u = mags['u'].flux[i], g = mags['g'].flux[i], r = mags['r'].flux[i], i = mags['i'].flux[i], z = mags['z'].flux[i], y = mags['y'].flux[i]) 
+
+    reading = event_marker + data + nrow + parameters + readings
+
+    text_file = open("sample.txt", "a")
+    n = text_file.write(reading)
+    text_file.close()
+
+def add_LCLIB_header():
+    """
+    Function to write the header of the lclib file.
+    """
+    header = "SURVEY: LSST\nFILTERS: ugrizY\nMODEL:   uLens_CFA-Binary \nRECUR_TYPE: NON-RECUR\nNEVENT:  11860\nMODEL_PARNAMES: KIC_ID,flare_temp,star_temp,distance,start_time,end_time\n"
+    text_file = open("sample.txt", "a")
+    n = text_file.write(header)
+    text_file.close()

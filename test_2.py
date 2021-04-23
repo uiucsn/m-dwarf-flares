@@ -12,35 +12,24 @@ from astropy.table import QTable
 # KIC 4726192 
 # KIC 5016904 
 # KIC 5597604
-flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
-kic = np.array(flare_data['KIC'])
-list = np.unique(kic)
 
-#df = pd.read_csv("kepler_kic_v10.csv.gz", compression='gzip')
-
-table = QTable(names = ('KIC ID' , 'kic_kepmag'))
-
-""" print(df.columns)
-for i in range(len(df)):
-    for kic in list: 
-        if(df['kic_kepler_id'][i] == kic):
-            print(df['kic_kepler_id'][i], df['kic_kepmag'][i])
-            table.add_row((df['kic_kepler_id'][i], df['kic_kepmag'][i]))
-            table.write('mag.csv', format = 'ascii.csv') """
-
-def generate_flare_file(KIC_ID, temperature, start_time, end_time):
-
+def generate_flare_file(KIC_ID, flare_temp, star_temp, distance, start_time, end_time):
+    # Data extraction
     lc = load_light_curve(KIC_ID)
     flare_lc = get_flare_lc_from_time(lc, start_time, end_time)
+
     new_lc = get_normalized_lc(flare_lc)
-    luminosity = get_luminosity_with_magnitude(KIC_ID).si
+    luminosity = get_luminosity_with_magnitude(KIC_ID).si  
     # Data modelling
-    flare_luminosities = get_flare_luminosities_in_lsst_passbands(new_lc, KIC_ID, temperature, luminosity)
+    flare_luminosities = get_flare_luminosities_in_lsst_passbands(new_lc, KIC_ID, flare_temp, luminosity)
     
-    baseline_luminosities = get_baseline_luminosity_in_lsst_passband(new_lc, KIC_ID, 2000, luminosity)
-    final_luminosities = fit_flare_on_base(flare_luminosities, baseline_luminosities)
+    baseline_luminosities = get_baseline_luminosity_in_lsst_passband(new_lc, KIC_ID, star_temp, luminosity)
+    model_luminosities = fit_flare_on_base(flare_luminosities, baseline_luminosities)
 
-    model_fluxes = get_fluxes_in_lsst_passbands(final_luminosities, 1000)
+    #model_flare_fluxes = get_spectra_data(new_lc, KIC_ID, flare_temp)
+    model_mags = get_mags_in_lsst_passbands(model_luminosities, distance)
+    add_LCLIB_header()
+    dump_modeled_data_to_LCLIB(0, 0, 0, KIC_ID, flare_temp, star_temp, distance, start_time, end_time, model_mags)
+    dump_modeled_data_to_LCLIB(0, 0, 0, KIC_ID, flare_temp, star_temp, distance, start_time, end_time, model_mags)
 
-KIC_ID = input("Enter the KIC ID: ")
-generate_flare_file(KIC_ID, 10000, 909.013, 909.115)
+generate_flare_file(892376, 10000, 3000, 10, 909.013, 909.115)
