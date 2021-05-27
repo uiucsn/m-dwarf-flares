@@ -1,4 +1,5 @@
 import astropy.coordinates as coord
+from astropy.coordinates import ICRS, FK5, SkyCoord
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
@@ -8,6 +9,7 @@ from astropy import units as u
 import astropy
 import numpy as np
 from pyvo.dal import TAPService
+from astroquery.vizier import Vizier
 
 def plotSkyMapFromSDSSData():
 
@@ -44,30 +46,6 @@ def plotSkyMap():
     ra_list = df['RAdeg']
     dec_list = df['DEdeg']
     print(df)
-
-
-
-    # distance = []
-
-    # for i in range(10):
-    #     search_radius_arcsec = 10
-    #     string_query = f'''SELECT distance(ra, dec, {ra_list[i]}, {dec_list[i]}) as d, r_med_geo, r_lo_geo, r_hi_geo, r_med_photogeo,r_lo_photogeo, r_hi_photogeo, phot_g_mean_mag FROM gedr3dist.main JOIN gaia.edr3lite USING (source_id) WHERE distance(ra, dec, {ra_list[i]}, {dec_list[i]}) < {search_radius_arcsec / 3600.0}'''
-        
-    #     tap = TAPService('https://dc.zah.uni-heidelberg.de/tap')
-    #     response = tap.search(string_query)
-    #     r = response.to_table()
-
-    #     if len(r) > 1:
-    #         index = np.where(r['r_med_geo'] == np.amin(r['r_med_geo']))
-    #         print(r[index])
-    #         distance.append(r[index]['r_med_geo'])
-    #         continue
-    #     elif len(r) == 0:
-    #         print('no data')
-    #         continue
-    #     else:
-    #         print(r[0])
-    #         distance.append(r[0]['r_med_geo'])
 
     ra = coord.Angle(ra_list)
     ra = ra.wrap_at(180*u.degree)
@@ -184,5 +162,127 @@ def plotLBDistribution():
     plt.colorbar(label = "Number of m dwarfs")
     plt.show()
 
-plotLBDistribution()
-#plotSkyMap()
+def plotSkyMapWithDistances():
+
+    ra_list = []
+    dec_list = []
+
+    df = astropy.io.ascii.read('aj403664t1_mrt.txt', quotechar="\s")
+    ra_list = df['RAdeg']
+    dec_list = df['DEdeg']
+    dist = distance = 1.0 / df['plx']
+
+    ra = coord.Angle(ra_list)
+    ra = ra.wrap_at(180*u.degree)
+    dec = coord.Angle(dec_list)
+    
+    fig = plt.figure(figsize=(8,6))
+    ax = fig.add_subplot(111, projection="mollweide")
+    sm = ax.scatter(ra.radian, dec.radian, c = dist)
+    ax.grid(True)
+    plt.colorbar(sm, label = "Distance in pc")
+    plt.show()
+
+def plotLDistCorrelation():
+
+    ra_list = []
+    dec_list = []
+
+    df = astropy.io.ascii.read('aj403664t1_mrt.txt', quotechar="\s")
+    ra_list = df['RAdeg']
+    dec_list = df['DEdeg']
+    dist = distance = 1.0 / df['plx']
+
+    ra = coord.Angle(ra_list)
+    ra = ra.wrap_at(180*u.degree)
+    dec = coord.Angle(dec_list)
+
+    l = []
+    b = []
+
+    for i in range(len(ra)):
+        c = SkyCoord(ra[i], dec[i], frame='icrs', unit='deg')
+        g = c.transform_to('galactic')
+        l.append(g.l.value)
+        b.append(g.b.value)
+    l = np.array(l)
+    b = np.array(b)
+    
+    plt.scatter(b,dist)
+    plt.show()
+
+def plotDensityDistribution():
+
+    table = astropy.io.ascii.read('aj403664t1_mrt.txt')
+    distance = np.sort(1.0 / table[(table['plx'] < 9) & (~table['plx'].mask)]['plx'])
+    plt.plot(distance, np.arange(1, distance.size+1), label='data')
+    plt.plot(np.linspace(2, 20, 100), np.linspace(2, 20, 100)**3 / 20**3 * 1200,label=r'$1200 \times (r / 20 pc)^3$')
+    plt.xlabel('r, pc')
+    plt.ylabel('N')
+    plt.legend()
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.show()
+
+def plotDistanceDistribution():
+
+    table = astropy.io.ascii.read('aj403664t1_mrt.txt')
+    distance = np.sort(1.0 / table[(table['plx'] < 9) & (~table['plx'].mask)]['plx'])
+
+    fig1, ax1 = plt.subplots(1,1)
+    N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(distance, bins=100, alpha = 0.5) 
+    ax1.set_title('Distribution of m dwarfs as a function of distance')
+    ax1.set_xlabel('distance in pc')
+    ax1.set_ylabel('Number of m dwarfs')
+    plt.show()
+
+def plotDistanceDistributionWithBellCurve():
+
+    table = astropy.io.ascii.read('aj403664t1_mrt.txt')
+    distance = np.sort(1.0 / table[(table['plx'] < 9) & (~table['plx'].mask)]['plx'])
+
+    count, bins, ignored = plt.hist(distance, bins=100, alpha = 0.5, density=True) 
+    plt.xlabel('distance in pc')
+    plt.ylabel('Number of m dwarfs')
+    plt.plot(bins, 1/(np.std(distance) * np.sqrt(2 * np.pi)) *
+               np.exp( - (bins - np.mean(distance))**2 / (2 * np.std(distance)**2)),
+         linewidth=2, color='r')
+    plt.show()
+
+def plotBDistributionWithBellCurve():
+
+    ra_list = []
+    dec_list = []
+
+    df = astropy.io.ascii.read('aj403664t1_mrt.txt', quotechar="\s")
+    ra_list = df['RAdeg']
+    dec_list = df['DEdeg']
+
+    print(df)
+
+
+
+    ra = coord.Angle(ra_list)
+    ra = ra.wrap_at(180*u.degree)
+    dec = coord.Angle(dec_list)
+    l = []
+    b = []
+
+    for i in range(len(ra)):
+        c = SkyCoord(ra[i], dec[i], frame='icrs', unit='deg')
+        g = c.transform_to('galactic')
+        l.append(g.l.value)
+        b.append(g.b.value)
+
+
+    count, bins, ignored = plt.hist(b, bins=100, alpha = 0.5, density=True) 
+    plt.xlabel('distance in pc')
+    plt.ylabel('Number of m dwarfs')
+    plt.plot(bins, 1/(np.std(b) * np.sqrt(2 * np.pi)) *
+               np.exp( - (bins - np.mean(b))**2 / (2 * np.std(b)**2)),
+         linewidth=2, color='r')
+    plt.show()
+
+
+
+plotBDistributionWithBellCurve()
