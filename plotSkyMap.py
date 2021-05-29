@@ -10,6 +10,9 @@ import astropy
 import numpy as np
 from pyvo.dal import TAPService
 from astroquery.vizier import Vizier
+import math
+import pandas as pd
+from astropy.table import QTable
 
 def plotSkyMapFromSDSSData():
 
@@ -241,11 +244,15 @@ def plotDistanceDistributionWithBellCurve():
     table = astropy.io.ascii.read('aj403664t1_mrt.txt')
     distance = np.sort(1.0 / table[(table['plx'] < 9) & (~table['plx'].mask)]['plx'])
 
+    mu = np.mean(distance)
+    sig = np.std(distance)
+    d = np.random.normal(mu, sig, 1000)
+
     count, bins, ignored = plt.hist(distance, bins=100, alpha = 0.5, density=True) 
     plt.xlabel('distance in pc')
     plt.ylabel('Number of m dwarfs')
-    plt.plot(bins, 1/(np.std(distance) * np.sqrt(2 * np.pi)) *
-               np.exp( - (bins - np.mean(distance))**2 / (2 * np.std(distance)**2)),
+    plt.plot(bins, 1/(sig * np.sqrt(2 * np.pi)) *
+               np.exp( - (bins - mu)**2 / (2 * sig**2)),
          linewidth=2, color='r')
     plt.show()
 
@@ -274,15 +281,164 @@ def plotBDistributionWithBellCurve():
         l.append(g.l.value)
         b.append(g.b.value)
 
+    mu = np.mean(b)
+    sig = np.std(b)
+    k = np.random.normal(mu, sig, 1000)
 
     count, bins, ignored = plt.hist(b, bins=100, alpha = 0.5, density=True) 
     plt.xlabel('distance in pc')
     plt.ylabel('Number of m dwarfs')
-    plt.plot(bins, 1/(np.std(b) * np.sqrt(2 * np.pi)) *
-               np.exp( - (bins - np.mean(b))**2 / (2 * np.std(b)**2)),
+    plt.plot(bins, 1/(sig * np.sqrt(2 * np.pi)) *
+               np.exp( - (bins - mu)**2 / (2 * sig**2)),
          linewidth=2, color='r')
     plt.show()
 
+def test_spherical_distribution():
+    count = 1000
+    R = 1000
+
+    ra = []
+    dec = []
+    dist = []
 
 
-plotBDistributionWithBellCurve()
+    while len(ra) != 1000:
+        x = (np.random.uniform(-1 * R,R) * u.pc)
+        y = (np.random.uniform(-1 * R,R) * u.pc)
+        z = (np.random.uniform(-1 * R,R) * u.pc)
+
+        if (x ** 2 + y ** 2 + z ** 2) ** (0.5) < R * u.pc:
+            r, lat, lon = coord.cartesian_to_spherical(x,y,z)
+            ra.append(lon)
+            dec.append(lat)
+            dist.append(r.value)
+    
+    ra = coord.Angle(ra)
+    ra = ra.wrap_at(180*u.degree)
+    dec = coord.Angle(dec)
+
+    fig = plt.figure(figsize=(8,6))
+    ax = fig.add_subplot(111, projection="mollweide")
+    sm = ax.scatter(ra.radian, dec.radian, c = dist)
+    ax.grid(True)
+    plt.colorbar(sm)
+    plt.show()
+
+def test_dist_distribution():
+    count = 1000
+    R = 1000
+
+    ra = []
+    dec = []
+    dist = []
+
+
+    while len(ra) != 1000:
+        x = (np.random.uniform(-1 * R,R) * u.pc)
+        y = (np.random.uniform(-1 * R,R) * u.pc)
+        z = (np.random.uniform(-1 * R,R) * u.pc)
+
+        if (x ** 2 + y ** 2 + z ** 2) ** (0.5) < R * u.pc:
+            r, lat, lon = coord.cartesian_to_spherical(x,y,z)
+            ra.append(lon)
+            dec.append(lat)
+            dist.append(r.value)
+    
+    count, bins, ignored = plt.hist(dist, bins=10, alpha = 0.5) 
+    plt.xlabel('distance in pc')
+    plt.ylabel('Number of m dwarfs')
+    plt.show()
+
+def test_dec_distribution():
+    count = 1000
+    R = 1000
+
+    ra = []
+    dec = []
+    dist = []
+
+
+    while len(ra) != 1000:
+        x = (np.random.uniform(-1 * R,R) * u.pc)
+        y = (np.random.uniform(-1 * R,R) * u.pc)
+        z = (np.random.uniform(-1 * R,R) * u.pc)
+
+        if (x ** 2 + y ** 2 + z ** 2) ** (0.5) < R * u.pc:
+            r, lat, lon = coord.cartesian_to_spherical(x,y,z)
+            ra.append(lon.degree)
+            dec.append(lat.degree)
+            dist.append(r.value)
+    
+    count, bins, ignored = plt.hist(dec, bins=100, alpha = 0.5) 
+    plt.xlabel('Declination')
+    plt.ylabel('Number of m dwarfs')
+    plt.show()
+
+def test_ra_distribution():
+    count = 1000
+    R = 1000
+
+    ra = []
+    dec = []
+    dist = []
+
+
+    while len(ra) != 1000:
+        x = (np.random.uniform(-1 * R,R) * u.pc)
+        y = (np.random.uniform(-1 * R,R) * u.pc)
+        z = (np.random.uniform(-1 * R,R) * u.pc)
+
+        if (x ** 2 + y ** 2 + z ** 2) ** (0.5) < R * u.pc:
+            r, lat, lon = coord.cartesian_to_spherical(x,y,z)
+            ra.append(lon.degree)
+            dec.append(lat.degree)
+            dist.append(r.value)
+    
+    count, bins, ignored = plt.hist(ra, bins=10, alpha = 0.5) 
+    plt.xlabel('RA')
+    plt.ylabel('Number of m dwarfs')
+    plt.show()
+
+def save_effective_kepler_temps():
+
+    mag = pd.read_csv('mag.csv')
+    kepler_cataloug = pd.read_csv('kepler_kic_v10.csv.gz')
+    
+    df = pd.DataFrame()
+    k = kepler_cataloug.loc[kepler_cataloug['kic_kepler_id'].isin(mag['KIC ID'].astype(int))]
+    
+    df['KIC ID'] = k['kic_kepler_id']
+    df['teff'] = k['kic_teff']
+
+    df.to_csv('eff_temp.csv')
+
+def plot_effective_kepler_temps():
+
+    df = pd.read_csv('eff_temp.csv')
+    print(np.mean(df['teff']))
+    print(np.std(df['teff']))
+    count, bins, ignored = plt.hist(df['teff'], bins=10, alpha = 0.5) 
+    plt.xlabel('Effective Temperature in Kelvin')
+    plt.ylabel('Number of m dwarfs')
+    plt.show()
+
+def remove_incomplete_entries_from_flare_data():
+    dist = pd.read_csv('dist_new.csv')
+    flare_data = astropy.io.ascii.read('flare_data/apjaa8ea2t3_mrt.txt', quotechar="\s")
+    df = flare_data.to_pandas()
+
+    filtered = df.loc[df['KIC'].isin(dist['KIC ID'].astype(int))]
+    df.to_csv('filtered_flares.csv')
+
+plot_effective_kepler_temps()
+remove_incomplete_entries_from_flare_data()
+
+    
+
+    
+
+
+
+
+
+
