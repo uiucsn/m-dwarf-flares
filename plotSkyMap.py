@@ -390,7 +390,7 @@ def test_ra_distribution():
 
         if (x ** 2 + y ** 2 + z ** 2) ** (0.5) < R * u.pc:
             r, lat, lon = coord.cartesian_to_spherical(x,y,z)
-            ra.append(lon.degree)
+            ra.append(lon.degree.to())
             dec.append(lat.degree)
             dist.append(r.value)
     
@@ -428,9 +428,9 @@ def remove_incomplete_entries_from_flare_data():
     df = flare_data.to_pandas()
 
     filtered = df.loc[df['KIC'].isin(dist['KIC ID'].astype(int))]
-    df.to_csv('filtered_flares.csv')
+    filtered.to_csv('filtered_flares.csv')
 
-plot_effective_kepler_temps()
+#plot_effective_kepler_temps()
 remove_incomplete_entries_from_flare_data()
 
     

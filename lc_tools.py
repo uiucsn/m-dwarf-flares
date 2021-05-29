@@ -239,7 +239,7 @@ def plot_all_flare_stats(amplitude, duration, area, num_bins):
         num_bins (int): Number of bins for the histograms.
     """
     # Plotting flare amplitude stats.
-    fig1, ax1 = plt.subplots(1,figsize=(15, 12))
+    fig1, ax1 = plt.subplots(1)
 
     amplitude = np.array(amplitude)
     amplitude = np.sort(amplitude)
@@ -252,7 +252,7 @@ def plot_all_flare_stats(amplitude, duration, area, num_bins):
 
 
     # Plotting flare duration stats.
-    fig2, (ax2, ax5) = plt.subplots(2,1,figsize=(15, 12))
+    fig2, ax2 = plt.subplots(1)
 
     duration = np.array(duration)
     duration = np.sort(duration)
@@ -263,17 +263,8 @@ def plot_all_flare_stats(amplitude, duration, area, num_bins):
     ax2.set_xlabel('Duration in days')
     ax2.set_ylabel('Number of flares')
 
-
-    cumulativeDuration = np.arange(duration.size, 0, -1)
-    ax5.plot(duration, cumulativeDuration) 
-    ax5.set_yscale('log')
-    ax5.set_title('Flare Duration distribution (Cumulative)')
-    ax5.set_xlabel('Duration in days')
-    ax5.set_ylabel('Number of flares with duration less than')
-
-
     # Plotting flare area stats.
-    fig3, (ax3, ax6) = plt.subplots(2,1,figsize=(15, 12))
+    fig3, ax3 = plt.subplots(1)
 
     area = np.array(area)
     area = np.sort(area)
@@ -283,13 +274,6 @@ def plot_all_flare_stats(amplitude, duration, area, num_bins):
     ax3.set_yscale('log')
     ax3.set_xlabel('Flare Area')
     ax3.set_ylabel('Number of flares')
-
-    cumulativeArea = np.arange(area.size, 0, -1)
-    #ax6.plot(amplitude, cumulativeArea)
-    ax6.set_yscale('log')
-    ax6.set_title('Flare Area Distribution (Cumulative)')
-    ax6.set_xlabel('Flare Area')
-    ax6.set_ylabel('Number of flares with area less than')
 
     fig1.savefig('amplitude')
     fig2.savefig('duration')
@@ -392,7 +376,7 @@ def find_nearest_index(lc_time, value):
     else:
         return index
 
-def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, flare_temp, star_temp, distance, start_time, end_time, mags):
+def dump_modeled_data_to_LCLIB(index, ra, dec, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, mags):
     """
     Function to write generated model magnitudes to lclib entries.
 
@@ -423,7 +407,7 @@ def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, flare_temp, star_temp, di
     n = text_file.write(reading)
     text_file.close()
 
-def add_LCLIB_header():
+def add_LCLIB_header(count):
     """
     Function to write the header of the lclib file.
     """
