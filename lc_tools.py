@@ -394,14 +394,20 @@ def dump_modeled_data_to_LCLIB(index, ra, dec, distance, KIC_ID, start_time, end
     """
     event_marker = "#------------------------------\n"
     data = "START_EVENT: {}\n".format(index)
-    nrow = "NROW: {nrow} RA: {ra} DEC: {dec}\n".format(nrow = 0, ra = ra, dec = dec)
+    end = "END_EVENT: {}\n".format(index)
+    nrow = "NROW: {nrow} RA: {ra} DEC: {dec}\n".format(nrow = 0, ra = ra.value, dec = dec.value)
     parameters = "PARVAL: {KIC_ID} {f_temp} {s_temp} {dist} {start} {end}\n".format(KIC_ID = KIC_ID, f_temp = flare_temp, s_temp = star_temp, dist = distance, start = start_time, end = end_time)
     readings = ""
 
     for i in range(len(mags['kep'].flux)):
+        if i == 0 or i == len(mags['kep'].flux) - 1:
+            readings = readings + "T:\t"
+        else:
+            readings = readings + "S:\t"
         readings = readings + "{time} {kep} {u} {g} {r} {i} {z} {y}\n".format(time = mags['kep'].time[i], kep = mags['kep'].flux[i], u = mags['u'].flux[i], g = mags['g'].flux[i], r = mags['r'].flux[i], i = mags['i'].flux[i], z = mags['z'].flux[i], y = mags['y'].flux[i]) 
 
-    reading = event_marker + data + nrow + parameters + readings
+    reading = event_marker + data + nrow + parameters + readings + end
+
 
     text_file = open("sample.txt", "a")
     n = text_file.write(reading)
@@ -411,7 +417,18 @@ def add_LCLIB_header(count):
     """
     Function to write the header of the lclib file.
     """
-    header = "SURVEY: LSST\nFILTERS: ugrizY\nMODEL:   uLens_CFA-Binary \nRECUR_TYPE: NON-RECUR\nNEVENT:  11860\nMODEL_PARNAMES: KIC_ID,flare_temp,star_temp,distance,start_time,end_time\n"
+    header ="""SURVEY: LSST
+FILTERS: ugrizY
+MODEL: m-dwarf flare model
+RECUR_TYPE: NON-RECUR
+NEVENT: {count}
+MODEL_PARNAMES: KIC_ID,flare_temp,star_temp,distance,start_time,end_time
+COMMENT: KIC_ID - Kepler Input Catalogue ID
+COMMENT: flare_temp - Temperature of the flare for spectral modelling
+COMMENT: star_temp - Temperature of the star for spectral modelling
+COMMENT: distance - Distance to the star in parsec
+COMMENT: start_time - Start time of the reference flare
+COMMENT: end_time - End time of the\n""".format(count = count)
     text_file = open("sample.txt", "a")
     n = text_file.write(header)
     text_file.close()

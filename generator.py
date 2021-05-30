@@ -25,7 +25,7 @@ KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS = 161.37182827551771
 
 def run_generator():
     RADIUS = 5
-    DAYS = 3650
+    DAYS = 365
 
     print("Computing number of flare instances")
     flare_count = get_number_of_expected_flares(RADIUS, DAYS)
@@ -71,15 +71,12 @@ def get_number_of_expected_flares(radius, duration):
 
 def get_uniformly_distributed_spherical_coordinates(radius, count):
 
-    R = 10 # Big Box edge in pc
     coordinates = []
     dist = []
 
     while len(coordinates) != count:
         print((len(coordinates) / count) * 100,'% Complete')
-        x = (np.random.uniform(-1 * R,R) * u.pc)
-        y = (np.random.uniform(-1 * R,R) * u.pc)
-        z = (np.random.uniform(-1 * R,R) * u.pc)
+        x, y, z = (np.random.uniform(-1 * radius,radius, 3) * u.pc)
         if (x ** 2 + y ** 2 + z ** 2) ** (0.5) < radius * u.pc:
             r, lat, lon = coord.cartesian_to_spherical(x,y,z)
             c = coord.SkyCoord(ra = lon, dec = lat)
