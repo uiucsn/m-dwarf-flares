@@ -59,6 +59,17 @@ def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, 
     dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, flare_temp, star_temp, distance, start_time, end_time, model_mags)
    
 def get_number_of_expected_flares(radius, duration):
+    """
+    Computes the number of expected flares for a sphere of given radius during a given time period.
+    This is based on data from the Kepler Space telescope and SUPERBLINK survey.
+
+    Args:
+        radius (float): Radius of sphere in parsec
+        duration (float): Duration in days
+
+    Returns:
+        int : An estimate of the number of flares expcted during this time period in the sphere
+    """
 
     flare_density = (NUMBER_OF_LOCAL_M_DWARFS / (4/3 * math.pi * LOCAL_RADIUS**2)) * (TOTAL_FLARE_INSTANCES_COUNT / (TOTAL_KEPLER_M_DWARF_COUNT * TOTAL_KEPLER_DURATION_IN_DAYS))
     volume = 4/3 * math.pi * (radius ** 3)
@@ -71,6 +82,18 @@ def get_number_of_expected_flares(radius, duration):
 
 
 def get_uniformly_distributed_spherical_coordinates(radius, count, chunk_size=1<<10):
+    """
+    Returns a collection of uniformally distributed coordinates (RA, Dec) and distances that all fall 
+    within a sphere of the parameter radius. 
+
+    Args:
+        radius (float): The radius of the sphere in parsec.
+        count (int): Number of coordinates to be returned.
+        chunk_size ([type], optional): [description]. Defaults to 1<<10.
+
+    Returns:
+        tuple: Contains two numpy arrays containing the skycoords and distances in parsec.
+    """
     x_ = []
     y_ = []
     z_ = []
@@ -94,6 +117,16 @@ def get_uniformly_distributed_spherical_coordinates(radius, count, chunk_size=1<
 
 
 def get_random_flare_events(count):
+    """
+    Returns a tuple of 3 numpy arrays containing the Kepler Input Catalogue ID, flare start time and flare end time 
+    of flares randomly selected from the filtered_flares.csv file.
+
+    Args:
+        count (int): Number of flares for which the data needs to be returned.
+
+    Returns:
+        tuple: Contains numpy arrays for the KIC ID, flare start time and flare end time respectively.
+    """
     KIC = []
     St_time = []
     End_time = []
@@ -110,9 +143,29 @@ def get_random_flare_events(count):
 
 
 def get_normally_distributed_star_temp(count):
+    """
+    Returns a numpy array of star temperatures modelled after a normal distribution of effective star temperatures
+    based on data from the Kepler Input Catalogue.
+
+    Args:
+        count (int): Length of numpy array to be returned
+
+    Returns:
+        numpy array: numpy array containing the star temperatures with length = count
+    """
     return np.random.normal(KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS, KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS, count)
 
+
 def get_normally_distributed_flare_temp(count):
+    """
+    Returns a numpy array of flare temperatures modelled after a normal distribution.
+
+    Args:
+        count (int): Length of numpy array to be returned
+
+    Returns:
+        numpy array: numpy array containing the flare temperatures with length = count
+    """
     return np.random.normal(9000, 500, count)
 
 run_generator()
