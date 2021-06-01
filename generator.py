@@ -69,21 +69,29 @@ def get_number_of_expected_flares(radius, duration):
 
     return flare_count
 
-def get_uniformly_distributed_spherical_coordinates(radius, count):
 
-    coordinates = []
-    dist = []
-
-    while len(coordinates) != count:
-        print((len(coordinates) / count) * 100,'% Complete')
-        x, y, z = (np.random.uniform(-1 * radius,radius, 3) * u.pc)
-        if (x ** 2 + y ** 2 + z ** 2) ** (0.5) < radius * u.pc:
-            r, lat, lon = coord.cartesian_to_spherical(x,y,z)
-            c = coord.SkyCoord(ra = lon, dec = lat)
-            coordinates.append(c)
-            dist.append(r.value)
+def get_uniformly_distributed_spherical_coordinates(radius, count, chunk_size=1<<10):
+    x_ = []
+    y_ = []
+    z_ = []
+    n = 0
+    while n < count:
+        print((len(x_) / count) * 100,'% Complete')
+        x, y, z = np.random.uniform(-1 * radius,radius, (3, chunk_size))
+        idx = x ** 2 + y ** 2 + z ** 2 < radius * radius
+        x_.append(x[idx])
+        y_.append(y[idx])
+        z_.append(z[idx])
+        n += np.count_nonzero(idx)
+    x = np.concatenate(x_)
+    y = np.concatenate(y_)
+    z = np.concatenate(z_)
     
-    return coordinates, dist
+    r, dec, ra = coord.cartesian_to_spherical(x[:count], y[:count], z[:count])
+    coordinates = coord.SkyCoord(ra=ra, dec=dec)
+    return coordinates, r.value
+
+
 
 def get_random_flare_events(count):
     KIC = []
