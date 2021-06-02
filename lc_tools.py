@@ -12,6 +12,8 @@ import pandas as pd
 import csv
 import numpy as np
 import math
+from datetime import date
+import datetime
 
 LC_DATA_PATH = 'lc_data/KIC-{}.csv'
 FLARE_DATA_PATH = 'flare_data/apjaa8ea2t3_mrt.txt'
@@ -376,7 +378,7 @@ def find_nearest_index(lc_time, value):
     else:
         return index
 
-def dump_modeled_data_to_LCLIB(index, ra, dec, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, mags):
+def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, mags):
     """
     Function to write generated model magnitudes to lclib entries.
 
@@ -393,10 +395,10 @@ def dump_modeled_data_to_LCLIB(index, ra, dec, distance, KIC_ID, start_time, end
         mags ([type]): [description]
     """
     event_marker = "#------------------------------\n"
-    data = "START_EVENT: {}\n".format(index)
+    start = "START_EVENT: {}\n".format(index)
     end = "END_EVENT: {}\n".format(index)
-    nrow = "NROW: {nrow} RA: {ra} DEC: {dec}\n".format(nrow = len(mags['kep'].time), ra = ra.value, dec = dec.value)
-    parameters = "PARVAL: {KIC_ID} {f_temp} {s_temp} {dist} {start} {end}\n".format(KIC_ID = KIC_ID, f_temp = flare_temp, s_temp = star_temp, dist = distance, start = start_time, end = end_time)
+    nrow = "NROW: {nrow} RA: {ra} DEC: {dec}.\n".format(nrow = len(mags['kep'].time), ra = ra.value, dec = dec.value)
+    parameters = "PARVAL: {KIC_ID} {start} {end} {f_temp} {s_temp} {dist}\n".format(KIC_ID = KIC_ID, f_temp = flare_temp, s_temp = star_temp, dist = distance, start = start_time, end = end_time)
     readings = ""
 
     for i in range(len(mags['kep'].flux)):
@@ -404,9 +406,9 @@ def dump_modeled_data_to_LCLIB(index, ra, dec, distance, KIC_ID, start_time, end
             readings = readings + "T:\t"
         else:
             readings = readings + "S:\t"
-        readings = readings + "{time:.5f}\t{kep:.3f}\t{u:.3f}\t{g:.3f}\t{r:.3f}\t{i:.3f}\t{z:.3f}\t{y:.3f}\n".format(time = mags['kep'].time[i], kep = mags['kep'].flux[i], u = mags['u'].flux[i], g = mags['g'].flux[i], r = mags['r'].flux[i], i = mags['i'].flux[i], z = mags['z'].flux[i], y = mags['y'].flux[i]) 
+        readings = readings + "{time:.5f}\t{u:.3f}\t{g:.3f}\t{r:.3f}\t{i:.3f}\t{z:.3f}\t{y:.3f}\n".format(time = mags['kep'].time[i], kep = mags['kep'].flux[i], u = mags['u'].flux[i], g = mags['g'].flux[i], r = mags['r'].flux[i], i = mags['i'].flux[i], z = mags['z'].flux[i], y = mags['y'].flux[i]) 
 
-    reading = event_marker + data + nrow + parameters + readings + end
+    reading = event_marker + start + nrow + parameters + readings + end
 
 
     text_file = open("sample.txt", "a")
@@ -422,13 +424,14 @@ FILTERS: ugrizY
 MODEL: m-dwarf flare model
 RECUR_TYPE: NON-RECUR
 NEVENT: {count}
-MODEL_PARNAMES: KIC_ID,flare_temp,star_temp,distance,start_time,end_time
+MODEL_PARNAMES: KIC_ID, start_time, end_time,star_temp, flare_temp, distance.
+COMMENT: Created on {date} at {time}
 COMMENT: KIC_ID - Kepler Input Catalogue ID
 COMMENT: flare_temp - Temperature of the flare for spectral modelling
 COMMENT: star_temp - Temperature of the star for spectral modelling
 COMMENT: distance - Distance to the star in parsec
 COMMENT: start_time - Start time of the reference flare
-COMMENT: end_time - End time of the\n""".format(count = count)
+COMMENT: end_time - End time of the\n""".format(count = count, date = datetime.date.today().strftime("%B %d, %Y"), time = datetime.datetime.now().strftime("%H:%M:%S"))
     text_file = open("sample.txt", "a")
     n = text_file.write(header)
     text_file.close()
