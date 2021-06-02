@@ -26,18 +26,26 @@ KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS = 161.37182827551771
 def run_generator():
     RADIUS = 5
     DAYS = 365
+    rng = np.random.default_rng(40)
 
     print("Computing number of flare instances")
     flare_count = get_number_of_expected_flares(RADIUS, DAYS)
+
     print("Sampling coordinates of stars")
-    coordinates, distances = get_uniformly_distributed_spherical_coordinates(RADIUS, flare_count)
+    coordinates, distances = get_uniformly_distributed_spherical_coordinates(rng, RADIUS, flare_count)
+    
     print("Obtaining reference flare")
-    kic_id, start_time, end_time = get_random_flare_events(flare_count)
+    kic_id, start_time, end_time = get_random_flare_events(rng, flare_count)
+    
     print("Sampling star temperature")
-    star_temp = get_normally_distributed_star_temp(flare_count)
+    star_temp = get_normally_distributed_star_temp(rng, flare_count)
+    
     print("Sampling flare temperature")
-    flare_temp = get_normally_distributed_flare_temp(flare_count)
+    flare_temp = get_normally_distributed_flare_temp(rng, flare_count)
+    
+    print("Begining flare modelling")
     add_LCLIB_header(flare_count)
+
     for i in range(flare_count):
         generate_model_flare_file(i, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i])
         
@@ -56,7 +64,7 @@ def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, 
     model_luminosities = fit_flare_on_base(flare_luminosities, baseline_luminosities)
     model_mags = get_mags_in_lsst_passbands(model_luminosities, distance)
 
-    dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, flare_temp, star_temp, distance, start_time, end_time, model_mags)
+    dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags)
    
 def get_number_of_expected_flares(radius, duration):
     """
@@ -75,13 +83,10 @@ def get_number_of_expected_flares(radius, duration):
     volume = 4/3 * math.pi * (radius ** 3)
     flare_count = math.floor(flare_density * volume * duration)
 
-    print('Flare Density:', flare_density, 'flares/pc^3/day')
-    print('Expected Number of flares in {radius} pc sphere during the {duration} day period:'.format(radius = radius, duration = duration), flare_count)
-
     return flare_count
 
 
-def get_uniformly_distributed_spherical_coordinates(radius, count, chunk_size=1<<10):
+def get_uniformly_distributed_spherical_coordinates(rng, radius, count, chunk_size=1<<10):
     """
     Returns a collection of uniformally distributed coordinates (RA, Dec) and distances that all fall 
     within a sphere of the parameter radius. 
@@ -100,7 +105,7 @@ def get_uniformly_distributed_spherical_coordinates(radius, count, chunk_size=1<
     n = 0
     while n < count:
         print((len(x_) / count) * 100,'% Complete')
-        x, y, z = np.random.uniform(-1 * radius,radius, (3, chunk_size))
+        x, y, z = rng.uniform(-1 * radius,radius, (3, chunk_size))
         idx = x ** 2 + y ** 2 + z ** 2 < radius * radius
         x_.append(x[idx])
         y_.append(y[idx])
@@ -116,7 +121,7 @@ def get_uniformly_distributed_spherical_coordinates(radius, count, chunk_size=1<
 
 
 
-def get_random_flare_events(count):
+def get_random_flare_events(rng, count):
     """
     Returns a tuple of 3 numpy arrays containing the Kepler Input Catalogue ID, flare start time and flare end time 
     of flares randomly selected from the filtered_flares.csv file.
@@ -132,7 +137,7 @@ def get_random_flare_events(count):
     End_time = []
 
     df = pd.read_csv(FLARE_DATA_PATH)
-    indices = np.random.randint(-1, len(df), count)
+    indices = rng.integers(low = 0, high = len(df), size = count)
     
     for index in indices:
         KIC.append(df['KIC'][index])
@@ -142,7 +147,7 @@ def get_random_flare_events(count):
     return KIC, St_time, End_time
 
 
-def get_normally_distributed_star_temp(count):
+def get_normally_distributed_star_temp(rng, count):
     """
     Returns a numpy array of star temperatures modelled after a normal distribution of effective star temperatures
     based on data from the Kepler Input Catalogue.
@@ -153,10 +158,10 @@ def get_normally_distributed_star_temp(count):
     Returns:
         numpy array: numpy array containing the star temperatures with length = count
     """
-    return np.random.normal(KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS, KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS, count)
+    return rng.normal(KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS, KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS, count)
 
 
-def get_normally_distributed_flare_temp(count):
+def get_normally_distributed_flare_temp(rng, count):
     """
     Returns a numpy array of flare temperatures modelled after a normal distribution.
 
@@ -166,6 +171,6 @@ def get_normally_distributed_flare_temp(count):
     Returns:
         numpy array: numpy array containing the flare temperatures with length = count
     """
-    return np.random.normal(9000, 500, count)
+    return rng.normal(9000, 500, count)
 
 run_generator()
