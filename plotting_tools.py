@@ -104,7 +104,7 @@ def plotDistanceDistributionSUPERBLINK():
 
 def plot_effective_kepler_temps():
 
-    df = pd.read_csv('eff_temp.csv')
+    df = pd.read_csv('flare_data/eff_temp.csv')
     print(np.mean(df['teff']))
     print(np.std(df['teff']))
     count, bins, ignored = plt.hist(df['teff'], bins=10, alpha = 0.5) 

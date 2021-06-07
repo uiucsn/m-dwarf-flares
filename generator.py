@@ -12,7 +12,7 @@ from distance import *
 from astropy.table import QTable
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 
-FLARE_DATA_PATH = 'filtered_flares.csv'
+FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
 TOTAL_KEPLER_M_DWARF_COUNT = 4664
 TOTAL_KEPLER_DURATION_IN_DAYS = 1460
@@ -111,7 +111,6 @@ def get_uniformly_distributed_spherical_coordinates(rng, radius, count, chunk_si
     z_ = []
     n = 0
     while n < count:
-        print((len(x_) / count) * 100,'% Complete')
         x, y, z = rng.uniform(-1 * radius,radius, (3, chunk_size))
         idx = x ** 2 + y ** 2 + z ** 2 < radius * radius
         x_.append(x[idx])

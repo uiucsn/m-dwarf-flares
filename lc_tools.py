@@ -16,7 +16,7 @@ from datetime import date
 import datetime
 
 LC_DATA_PATH = 'lc_data/KIC-{}.csv'
-FLARE_DATA_PATH = 'flare_data/apjaa8ea2t3_mrt.txt'
+FLARE_DATA_PATH = 'data_files/apjaa8ea2t3_mrt.txt'
 FLARE_INSTANCES_PATH = 'flare_instances/KIC-{}/'
 FLARE_INSTANCE = 'flare_instances/KIC-{kic}/{start}-{end}.csv'
 

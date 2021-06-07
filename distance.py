@@ -19,8 +19,8 @@ import math
 from lc_tools import *
 #from spectra_tools import get_kepler_transmission, compute_band_intensity
 
-dist_data = astropy.io.ascii.read('dist_new.csv')
-mag_data = astropy.io.ascii.read('mag.csv')
+dist_data = astropy.io.ascii.read('data_files/dist_new.csv')
+mag_data = astropy.io.ascii.read('data_files/mag.csv')
 
 def get_luminosity_with_magnitude(KIC):
     """

@@ -19,29 +19,27 @@ import lightkurve as lk
 
 def save_effective_kepler_temps():
 
-    mag = pd.read_csv('mag.csv')
-    kepler_cataloug = pd.read_csv('kepler_kic_v10.csv.gz')
+    mag = pd.read_csv('data_files/mag.csv')
+    kepler_cataloug = pd.read_csv('data_files/kepler_kic_v10.csv.gz')
     
     df = pd.DataFrame()
     k = kepler_cataloug.loc[kepler_cataloug['kic_kepler_id'].isin(mag['KIC ID'].astype(int))]
-    
-    df['KIC ID'] = k['kic_kepler_id']
-    df['teff'] = k['kic_teff']
 
-    df.to_csv('eff_temp.csv')
+    k.to_csv('data_files/eff_temp.csv')
 
 
 def remove_incomplete_entries_from_flare_data():
-    dist = pd.read_csv('dist_new.csv')
-    flare_data = astropy.io.ascii.read('flare_data/apjaa8ea2t3_mrt.txt', quotechar="\s")
+
+    dist = pd.read_csv('data_files/dist_new.csv')
+    flare_data = astropy.io.ascii.read('data_files/apjaa8ea2t3_mrt.txt', quotechar="\s")
     df = flare_data.to_pandas()
 
     filtered = df.loc[df['KIC'].isin(dist['KIC ID'].astype(int))]
-    filtered.to_csv('filtered_flares.csv')
+    filtered.to_csv('data_files/filtered_flares.csv')
 
 def fetch_Gaia_Data():
 
-    FLARE_DATA_PATH = 'flare_data/apjaa8ea2t3_mrt.txt'
+    FLARE_DATA_PATH = 'data_files/apjaa8ea2t3_mrt.txt'
 
     flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
     kic = np.array(flare_data['KIC'])
@@ -72,7 +70,7 @@ def fetch_Gaia_Data():
             continue
         else:
             table.add_row((KIC_ID, r[0]['d'], r[0]['r_med_geo'], r[0]['r_lo_geo'], r[0]['r_hi_geo'], r[0]['r_med_photogeo'], r[0]['r_lo_photogeo'], r[0]['r_hi_photogeo'], r[0]['phot_g_mean_mag']))
-        table.write('dist_new.csv', format = 'ascii.csv')
+        table.write('data_files/dist_new.csv', format = 'ascii.csv')
 
         print(table)
 
