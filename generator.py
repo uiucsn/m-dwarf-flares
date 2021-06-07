@@ -10,6 +10,7 @@ from spectra_tools import *
 import matplotlib.pyplot as plt
 from distance import *
 from astropy.table import QTable
+from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 
 FLARE_DATA_PATH = 'filtered_flares.csv'
 
@@ -28,11 +29,13 @@ def run_generator():
     DAYS = 365
     rng = np.random.default_rng(40)
 
+    get_realistically_distributed_spherical_coordinates(10)
+
     print("Computing number of flare instances")
     flare_count = get_number_of_expected_flares(RADIUS, DAYS)
 
     print("Sampling coordinates of stars")
-    coordinates, distances = get_uniformly_distributed_spherical_coordinates(rng, RADIUS, flare_count)
+    coordinates, distances = get_realistically_distributed_spherical_coordinates(flare_count)
     
     print("Obtaining reference flare")
     kic_id, start_time, end_time = get_random_flare_events(rng, flare_count)
@@ -85,6 +88,11 @@ def get_number_of_expected_flares(radius, duration):
 
     return flare_count
 
+def get_realistically_distributed_spherical_coordinates(count):
+    mw = MWDensity()
+    coordinates = mw.sample_eq(count)
+    return coordinates, coordinates.distance.value
+
 
 def get_uniformly_distributed_spherical_coordinates(rng, radius, count, chunk_size=1<<10):
     """
@@ -99,7 +107,7 @@ def get_uniformly_distributed_spherical_coordinates(rng, radius, count, chunk_si
     Returns:
         tuple: Contains two numpy arrays containing the skycoords and distances in parsec.
     """
-    
+
     x_ = []
     y_ = []
     z_ = []
