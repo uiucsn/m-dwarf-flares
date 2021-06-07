@@ -99,6 +99,7 @@ def get_uniformly_distributed_spherical_coordinates(rng, radius, count, chunk_si
     Returns:
         tuple: Contains two numpy arrays containing the skycoords and distances in parsec.
     """
+    
     x_ = []
     y_ = []
     z_ = []
@@ -132,6 +133,7 @@ def get_random_flare_events(rng, count):
     Returns:
         tuple: Contains numpy arrays for the KIC ID, flare start time and flare end time respectively.
     """
+
     KIC = []
     St_time = []
     End_time = []
@@ -158,6 +160,7 @@ def get_normally_distributed_star_temp(rng, count):
     Returns:
         numpy array: numpy array containing the star temperatures with length = count
     """
+
     return rng.normal(KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS, KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS, count)
 
 
@@ -171,6 +174,7 @@ def get_normally_distributed_flare_temp(rng, count):
     Returns:
         numpy array: numpy array containing the flare temperatures with length = count
     """
+
     return rng.normal(9000, 500, count)
 
 run_generator()

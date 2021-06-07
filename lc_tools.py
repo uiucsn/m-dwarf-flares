@@ -82,6 +82,7 @@ def all_flare_stats(lc, KIC_ID):
     Returns:
         tuple : tuple contatining the list of amplitude, area, duration, data for all the flares in a particular KIC object
     """
+
     flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
     duration = []
     area = []
@@ -240,6 +241,7 @@ def plot_all_flare_stats(amplitude, duration, area, num_bins):
         area (list): A list containing all the flare Areas
         num_bins (int): Number of bins for the histograms.
     """
+
     # Plotting flare amplitude stats.
     fig1, ax1 = plt.subplots(1)
 
@@ -295,6 +297,7 @@ def get_flare_lc(lc, flare):
         Kepler light curve object: A normalized light curve of the flare followed by a 
         trailing and leading observation
     """
+
     start_index = find_nearest_index(lc.time, flare['St-BKJD']) - 1
     end_index = find_nearest_index(lc.time, flare['End-BKJD']) + 2
     
@@ -321,6 +324,7 @@ def get_flare_lc_from_time(lc, start_time, end_time):
         Kepler light curve object: A normalized light curve of the flare followed by a 
         trailing and leading observation
     """
+
     start_index = find_nearest_index(lc.time, start_time) - 1
     end_index = find_nearest_index(lc.time, end_time) + 2
     
@@ -369,6 +373,7 @@ def find_nearest_index(lc_time, value):
     Returns:
         int : Index of the value in the array or the index of it's closes neigbour.
     """
+
     index = np.searchsorted(lc_time, value, side="left")
 
     if index > 0 and index == len(lc_time):
@@ -394,6 +399,7 @@ def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, sta
         end_time ([type]): [description]
         mags ([type]): [description]
     """
+
     event_marker = "#------------------------------\n"
     start = "START_EVENT: {}\n".format(index)
     end = "END_EVENT: {}\n".format(index)
@@ -419,6 +425,7 @@ def add_LCLIB_header(count):
     """
     Function to write the header of the lclib file.
     """
+    
     header ="""SURVEY: LSST
 FILTERS: ugrizY
 MODEL: m-dwarf flare model
