@@ -1,15 +1,6 @@
-import numpy as np
-import astropy
-from astropy import units as u
 import astropy.coordinates as coord
-import astropy.io.ascii 
-import math
-import pandas as pd
-from lc_tools import *
 from spectra_tools import *
-import matplotlib.pyplot as plt
 from distance import *
-from astropy.table import QTable
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 from plotting_tools import plotGenricSkyMapWithDistances, plotGenricSkyMap, plotGeneric2DHistogram, plotGenericHistogram
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'

@@ -1,16 +1,6 @@
-import astropy.coordinates as coord
-from astropy.coordinates import ICRS, FK5, SkyCoord
 from astropy.io import fits
-import matplotlib.pyplot as plt
-from astropy.visualization import astropy_mpl_style
-from astropy.table import Table
-from astropy.coordinates import SkyCoord, CylindricalRepresentation
-from astropy import units as u
 import astropy
 import numpy as np
-from pyvo.dal import TAPService
-from astroquery.vizier import Vizier
-import math
 import pandas as pd
 from astropy.table import QTable
 from pyvo.dal import TAPService

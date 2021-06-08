@@ -1,18 +1,5 @@
-import astropy
-from astropy.io import ascii
-from astropy.modeling import models
 from astropy import units as u
 import lightkurve as lk
-from lightkurve import search_lightcurvefile
-from lightkurve import LightCurveFileCollection
-import matplotlib.pyplot as plt
-from matplotlib.ticker import PercentFormatter
-import os.path
-import pandas as pd
-import csv
-import numpy as np
-import math
-from lc_tools import *
 from distance import *
 from scipy.integrate import simps
 from astropy.modeling.blackbody import blackbody_lambda as bb

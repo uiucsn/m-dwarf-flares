@@ -1,18 +1,12 @@
 import astropy
 from astropy.io import ascii
-from astropy.modeling import models
-from astropy import units as u
 import lightkurve as lk
 from lightkurve import search_lightcurvefile
 from lightkurve import LightCurveFileCollection
 import matplotlib.pyplot as plt
-from matplotlib.ticker import PercentFormatter
 import os.path
 import pandas as pd
-import csv
 import numpy as np
-import math
-from datetime import date
 import datetime
 
 LC_DATA_PATH = 'lc_data/KIC-{}.csv'
