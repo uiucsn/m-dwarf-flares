@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from distance import *
 from astropy.table import QTable
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
-
+from plotting_tools import plotGenricSkyMapWithDistances, plotGenricSkyMap, plotGeneric2DHistogram, plotGenericHistogram
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
 TOTAL_KEPLER_M_DWARF_COUNT = 4664
