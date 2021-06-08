@@ -403,10 +403,10 @@ def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, sta
 
     for i in range(len(mags['kep'].flux)):
         if i == 0:
-            readings = readings + "T:\t"
+            readings += "T:\t"
         else:
-            readings = readings + "S:\t"
-        readings = readings + "{time:.5f}\t{u:.3f}\t{g:.3f}\t{r:.3f}\t{i:.3f}\t{z:.3f}\t{y:.3f}\n".format(time = mags['kep'].time[i], kep = mags['kep'].flux[i], u = mags['u'].flux[i], g = mags['g'].flux[i], r = mags['r'].flux[i], i = mags['i'].flux[i], z = mags['z'].flux[i], y = mags['y'].flux[i]) 
+            readings += "S:\t"
+        readings += "{time:.5f}\t{u:.3f}\t{g:.3f}\t{r:.3f}\t{i:.3f}\t{z:.3f}\t{y:.3f}\n".format(time = mags['kep'].time[i], kep = mags['kep'].flux[i], u = mags['u'].flux[i], g = mags['g'].flux[i], r = mags['r'].flux[i], i = mags['i'].flux[i], z = mags['z'].flux[i], y = mags['y'].flux[i]) 
 
     reading = event_marker + start + nrow + parameters + readings + end
 

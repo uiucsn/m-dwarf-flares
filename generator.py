@@ -3,6 +3,7 @@ from spectra_tools import *
 from distance import *
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 from plotting_tools import plotGenricSkyMapWithDistances, plotGenricSkyMap, plotGeneric2DHistogram, plotGenericHistogram
+
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
 TOTAL_KEPLER_M_DWARF_COUNT = 4664
@@ -15,25 +16,21 @@ NUMBER_OF_LOCAL_M_DWARFS = 1082
 KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
 KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS = 161.37182827551771
 
-def run_generator():
-    RADIUS = 5
-    DAYS = 365
-    rng = np.random.default_rng(40)
+def run_generator(flare_count):
 
-    print("Computing number of flare instances")
-    flare_count = get_number_of_expected_flares(RADIUS, DAYS)
+    rng = np.random.default_rng(40)
 
     print("Sampling coordinates of stars")
     coordinates, distances = get_realistically_distributed_spherical_coordinates(flare_count, rng)
-    
+
     print("Obtaining reference flare")
-    kic_id, start_time, end_time = get_random_flare_events(rng, flare_count)
+    kic_id, start_time, end_time = get_random_flare_events(flare_count, rng)
     
     print("Sampling star temperature")
-    star_temp = get_normally_distributed_star_temp(rng, flare_count)
+    star_temp = get_normally_distributed_star_temp(flare_count, rng)
     
     print("Sampling flare temperature")
-    flare_temp = get_normally_distributed_flare_temp(rng, flare_count)
+    flare_temp = get_normally_distributed_flare_temp(flare_count, rng)
     
     print("Begining flare modelling")
     add_LCLIB_header(flare_count)
@@ -83,7 +80,7 @@ def get_realistically_distributed_spherical_coordinates(count, rng):
     return coordinates, coordinates.distance.value
 
 
-def get_uniformly_distributed_spherical_coordinates(rng, radius, count, chunk_size=1<<10):
+def get_uniformly_distributed_spherical_coordinates(radius, count, rng, chunk_size=1<<10):
     """
     Returns a collection of uniformally distributed coordinates (RA, Dec) and distances that all fall 
     within a sphere of the parameter radius. 
@@ -118,7 +115,7 @@ def get_uniformly_distributed_spherical_coordinates(rng, radius, count, chunk_si
 
 
 
-def get_random_flare_events(rng, count):
+def get_random_flare_events(count, rng):
     """
     Returns a tuple of 3 numpy arrays containing the Kepler Input Catalogue ID, flare start time and flare end time 
     of flares randomly selected from the filtered_flares.csv file.
@@ -145,7 +142,7 @@ def get_random_flare_events(rng, count):
     return KIC, St_time, End_time
 
 
-def get_normally_distributed_star_temp(rng, count):
+def get_normally_distributed_star_temp(count, rng):
     """
     Returns a numpy array of star temperatures modelled after a normal distribution of effective star temperatures
     based on data from the Kepler Input Catalogue.
@@ -160,7 +157,7 @@ def get_normally_distributed_star_temp(rng, count):
     return rng.normal(KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS, KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS, count)
 
 
-def get_normally_distributed_flare_temp(rng, count):
+def get_normally_distributed_flare_temp(count, rng):
     """
     Returns a numpy array of flare temperatures modelled after a normal distribution.
 
@@ -171,6 +168,6 @@ def get_normally_distributed_flare_temp(rng, count):
         numpy array: numpy array containing the flare temperatures with length = count
     """
 
-    return rng.normal(9000, 500, count)
+    return rng.normal(30000, 500, count)
 
-run_generator()
+run_generator(1000)
