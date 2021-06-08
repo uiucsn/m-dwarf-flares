@@ -1,6 +1,6 @@
 from astropy import units as u
 import lightkurve as lk
-from distance import *
+import numpy as np
 from scipy.integrate import simps
 from astropy.modeling.blackbody import blackbody_lambda as bb
 

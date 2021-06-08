@@ -1,6 +1,11 @@
 import astropy.coordinates as coord
-from spectra_tools import *
-from distance import *
+import numpy as np
+import pandas as pd
+import math
+
+from lc_tools import  load_light_curve, get_flare_lc_from_time, get_normalized_lc, dump_modeled_data_to_LCLIB, add_LCLIB_header
+from spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_luminosities_in_lsst_passbands, fit_flare_on_base
+from distance import get_luminosity_with_magnitude, get_mags_in_lsst_passbands
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 from plotting_tools import plotGenricSkyMapWithDistances, plotGenricSkyMap, plotGeneric2DHistogram, plotGenericHistogram
 
@@ -170,4 +175,5 @@ def get_normally_distributed_flare_temp(count, rng):
 
     return rng.normal(30000, 500, count)
 
-run_generator(1000)
+if __name__ == "__main__":
+    run_generator(1000)

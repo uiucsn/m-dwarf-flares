@@ -1,9 +1,8 @@
-from astropy.io import ascii
+import astropy
 from astropy import units as u
 import lightkurve as lk
-from lc_tools import *
 import math
-
+import numpy as np
 
 dist_data = astropy.io.ascii.read('data_files/dist_new.csv')
 mag_data = astropy.io.ascii.read('data_files/mag.csv')
