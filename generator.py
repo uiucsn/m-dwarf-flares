@@ -80,6 +80,17 @@ def get_number_of_expected_flares(radius, duration):
     return flare_count
 
 def get_realistically_distributed_spherical_coordinates(count, rng):
+    """
+    Uses the the milky way juric 2008 ch_vars module by Malanchev Kostya
+    to get realistic distribution of coordinates in the Milky way.
+
+    Args:
+        count (int): Number of coordinates that need to be generated
+        rng ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     mw = MWDensity()
     coordinates = mw.sample_eq(count, rng)
     return coordinates, coordinates.distance.value
