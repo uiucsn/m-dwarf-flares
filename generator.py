@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import math
 import time
+import argparse
 
 from lc_tools import  load_light_curve, get_flare_lc_from_time, get_normalized_lc, dump_modeled_data_to_LCLIB, add_LCLIB_header
 from spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_luminosities_in_lsst_passbands, fit_flare_on_base
@@ -190,6 +191,15 @@ def get_normally_distributed_flare_temp(count, rng):
     return rng.normal(30000, 500, count)
 
 if __name__ == "__main__":
+    argparser = argparse.ArgumentParser(
+    description='Generates a LCLIB file with simulated flare instances')
+    argparser.add_argument('flare_count', type=int,
+                        help='Number of flares to be generated')
+    argparser.add_argument('output_file_name', type=str,
+                        help='Name of the LCLIB file. Should have a .txt extension')
+    args = argparser.parse_args()
+    print(args.flare_count, args.output_file_name)
+    
     start_time = time.time()
     run_generator(1000)
     print("--- %s seconds ---" % (time.time() - start_time))
