@@ -2,6 +2,7 @@ import astropy.coordinates as coord
 import numpy as np
 import pandas as pd
 import math
+import time
 
 from lc_tools import  load_light_curve, get_flare_lc_from_time, get_normalized_lc, dump_modeled_data_to_LCLIB, add_LCLIB_header
 from spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_luminosities_in_lsst_passbands, fit_flare_on_base
@@ -26,7 +27,8 @@ def run_generator(flare_count):
     rng = np.random.default_rng(40)
 
     print("Sampling coordinates of stars")
-    coordinates, distances = get_realistically_distributed_spherical_coordinates(flare_count, rng)
+    coordinates = get_realistically_distributed_spherical_coordinates(flare_count, rng)
+    distances = coordinates.distance
 
     print("Obtaining reference flare")
     kic_id, start_time, end_time = get_random_flare_events(flare_count, rng)
@@ -41,6 +43,7 @@ def run_generator(flare_count):
     add_LCLIB_header(flare_count)
 
     for i in range(flare_count):
+        print(i/flare_count, '%')
         generate_model_flare_file(i, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i])
         
 
@@ -93,7 +96,7 @@ def get_realistically_distributed_spherical_coordinates(count, rng):
     """
     mw = MWDensity()
     coordinates = mw.sample_eq(count, rng)
-    return coordinates, coordinates.distance.value
+    return coordinates
 
 
 def get_uniformly_distributed_spherical_coordinates(radius, count, rng, chunk_size=1<<10):
@@ -127,7 +130,7 @@ def get_uniformly_distributed_spherical_coordinates(radius, count, rng, chunk_si
     
     r, dec, ra = coord.cartesian_to_spherical(x[:count], y[:count], z[:count])
     coordinates = coord.SkyCoord(ra=ra, dec=dec)
-    return coordinates, r.value
+    return coordinates
 
 
 
@@ -187,4 +190,7 @@ def get_normally_distributed_flare_temp(count, rng):
     return rng.normal(30000, 500, count)
 
 if __name__ == "__main__":
+    start_time = time.time()
     run_generator(1000)
+    print("--- %s seconds ---" % (time.time() - start_time))
+    
