@@ -23,6 +23,7 @@ NUMBER_OF_LOCAL_M_DWARFS = 1082
 
 MIN_RELATIVE_FLUX_AMPLITUDE = 0.01 # Minimum Relative Flux Amplitude of the flares. Flares below this relative flux amplitude will be filtered out.
 PEAK_MAGNITUDE_THRESHOLD = 25 # Maximum magnitude for a flare in the LSST u passband. Flares above this mag value will be filtered out.
+U_BAND_AMPLITUDE_THRESHOLD = 0
 NUMBER_OF_NOMINAL_FLARES = 0
 
 KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
@@ -112,10 +113,15 @@ def is_nominal_flare(flare):
     Returns:
         [boolean]: True if the flare is nominal, false otherwise.
     """
-    truth = flare['u'].flux > PEAK_MAGNITUDE_THRESHOLD
+    truth = flare['u'].flux >= PEAK_MAGNITUDE_THRESHOLD
     if np.isnan(flare['u'].flux).any():
+        # Checking if light curve has nan values
         return False
     elif True in truth:
+        # Checking if u band has magnitude greater than the PEAK_MAGNITUDE_THRESHOLD
+        return False
+    elif (np.amax(flare['u'].flux) - np.amin(flare['u'].flux)) <= U_BAND_AMPLITUDE_THRESHOLD:
+        # Checking if u band has amplitude greater than U_BAND_AMPLITUDE
         return False
     return True
 
