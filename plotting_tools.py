@@ -182,7 +182,10 @@ def plotGenricSkyMapWithDistances(coords):
     plt.show()
 
 def plotFlareFluxAmplitude():
-    
+    """
+    Plots the distribution for the reletive flux amplitude of all the flares in filtered_flares.csv
+    """
+
     df = pd.read_csv('data_files/filtered_flares.csv')
     amp = df['flux_amp']
     fig1, ax = plt.subplots(1,1)
