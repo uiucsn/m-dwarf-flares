@@ -180,3 +180,15 @@ def plotGenricSkyMapWithDistances(coords):
     ax.set_xticklabels(['10h', '8h', '6h', '4h', '2h', '0h', '22h', '20h', '18h', '16h', '14h'])
     plt.colorbar(scatter, label = "Distance in pc")
     plt.show()
+
+def plotFlareFluxAmplitude():
+    
+    df = pd.read_csv('data_files/filtered_flares.csv')
+    amp = df['flux_amp']
+    fig1, ax = plt.subplots(1,1)
+    N_amplitude, bins_amplitude, patches_amplitude = ax.hist(amp, bins=10, alpha = 0.5) 
+    ax.set_xlabel('Relative Flux Amplitude')
+    ax.set_ylabel('Number of m dwarfs')
+    ax.set_yscale('log')
+    plt.show()
+    

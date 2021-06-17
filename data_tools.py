@@ -5,10 +5,14 @@ import pandas as pd
 from astropy.table import QTable
 from pyvo.dal import TAPService
 import lightkurve as lk
+import matplotlib.pyplot as plt
+from lc_tools import load_light_curve, get_flare_lc_from_time, get_normalized_lc
 
 
 def save_effective_kepler_temps():
-
+    """
+    Function to save the effective temp for the the 541 kic objects from the kepler input catalogue
+    """
     mag = pd.read_csv('data_files/mag.csv')
     kepler_cataloug = pd.read_csv('data_files/kepler_kic_v10.csv.gz')
     
@@ -19,7 +23,9 @@ def save_effective_kepler_temps():
 
 
 def remove_incomplete_entries_from_flare_data():
-
+    """
+    Removes flares for which Gaia distance data does not exist
+    """
     dist = pd.read_csv('data_files/dist_new.csv')
     flare_data = astropy.io.ascii.read('data_files/apjaa8ea2t3_mrt.txt', quotechar="\s")
     df = flare_data.to_pandas()
@@ -28,6 +34,9 @@ def remove_incomplete_entries_from_flare_data():
     filtered.to_csv('data_files/filtered_flares.csv')
 
 def fetch_Gaia_Data():
+    """
+    Function to query Gaia Data
+    """
 
     FLARE_DATA_PATH = 'data_files/apjaa8ea2t3_mrt.txt'
 
@@ -64,8 +73,22 @@ def fetch_Gaia_Data():
 
         print(table)
 
-
-
-
+ 
+def save_flare_flux_amps():
+    """
+    Function to save flare's relative flux ampslitude in the filtered flares file
+    """
+    df = pd.read_csv('data_files/filtered_flares.csv')
+    print(df)
+    amps = []
+    for i in range(len(df)):
+        lc = load_light_curve(df['KIC'][i])
+        flare_lc = get_flare_lc_from_time(lc, df['St-BKJD'][i], df['End-BKJD'][i])
+        normalized_flare = get_normalized_lc(flare_lc)
+        amps.append(np.amax(normalized_flare.flux))
+        print((i / len(df)) * 100, '%')
+    
+    df['flux_amp'] = amps
+    df.to_csv('data_files/filtered_flares.csv')
 
 

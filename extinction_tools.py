@@ -1,12 +1,24 @@
 from astropy.coordinates import SkyCoord
 import astropy.units as u
+from astropy.io import ascii
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from dustmaps.bayestar import BayestarQuery
 from dustmaps.sfd import SFDQuery, fetch
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 
 def get_extinction_after_symmetric_interpolation(coordinates):
+    """
+    Interpolates the Bayestar Dust Data for the entire sky by inverting the galactic coordinates of 
+    points where real data is not avalible.
+
+    Args:
+        coordinates (Astropy sky coords): coordinates for which extinction needs to be calculated.
+
+    Returns:
+        Bayestar 19 reddening values: The Reddeining values from the Bayestar 19 map.
+    """
 
     bayestar = BayestarQuery(version='bayestar2019')
 
@@ -21,6 +33,16 @@ def get_extinction_after_symmetric_interpolation(coordinates):
     return reddening_interpolated
 
 def get_extinction_after_symmetric_interpolation_with_sfd_factor(coordinates):
+    """
+    Interpolates the Bayestar Dust Data for the entire sky by inverting the galactic coordinates of 
+    points where real data is not avalible and applying a correction factor from SFD 2D data.
+
+    Args:
+        coordinates (Astropy sky coords): coordinates for which extinction needs to be calculated.
+
+    Returns:
+        Bayestar 19 reddening values: The Reddeining values from the Bayestar 19 map.
+    """
 
     bayestar = BayestarQuery(version='bayestar2019')
     sfd = SFDQuery()
@@ -38,7 +60,61 @@ def get_extinction_after_symmetric_interpolation_with_sfd_factor(coordinates):
 
     return reddening_interpolated
 
+def get_extinction_in_lsst_passbands(coordinates):
+    """
+    Computes extinction in lsst passbands after applying appropriate correction factors to 
+    results from the get_extinction_after_symmetric_interpolation_with_sfd_factor() function
+
+    Args:
+        coordinates (Astropy sky coords): coordinates for which extinction needs to be calculated in lsst passbands.
+
+    Returns:
+        dictionary: Extinction values in the lsst ugrizy passbands for the given coordinates.
+    """
+
+    df = pd.read_csv('data_files/LSST_rv_3_1.csv')
+    rv = pd.Series(df['value'].values,index=df['lsst_passband']).to_dict()
+
+    bayestar_coefficient = 0.884
+    bayestar_reddening = get_extinction_after_symmetric_interpolation_with_sfd_factor(coordinates)
+    e_bv = bayestar_coefficient * bayestar_reddening
+
+    lsst_ext = {
+        'u': rv['u'] * e_bv,
+        'g': rv['g'] * e_bv,
+        'r': rv['r'] * e_bv,
+        'i': rv['i'] * e_bv,
+        'z': rv['z'] * e_bv,
+        'y': rv['y'] * e_bv,
+    }
+    return lsst_ext
+
+def apply_extinction_to_lsst_mags(magnitudes, extinction_values):
+    """
+    Applies the extinction value to the lsst model magnitudes
+
+    Args:
+        magnitudes (dictionary): A dictionary of lightcurves in lsst ugrizy and kep passbands
+        extinction_values (dictionary): A dictionary of extinction values in lsst ugrizy passbands
+
+    Returns:
+        dictionary: A dictionary of lightcurves in lsst ugrizy and kep passbands
+    """
+    lsst_mags_with_ext = {
+        'u': magnitudes['u'] + extinction_values['u'],
+        'g': magnitudes['g'] + extinction_values['g'],
+        'r': magnitudes['r'] + extinction_values['r'],
+        'i': magnitudes['i'] + extinction_values['i'],
+        'z': magnitudes['z'] + extinction_values['z'],
+        'y': magnitudes['y'] + extinction_values['y'],
+        'kep': magnitudes['kep'],
+    }    
+    return lsst_mags_with_ext
+
 def plot_extinction_after_symmetric_interpolation():
+    """
+    Plots a sky map of extinction computed using get_extinction_after_symmetric_interpolation()
+    """
 
     ra, dec = np.meshgrid(np.linspace(-180, 180, 361, endpoint=False), np.linspace(-90, 90, 181, endpoint=False))
     coordinates =  SkyCoord(ra = ra * u.degree, dec = dec * u.degree, distance = 2000 * u.pc)
@@ -53,6 +129,9 @@ def plot_extinction_after_symmetric_interpolation():
     plt.show()
 
 def plot_extinction_after_symmetric_interpolation_with_sfd_factor():
+    """
+    Plots a sky map of extinction computed using get_extinction_after_symmetric_interpolation_with_sfd_factor()
+    """
 
     ra, dec = np.meshgrid(np.linspace(-180, 180, 361, endpoint=False), np.linspace(-90, 90, 181, endpoint=False))
     coordinates =  SkyCoord(ra = ra * u.degree, dec = dec * u.degree, distance = 2000 * u.pc)

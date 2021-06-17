@@ -397,10 +397,18 @@ def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, sta
     event_marker = "#------------------------------\n"
     start = "START_EVENT: {}\n".format(index)
     end = "END_EVENT: {}\n".format(index)
-    nrow = "NROW: {nrow} RA: {ra} DEC: {dec}.\n".format(nrow = len(mags['kep'].time), ra = ra.value, dec = dec.value)
-    parameters = "PARVAL: {KIC_ID} {start} {end} {f_temp} {s_temp} {dist}\n".format(KIC_ID = KIC_ID, f_temp = flare_temp, s_temp = star_temp, dist = distance, start = start_time, end = end_time)
+    nrow = "NROW: {nrow} RA: {ra:.5f} DEC: {dec:.5f}.\n".format(nrow = len(mags['kep'].time), 
+                                                                ra = ra.value, 
+                                                                dec = dec.value)
+    parameters = "PARVAL: {KIC_ID} {start} {end} {f_temp:.2f} {s_temp:.2f} {dist:.7f}\n".format(KIC_ID = KIC_ID, 
+                                                                                    f_temp = flare_temp, 
+                                                                                    s_temp = star_temp, 
+                                                                                    dist = distance, 
+                                                                                    start = start_time, 
+                                                                                    end = end_time)
     readings = ""
 
+    # For loop to add readings of the simulations to the text file
     for i in range(len(mags['kep'].flux)):
         if i == 0:
             readings += "T:\t"
@@ -408,11 +416,10 @@ def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, sta
             readings += "S:\t"
         readings += "{time:.5f}\t{u:.3f}\t{g:.3f}\t{r:.3f}\t{i:.3f}\t{z:.3f}\t{y:.3f}\n".format(time = mags['kep'].time[i], kep = mags['kep'].flux[i], u = mags['u'].flux[i], g = mags['g'].flux[i], r = mags['r'].flux[i], i = mags['i'].flux[i], z = mags['z'].flux[i], y = mags['y'].flux[i]) 
 
-    reading = event_marker + start + nrow + parameters + readings + end
-
+    simulation = event_marker + start + nrow + parameters + readings + end
 
     text_file = open("sample.txt", "a")
-    n = text_file.write(reading)
+    n = text_file.write(simulation)
     text_file.close()
 
 def add_LCLIB_header(count):
@@ -420,19 +427,22 @@ def add_LCLIB_header(count):
     Function to write the header of the lclib file.
     """
     
-    header ="""SURVEY: LSST
-FILTERS: ugrizY
-MODEL: m-dwarf flare model
-RECUR_TYPE: NON-RECUR
-NEVENT: {count}
-MODEL_PARNAMES: KIC_ID, start_time, end_time,star_temp, flare_temp, distance.
-COMMENT: Created on {date} at {time}
-COMMENT: KIC_ID - Kepler Input Catalogue ID
-COMMENT: flare_temp - Temperature of the flare for spectral modelling
-COMMENT: star_temp - Temperature of the star for spectral modelling
-COMMENT: distance - Distance to the star in parsec
-COMMENT: start_time - Start time of the reference flare
-COMMENT: end_time - End time of the\n""".format(count = count, date = datetime.date.today().strftime("%B %d, %Y"), time = datetime.datetime.now().strftime("%H:%M:%S"))
+    header = ('SURVEY: LSST\n'
+              'FILTERS: ugrizY\n'
+              'MODEL: m-dwarf flare model\n'
+              'RECUR_TYPE: NON-RECUR\n'
+              'NEVENT: {count}\n'
+              'MODEL_PARNAMES: KIC_ID, start_time, end_time,star_temp, flare_temp, distance.\n'
+              'COMMENT: Created on {date} at {time}\n'
+              'COMMENT: KIC_ID - Kepler Input Catalogue ID\n'
+              'COMMENT: flare_temp - Temperature of the flare for spectral modelling\n'
+              'COMMENT: star_temp - Temperature of the star for spectral modelling\n'
+              'COMMENT: distance - Distance to the star in parsec\n'
+              'COMMENT: start_time - Start time of the reference flare\n'
+              'COMMENT: end_time - End time of the\n'
+              'COMMENT: Order of PARVALS is Kepler Input Catalogue ID, flare start time (in BKJD), flare end time (in BKJD), flare temperature (in Kelvin), star temperature (in Kelvin), star distance.\n').format(count = count, 
+                                                              date = datetime.date.today().strftime("%B %d, %Y"), 
+                                                              time = datetime.datetime.now().strftime("%H:%M:%S"))
     text_file = open("sample.txt", "a")
     n = text_file.write(header)
     text_file.close()

@@ -10,6 +10,7 @@ from spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_lu
 from distance import get_luminosity_with_magnitude, get_mags_in_lsst_passbands
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 from plotting_tools import plotGenricSkyMapWithDistances, plotGenricSkyMap, plotGeneric2DHistogram, plotGenericHistogram
+from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
 
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
@@ -19,6 +20,7 @@ TOTAL_FLARE_INSTANCES_COUNT = 103187
 
 LOCAL_RADIUS = 20
 NUMBER_OF_LOCAL_M_DWARFS = 1082
+MIN_RELATIVE_FLUX_AMPLITUDE = 0.01 # Minimum Relative Flux Amplitude of the flares.
 
 KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
 KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS = 161.37182827551771
@@ -30,8 +32,11 @@ def run_generator(flare_count):
     print("Sampling coordinates of stars")
     coordinates = get_realistically_distributed_spherical_coordinates(flare_count, rng)
     distances = coordinates.distance
+    
+    print("Computing extinction values in lsst passbands")
+    extinction_values = get_extinction_in_lsst_passbands(coord.SkyCoord(coordinates))
 
-    print("Obtaining reference flare")
+    print("Obtaining reference flares")
     kic_id, start_time, end_time = get_random_flare_events(flare_count, rng)
     
     print("Sampling star temperature")
@@ -44,26 +49,40 @@ def run_generator(flare_count):
     add_LCLIB_header(flare_count)
 
     for i in range(flare_count):
-        print(i/flare_count, '%')
-        generate_model_flare_file(i, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i])
-        
+        print((i/flare_count) * 100 , '%')
+        # Finding extinction for the flare instance
+        extinction = {
+            'u': extinction_values['u'][i],
+            'g': extinction_values['g'][i],
+            'r': extinction_values['r'][i],
+            'i': extinction_values['i'][i],
+            'z': extinction_values['z'][i],
+            'y': extinction_values['y'][i],
+        }
+        generate_model_flare_file(i, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction)
+    
 
-def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp):
-    # Data extraction
+def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction):
+    # Loading the orignal flare light curve and normalizing it
     lc = load_light_curve(KIC_ID)
     flare_lc = get_flare_lc_from_time(lc, start_time, end_time)
-
     new_lc = get_normalized_lc(flare_lc)
+
+    # Computing the stellar luminosity based on Kepler and Gaia Data
     luminosity = get_luminosity_with_magnitude(KIC_ID).si  
-    # Data modelling
+
+    # Modelling the spetra and fitting the flare on the nominal stellar luminosity
     flare_luminosities = get_flare_luminosities_in_lsst_passbands(new_lc, KIC_ID, flare_temp, luminosity)
-    
     baseline_luminosities = get_baseline_luminosity_in_lsst_passband(new_lc, KIC_ID, star_temp, luminosity)
     model_luminosities = fit_flare_on_base(flare_luminosities, baseline_luminosities)
-    model_mags = get_mags_in_lsst_passbands(model_luminosities, distance)
 
-    dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags)
-   
+    # Converting luminosity to distances based on distances and applying extinction
+    model_mags = get_mags_in_lsst_passbands(model_luminosities, distance)
+    model_mags_with_extinction = apply_extinction_to_lsst_mags(model_mags, extinction)
+
+    # Writing modelled data to LCLIB file
+    dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction)
+
 def get_number_of_expected_flares(radius, duration):
     """
     Computes the number of expected flares for a sphere of given radius during a given time period.
@@ -134,8 +153,7 @@ def get_uniformly_distributed_spherical_coordinates(radius, count, rng, chunk_si
     return coordinates
 
 
-
-def get_random_flare_events(count, rng):
+def get_random_flare_events(count, rng, threshold = 0):
     """
     Returns a tuple of 3 numpy arrays containing the Kepler Input Catalogue ID, flare start time and flare end time 
     of flares randomly selected from the filtered_flares.csv file.
@@ -152,12 +170,16 @@ def get_random_flare_events(count, rng):
     End_time = []
 
     df = pd.read_csv(FLARE_DATA_PATH)
-    indices = rng.integers(low = 0, high = len(df), size = count)
+    # Filtering flares with fluxes below the threshold
+    df_flitered = df[df['flux_amp'] >= threshold]
+    df_flitered.reset_index(drop=True, inplace = True)
+    indices = rng.integers(low = 0, high = len(df_flitered), size = count)
+    print(len(df_flitered), ' out of ', len(df), ' flares are chosen for random selection based on threshold value of:', threshold)
     
     for index in indices:
-        KIC.append(df['KIC'][index])
-        St_time.append(df['St-BKJD'][index])
-        End_time.append(df['End-BKJD'][index])
+        KIC.append(df_flitered['KIC'][index])
+        St_time.append(df_flitered['St-BKJD'][index])
+        End_time.append(df_flitered['End-BKJD'][index])
     
     return KIC, St_time, End_time
 
@@ -188,7 +210,7 @@ def get_normally_distributed_flare_temp(count, rng):
         numpy array: numpy array containing the flare temperatures with length = count
     """
 
-    return rng.normal(30000, 500, count)
+    return rng.normal(10000, 100, count)
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(
@@ -198,9 +220,8 @@ if __name__ == "__main__":
     argparser.add_argument('output_file_name', type=str,
                         help='Name of the LCLIB file. Should have a .txt extension')
     args = argparser.parse_args()
-    print(args.flare_count, args.output_file_name)
-    
+
     start_time = time.time()
-    run_generator(1000)
+    run_generator(args.flare_count)
     print("--- %s seconds ---" % (time.time() - start_time))
     
