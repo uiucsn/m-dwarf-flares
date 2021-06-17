@@ -28,11 +28,9 @@ def load_light_curve(KIC_ID):
 
     KIC = "KIC {}".format(KIC_ID)
     if os.path.isfile(LC_DATA_PATH.format(KIC_ID)):
-        print("Loading local light curve data ... " + str(KIC))
         df = pd.read_csv(LC_DATA_PATH.format(KIC_ID))
         lc = lk.LightCurve(time = df['time'], flux = df['flux'], flux_err = df['flux_err'])
     else:
-        print('Downloading light curve data ... ' + str(KIC))
         lcf = search_lightcurvefile(KIC, mission = 'Kepler').download_all()
         new_lcf =  LightCurveFileCollection([x for x in lcf if x.targetid == int(KIC_ID)])
         lc = new_lcf.SAP_FLUX.stitch()
