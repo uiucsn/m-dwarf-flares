@@ -91,4 +91,21 @@ def save_flare_flux_amps():
     df['flux_amp'] = amps
     df.to_csv('data_files/filtered_flares.csv')
 
-
+def filter_out_flares_with_nans():
+    """
+    Removes all flares that contain nan values in their flux arrays
+    """
+    df = pd.read_csv('data_files/filtered_flares.csv')
+    count = 0
+    indices = []
+    for i in range(len(df)):
+        lc = load_light_curve(df['KIC'][i])
+        flare_lc = get_flare_lc_from_time(lc, df['St-BKJD'][i], df['End-BKJD'][i])
+        print((i / len(df)) * 100, '% Number of bad flares', count, end='\r')
+        if np.isnan(flare_lc.flux).any():
+            print('bad flare', i)
+            indices.append(i)
+            count += 1
+    df.drop(df.index[indices], inplace=True)
+    print(len(df))
+    df.to_csv('data_files/filtered_flares.csv')

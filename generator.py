@@ -104,8 +104,8 @@ def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, 
 
 def is_nominal_flare(flare):
     """
-    Checking if the generated flare is under the threshold for max magnitude and does 
-    not contain any nan values.
+    Checking if the generated flare is under the threshold for max magnitude and has a
+    amplitude greater than the threshold
 
     Args:
         flare (dicitonary): A dictionary of lightcurves in the LSST ugrizy and kep passbands
@@ -113,16 +113,13 @@ def is_nominal_flare(flare):
     Returns:
         [boolean]: True if the flare is nominal, false otherwise.
     """
-    truth = flare['u'].flux >= PEAK_MAGNITUDE_THRESHOLD
-    if np.isnan(flare['u'].flux).any():
-        # Checking if light curve has nan values
-        return False
-    elif True in truth:
+    if np.any(flare['u'].flux >= PEAK_MAGNITUDE_THRESHOLD):
         # Checking if u band has magnitude greater than the PEAK_MAGNITUDE_THRESHOLD
         return False
-    elif (np.amax(flare['u'].flux) - np.amin(flare['u'].flux)) <= U_BAND_AMPLITUDE_THRESHOLD:
-        # Checking if u band has amplitude greater than U_BAND_AMPLITUDE
+    if np.ptp(flare['u'].flux) <= U_BAND_AMPLITUDE_THRESHOLD:
+        # Checking if u band has amplitude less than U_BAND_AMPLITUDE
         return False
+
     return True
 
 def get_number_of_expected_flares(radius, duration):
@@ -213,15 +210,15 @@ def get_random_flare_events(count, rng, threshold = 0):
 
     df = pd.read_csv(FLARE_DATA_PATH)
     # Filtering flares with fluxes below the threshold
-    df_flitered = df[df['flux_amp'] >= threshold]
-    df_flitered.reset_index(drop=True, inplace = True)
-    indices = rng.integers(low = 0, high = len(df_flitered), size = count)
-    print(len(df_flitered), ' out of ', len(df), ' flares are chosen for random selection based on threshold value of:', threshold)
+    df_filtered = df[df['flux_amp'] >= threshold]
+    df_filtered.reset_index(drop=True, inplace = True)
+    indices = rng.integers(low = 0, high = len(df_filtered), size = count)
+    print(len(df_filtered), ' out of ', len(df), ' flares are chosen for random selection based on threshold value of:', threshold)
     
     for index in indices:
-        KIC.append(df_flitered['KIC'][index])
-        St_time.append(df_flitered['St-BKJD'][index])
-        End_time.append(df_flitered['End-BKJD'][index])
+        KIC.append(df_filtered['KIC'][index])
+        St_time.append(df_filtered['St-BKJD'][index])
+        End_time.append(df_filtered['End-BKJD'][index])
     
     return KIC, St_time, End_time
 
