@@ -4,6 +4,7 @@ import pandas as pd
 import math
 import time
 import argparse
+import sys
 
 from lc_tools import  load_light_curve, get_flare_lc_from_time, get_normalized_lc, dump_modeled_data_to_LCLIB, add_LCLIB_header
 from spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_luminosities_in_lsst_passbands, fit_flare_on_base
@@ -13,6 +14,7 @@ from plotting_tools import plotGenricSkyMapWithDistances, plotGenricSkyMap, plot
 from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
 
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
+LCLIB_PATH = ''
 
 TOTAL_KEPLER_M_DWARF_COUNT = 4664
 TOTAL_KEPLER_DURATION_IN_DAYS = 1460
@@ -36,7 +38,7 @@ def run_generator(flare_count):
     parameter_count = 20 * flare_count # Generating more parameters to avoid reloading of dust map and other files
 
     # Adding lc lib to header
-    add_LCLIB_header(flare_count)
+    add_LCLIB_header(flare_count, LCLIB_PATH)
 
     # While loop keeps executing until the number of flares generated matches the flare count
     while (NUMBER_OF_NOMINAL_FLARES < flare_count):
@@ -100,7 +102,7 @@ def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, 
     if is_nominal_flare(model_mags_with_extinction):
         # Writing modelled data to LCLIB file if the flare is nominal
         NUMBER_OF_NOMINAL_FLARES = NUMBER_OF_NOMINAL_FLARES + 1
-        dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction)
+        dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction, LCLIB_PATH)
 
 def is_nominal_flare(flare):
     """
@@ -252,7 +254,7 @@ def get_normally_distributed_flare_temp(count, rng):
     return rng.normal(10000, 100, count)
 
 if __name__ == "__main__":
-
+    # Getting Arguments
     argparser = argparse.ArgumentParser(
     description='Generates a LCLIB file with simulated flare instances')
     argparser.add_argument('flare_count', type=int,
@@ -261,6 +263,14 @@ if __name__ == "__main__":
                         help='Name of the LCLIB file. Should have a .txt extension')
     args = argparser.parse_args()
 
+    # Checking file name
+    if not args.output_file_name.endswith(".txt"):
+        print('Output file must be a .txt file')
+        sys.exit(1)
+
+    LCLIB_PATH = args.output_file_name
+
+    # Starting flare modelling process
     start_time = time.time()
     run_generator(args.flare_count)
     print("--- Process completed in %s seconds. File saved. ---" % (int(time.time() - start_time)))

@@ -375,7 +375,7 @@ def find_nearest_index(lc_time, value):
     else:
         return index
 
-def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, mags):
+def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, mags, file_path):
     """
     Function to write generated model magnitudes to lclib entries.
 
@@ -416,11 +416,10 @@ def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, sta
 
     simulation = event_marker + start + nrow + parameters + readings + end
 
-    text_file = open("sample.txt", "a")
-    n = text_file.write(simulation)
-    text_file.close()
+    with open(file_path, 'a') as output_file:
+        output_file.write(simulation)
 
-def add_LCLIB_header(count):
+def add_LCLIB_header(count, file_path):
     """
     Function to write the header of the lclib file.
     """
@@ -441,6 +440,5 @@ def add_LCLIB_header(count):
               'COMMENT: Order of PARVALS is Kepler Input Catalogue ID, flare start time (in BKJD), flare end time (in BKJD), flare temperature (in Kelvin), star temperature (in Kelvin), star distance.\n').format(count = count, 
                                                               date = datetime.date.today().strftime("%B %d, %Y"), 
                                                               time = datetime.datetime.now().strftime("%H:%M:%S"))
-    text_file = open("sample.txt", "a")
-    n = text_file.write(header)
-    text_file.close()
+    with open(file_path, 'w') as output_file:
+        output_file.write(header)
