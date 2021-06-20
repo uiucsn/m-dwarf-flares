@@ -37,49 +37,52 @@ def run_generator(flare_count):
     random_seed = 40
     parameter_count = 20 * flare_count # Generating more parameters to avoid reloading of dust map and other files
 
-    # Adding lc lib to header
-    add_LCLIB_header(flare_count, LCLIB_PATH)
+    with open(LCLIB_PATH, 'w') as output_file:
 
-    # While loop keeps executing until the number of flares generated matches the flare count
-    while (NUMBER_OF_NOMINAL_FLARES < flare_count):
+        # Adding lc lib to header
+        add_LCLIB_header(flare_count, output_file)
 
-        print("--- Generating new parameters for flare modelling ---")
-        rng = np.random.default_rng(random_seed)
+        # While loop keeps executing until the number of flares generated matches the flare count
+        while (NUMBER_OF_NOMINAL_FLARES < flare_count):
 
-        print("1. Sampling coordinates of stars ...")
-        coordinates = get_realistically_distributed_spherical_coordinates(parameter_count, rng)
-        distances = coordinates.distance
-        
-        print("2. Computing extinction values in lsst passbands ...")
-        extinction_values = get_extinction_in_lsst_passbands(coord.SkyCoord(coordinates))
+            print("--- Generating new parameters for flare modelling ---")
+            rng = np.random.default_rng(random_seed)
 
-        print("3. Obtaining reference flares ...")
-        kic_id, start_time, end_time = get_random_flare_events(parameter_count, rng)
-        
-        print("4. Sampling star temperature ...")
-        star_temp = get_normally_distributed_star_temp(parameter_count, rng)
-        
-        print("5. Sampling flare temperature ...")
-        flare_temp = get_normally_distributed_flare_temp(parameter_count, rng)
-        
-        print("6. Commencing flare modelling ...")
-        for i in range(parameter_count):
-            # Breaking out of the loop if the correct number of flares are generated
-            if (NUMBER_OF_NOMINAL_FLARES == flare_count):
-                break
-            print(( NUMBER_OF_NOMINAL_FLARES / flare_count) * 100 , '%', end='\r')
-            extinction = {
-                'u': extinction_values['u'][i],
-                'g': extinction_values['g'][i],
-                'r': extinction_values['r'][i],
-                'i': extinction_values['i'][i],
-                'z': extinction_values['z'][i],
-                'y': extinction_values['y'][i],
-            }
-            generate_model_flare_file(NUMBER_OF_NOMINAL_FLARES, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction)
-        random_seed = random_seed + 1
+            print("1. Sampling coordinates of stars ...")
+            coordinates = get_realistically_distributed_spherical_coordinates(parameter_count, rng)
+            distances = coordinates.distance
+            
+            print("2. Computing extinction values in lsst passbands ...")
+            extinction_values = get_extinction_in_lsst_passbands(coord.SkyCoord(coordinates))
 
-def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction):
+            print("3. Obtaining reference flares ...")
+            kic_id, start_time, end_time = get_random_flare_events(parameter_count, rng)
+            
+            print("4. Sampling star temperature ...")
+            star_temp = get_normally_distributed_star_temp(parameter_count, rng)
+            
+            print("5. Sampling flare temperature ...")
+            flare_temp = get_normally_distributed_flare_temp(parameter_count, rng)
+            
+            print("6. Commencing flare modelling ...")
+            for i in range(parameter_count):
+                # Breaking out of the loop if the correct number of flares are generated
+                if (NUMBER_OF_NOMINAL_FLARES == flare_count):
+                    break
+                print(( NUMBER_OF_NOMINAL_FLARES / flare_count) * 100 , '%', end='\r')
+                extinction = {
+                    'u': extinction_values['u'][i],
+                    'g': extinction_values['g'][i],
+                    'r': extinction_values['r'][i],
+                    'i': extinction_values['i'][i],
+                    'z': extinction_values['z'][i],
+                    'y': extinction_values['y'][i],
+                }
+                generate_model_flare_file(NUMBER_OF_NOMINAL_FLARES, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file)
+            random_seed = random_seed + 1
+    output_file.close()
+
+def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction, output_file):
 
     global NUMBER_OF_NOMINAL_FLARES
     # Loading the orignal flare light curve and normalizing it
@@ -102,7 +105,7 @@ def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, 
     if is_nominal_flare(model_mags_with_extinction):
         # Writing modelled data to LCLIB file if the flare is nominal
         NUMBER_OF_NOMINAL_FLARES = NUMBER_OF_NOMINAL_FLARES + 1
-        dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction, LCLIB_PATH)
+        dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction, output_file)
 
 def is_nominal_flare(flare):
     """
