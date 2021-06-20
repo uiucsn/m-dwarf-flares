@@ -7,7 +7,7 @@ import numpy as np
 dist_data = astropy.io.ascii.read('data_files/dist_new.csv')
 mag_data = astropy.io.ascii.read('data_files/mag.csv')
 
-def get_luminosity_with_magnitude(KIC):
+def get_stellar_luminosity(KIC):
     """
     Computes the luminosity of a KIC object based on distance data from Gaia
     DR3 and Kepler band magnitude.
@@ -21,7 +21,7 @@ def get_luminosity_with_magnitude(KIC):
 
     for row in dist_data:
         if row['KIC ID'] == int(KIC):
-            if row['r_med_photogeo'] != 0:
+            if row['r_med_photogeo'] != 0 and not np.isnan(row['r_med_photogeo']):
                 distance = row['r_med_photogeo']
             else:
                 distance = row['r_med_geo']

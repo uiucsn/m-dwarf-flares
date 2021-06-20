@@ -8,7 +8,7 @@ import sys
 
 from lc_tools import  load_light_curve, get_flare_lc_from_time, get_normalized_lc, dump_modeled_data_to_LCLIB, add_LCLIB_header
 from spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_luminosities_in_lsst_passbands, fit_flare_on_base
-from distance import get_luminosity_with_magnitude, get_mags_in_lsst_passbands
+from distance import get_stellar_luminosity, get_mags_in_lsst_passbands
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 from plotting_tools import plotGenricSkyMapWithDistances, plotGenricSkyMap, plotGeneric2DHistogram, plotGenericHistogram
 from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
@@ -88,7 +88,7 @@ def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, 
     new_lc = get_normalized_lc(flare_lc)
 
     # Computing the stellar luminosity based on Kepler and Gaia Data
-    luminosity = get_luminosity_with_magnitude(KIC_ID).si  
+    luminosity = get_stellar_luminosity(KIC_ID).si  
 
     # Modelling the spetra and fitting the flare on the nominal stellar luminosity
     flare_luminosities = get_flare_luminosities_in_lsst_passbands(new_lc, KIC_ID, flare_temp, luminosity)
