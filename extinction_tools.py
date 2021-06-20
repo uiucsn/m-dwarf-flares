@@ -55,7 +55,9 @@ def get_extinction_after_symmetric_interpolation_with_sfd_factor(coordinates):
     reddening_sfd_norm = sfd(coordinates)
     reddening_sfd_flip = sfd(mirrored_coordinates)
 
-    interpolated_reddening_3D = (reddening_sfd_norm / reddening_sfd_flip) * reddening_bayes_mirrored
+    # This replaces any undefined proportionality factors (i.e 1 / 0) by 0
+    sfd_factor = np.divide(reddening_sfd_norm, reddening_sfd_flip, out = np.ones_like(reddening_sfd_norm), where = reddening_sfd_flip != 0)
+    interpolated_reddening_3D = sfd_factor * reddening_bayes_mirrored
     reddening_interpolated = np.where(np.isnan(reddening_bayes), interpolated_reddening_3D, reddening_bayes)
 
     return reddening_interpolated

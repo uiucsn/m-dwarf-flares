@@ -16,13 +16,17 @@ from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_
 
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
+# Do not change these values
 KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
 KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS = 161.37182827551771
-
-MIN_RELATIVE_FLUX_AMPLITUDE = 0.01 # Minimum Relative Flux Amplitude of the flares. Flares below this relative flux amplitude will be filtered out.
-PEAK_MAGNITUDE_THRESHOLD = 25 # Maximum magnitude for a flare in the LSST u passband. Flares above this mag value will be filtered out.
-U_BAND_AMPLITUDE_THRESHOLD = 0 # Minimum magnitude amplitude of the simulated flare in the u passband. Flares below this mag amplitude will be filtered out.
 NUMBER_OF_NOMINAL_FLARES = 0
+
+# Minimum Relative Flux Amplitude of the flares. Flares below this relative flux amplitude will be filtered out.
+MIN_RELATIVE_FLUX_AMPLITUDE = 0.01 
+# Maximum magnitude for a flare in the LSST u passband. Flares above this mag value will be filtered out.
+PEAK_MAGNITUDE_THRESHOLD = 25 
+# Minimum magnitude amplitude of the simulated flare in the u passband. Flares below this mag amplitude will be filtered out.
+U_BAND_AMPLITUDE_THRESHOLD = 0.5 
 
 RANDOM_SEED = 40
 PARAMETER_COUNT_MULTIPLIER = 20
@@ -52,7 +56,7 @@ def run_generator(flare_count, file_path):
                 extinction_values = get_extinction_in_lsst_passbands(coord.SkyCoord(coordinates))
 
                 print("3. Obtaining reference flares ...")
-                kic_id, start_time, end_time = get_random_flare_events(parameter_count, rng)
+                kic_id, start_time, end_time = get_random_flare_events(parameter_count, rng, MIN_RELATIVE_FLUX_AMPLITUDE)
                 
                 print("4. Sampling star temperature ...")
                 star_temp = get_normally_distributed_star_temp(parameter_count, rng)
