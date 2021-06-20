@@ -30,9 +30,8 @@ def get_stellar_luminosity(KIC):
         if row['KIC ID'] == int(KIC):
             ab_magnitude = row['kic_kepmag'] 
 
-
-    flux = (10 ** (-ab_magnitude / 2.5)) * 3630.7805 * astropy.units.Jy
-    luminosity = flux * 4 * math.pi * (distance * astropy.units.pc) ** 2
+    flux = (ab_magnitude * u.ABmag).to(u.Jy)
+    luminosity = flux * 4 * math.pi * (distance * u.pc) ** 2
     return luminosity
 
 def get_mags_in_lsst_passbands(model_luminosities, distance):
