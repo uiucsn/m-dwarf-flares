@@ -26,15 +26,15 @@ MIN_RELATIVE_FLUX_AMPLITUDE = 0.01
 # Maximum magnitude for a flare in the LSST u passband. Flares above this mag value will be filtered out.
 PEAK_MAGNITUDE_THRESHOLD = 25 
 # Minimum magnitude amplitude of the simulated flare in the u passband. Flares below this mag amplitude will be filtered out.
-U_BAND_AMPLITUDE_THRESHOLD = 0.5 
+U_BAND_AMPLITUDE_THRESHOLD = 0.1 
 
 RANDOM_SEED = 40
-PARAMETER_COUNT_MULTIPLIER = 20
+PARAMETER_COUNT_MULTIPLIER = 50
 
 def run_generator(flare_count, file_path):
 
-    global NUMBER_OF_NOMINAL_FLARES
-    global RANDOM_SEED
+    number_of_nominal_flares = 0
+    rng = np.random.default_rng(RANDOM_SEED)
     parameter_count = PARAMETER_COUNT_MULTIPLIER * flare_count # Generating more parameters to avoid reloading of dust map and other files
 
     with open(file_path, 'w') as output_file:
@@ -43,10 +43,9 @@ def run_generator(flare_count, file_path):
         add_LCLIB_header(flare_count, output_file)
         with progressbar.ProgressBar(max_value = flare_count) as bar:
             # While loop keeps executing until the number of flares generated matches the flare count
-            while (NUMBER_OF_NOMINAL_FLARES < flare_count):
+            while (number_of_nominal_flares < flare_count):
 
                 print("--- Generating new parameters for flare modelling ---")
-                rng = np.random.default_rng(RANDOM_SEED)
 
                 print("1. Sampling coordinates of stars ...")
                 coordinates = get_realistically_distributed_spherical_coordinates(parameter_count, rng)
@@ -67,9 +66,9 @@ def run_generator(flare_count, file_path):
                 print("6. Commencing flare modelling ...")
                 for i in range(parameter_count):
                     # Breaking out of the loop if the correct number of flares are generated
-                    if (NUMBER_OF_NOMINAL_FLARES == flare_count):
+                    bar.update(number_of_nominal_flares)
+                    if (number_of_nominal_flares == flare_count):
                         break
-                    bar.update(NUMBER_OF_NOMINAL_FLARES)
                     extinction = {
                         'u': extinction_values['u'][i],
                         'g': extinction_values['g'][i],
@@ -78,13 +77,13 @@ def run_generator(flare_count, file_path):
                         'z': extinction_values['z'][i],
                         'y': extinction_values['y'][i],
                     }
-                    generate_model_flare_file(NUMBER_OF_NOMINAL_FLARES, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file)
-                RANDOM_SEED += 1
+                    is_valid_flare = generate_model_flare_file(number_of_nominal_flares, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file)
+                    if is_valid_flare:
+                        number_of_nominal_flares += 1
     output_file.close()
 
 def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction, output_file):
 
-    global NUMBER_OF_NOMINAL_FLARES
     # Loading the orignal flare light curve and normalizing it
     lc = load_light_curve(KIC_ID)
     flare_lc = get_flare_lc_from_time(lc, start_time, end_time)
@@ -104,8 +103,10 @@ def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, 
 
     if is_nominal_flare(model_mags_with_extinction):
         # Writing modelled data to LCLIB file if the flare is nominal
-        NUMBER_OF_NOMINAL_FLARES = NUMBER_OF_NOMINAL_FLARES + 1
         dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction, output_file)
+        return True
+    else:
+        return False
 
 def is_nominal_flare(flare):
     """
@@ -260,25 +261,25 @@ def get_normally_distributed_flare_temp(count, rng):
         numpy array: numpy array containing the flare temperatures with length = count
     """
 
-    return rng.normal(10000, 100, count)
+    return rng.normal(9000, 1000, count)
 
 if __name__ == "__main__":
     # Getting Arguments
     argparser = argparse.ArgumentParser(
     description='Generates a LCLIB file with simulated flare instances')
-    argparser.add_argument('flare_count', type=int,
-                        help='Number of flares to be generated')
-    argparser.add_argument('output_file_name', type=str,
-                        help='Name of the LCLIB file. Should have a .txt extension')
+    argparser.add_argument('flare_count', type = int,
+                            help = 'Number of flares to be generated')
+    argparser.add_argument('--file_name', type = str, required = False, default = 'LCLIB_Mdwarf-flare-LSSTA.TEXT',
+                            help = 'Name of the output LCLIB file. Should have a .TEXT extension (Default: LCLIB_Mdwarf-flare-LSST.TEXT)')
     args = argparser.parse_args()
 
     # Checking file name
-    if not args.output_file_name.endswith(".txt"):
-        print('Output file must be a .txt file')
+    if not args.file_name.endswith(".TEXT"):
+        print('Output file must be a .TEXT file')
         sys.exit(1)
 
     # Starting flare modelling process
     start_time = time.time()
-    run_generator(args.flare_count, args.output_file_name)
+    run_generator(args.flare_count, args.file_name)
     print("--- Process completed in %s seconds. File saved. ---" % (int(time.time() - start_time)))
     
