@@ -7,23 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-def plotSkyMapFromSDSSData():
-    """
-    Plots the Sky Map for m dwarf population based on SDSS Data
-    """
-
-    data = fits.getdata('data_files/dr7_lowmass_av.fits', 1)
-
-    t = Table(data)
-    c = CylindricalRepresentation(rho = t['RGAL'], phi = t['THETA'] * u.rad, z = t['ZGAL'])
-    coords = SkyCoord(c)
-
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(111, projection="mollweide")
-    scatter = ax.scatter(-coords.ra.wrap_at(180 * u.deg).radian, coords.dec.wrap_at(180 * u.deg).radian, s=3, vmin=0)
-    ax.grid(True)
-    ax.set_xticklabels(['10h', '8h', '6h', '4h', '2h', '0h', '22h', '20h', '18h', '16h', '14h'])
-    plt.show()
 
 def plotSkyMapFromSUPERBLINK():
     """
