@@ -48,9 +48,17 @@ ____
 
 Download the kepler_kic_v10.csv.gz file from
 
-https://archive.stsci.edu/missions-and-data/kepler#section-16b33ad2-670c-418f-8e14-b2ed605544ab
+https://archive.stsci.edu/pub/kepler/catalogs/kepler_kic_v10.csv.gz
 
 And save it to the data_files directory.
+
+___
+
+### Filter Data :
+
+The LSST filter data is already included in the repo. They can be found here:
+
+http://svo2.cab.inta-csic.es/svo/theory/fps3/index.php?mode=browse&gname=LSST&asttype=
 
 ## Running :
 
