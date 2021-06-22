@@ -11,7 +11,7 @@ from lc_tools import  load_light_curve, get_flare_lc_from_time, get_normalized_l
 from spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_luminosities_in_lsst_passbands, fit_flare_on_base
 from distance import get_stellar_luminosity, get_mags_in_lsst_passbands
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
-from plotting_tools import plotGenricSkyMapWithDistances, plotGenricSkyMap, plotGeneric2DHistogram, plotGenericHistogram
+from plotting_tools import save_simulation_plots
 from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
 
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
@@ -34,6 +34,7 @@ PARAMETER_COUNT_MULTIPLIER = 50
 def run_generator(flare_count, file_path):
 
     number_of_nominal_flares = 0
+    nominal_flare_indices = []
     rng = np.random.default_rng(RANDOM_SEED)
     parameter_count = PARAMETER_COUNT_MULTIPLIER * flare_count # Generating more parameters to avoid reloading of dust map and other files
 
@@ -80,7 +81,11 @@ def run_generator(flare_count, file_path):
                     is_valid_flare = generate_model_flare_file(number_of_nominal_flares, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file)
                     if is_valid_flare:
                         number_of_nominal_flares += 1
+                        nominal_flare_indices.append(i)
     output_file.close()
+    nominal_coordinates = coord.SkyCoord(coordinates[nominal_flare_indices])
+    save_simulation_plots(nominal_coordinates)
+
 
 def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction, output_file):
 

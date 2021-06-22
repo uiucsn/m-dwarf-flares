@@ -2,11 +2,56 @@ from astropy.io import fits
 from astropy.table import Table
 from astropy.coordinates import SkyCoord, CylindricalRepresentation
 from astropy import units as u
+from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
+
 import astropy
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+def save_simulation_plots(coordinates):
+    save_simulated_l_distribution(coordinates)
+    save_simulated_b_distribution(coordinates)
+    save_sky_map_with_distances(coordinates)
+
+def save_simulated_l_distribution(coordinates):
+    mw = MWDensity()
+    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates)))
+    ideal_coordinates = ideal_coordinates.galactic
+
+    gal = coordinates.galactic
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.hist(gal.l.value, bins=10, alpha = 0.5, label = 'Simulation generated') 
+    ax.hist(ideal_coordinates.l.value, bins=10, alpha = 0.5, label = 'Model generated')
+    ax.set_xlabel('Galactic longitude in degrees')
+    ax.set_ylabel('Number of m dwarfs')
+    plt.legend(loc='upper right')
+    plt.savefig("simulation_stats/l_distribution.pdf")
+
+def save_simulated_b_distribution(coordinates):
+    mw = MWDensity()
+    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates)))
+    ideal_coordinates = ideal_coordinates.galactic
+
+    gal = coordinates.galactic
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.hist(gal.b.value, bins=10, alpha = 0.5, label = 'Simulation generated') 
+    ax.hist(ideal_coordinates.b.value, bins=10, alpha = 0.5, label = 'Model generated')
+    ax.set_xlabel('Galactic latitude in degrees')
+    ax.set_ylabel('Number of m dwarfs')
+    plt.legend(loc='upper right')
+    plt.savefig("simulation_stats/b_distribution.pdf")
+
+def save_sky_map_with_distances(coordinates):
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection="mollweide")
+    scatter = ax.scatter(-coordinates.ra.wrap_at(180 * u.deg).radian, coordinates.dec.wrap_at(180 * u.deg).radian,c = coordinates.distance.value, s=3, vmin=0)
+    ax.grid(True)
+    ax.set_xticklabels(['10h', '8h', '6h', '4h', '2h', '0h', '22h', '20h', '18h', '16h', '14h'])
+    plt.colorbar(scatter, label = "Distance in kpc")
+    plt.savefig("simulation_stats/sky_map.pdf")
 
 def plotSkyMapFromSUPERBLINK():
     """
