@@ -9,44 +9,181 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-def save_simulation_plots(coordinates):
-    save_simulated_l_distribution(coordinates)
-    save_simulated_b_distribution(coordinates)
+def save_simulation_plots(coordinates, flares, rng):
+    """
+    Generates and saves the plots for the simulated flares that are saved to the LCLIB file.
+
+    Args:
+        coordinates (Astropy sky coords): Array of coords that are saved to the LCLIB
+        flares (dictionary of lightcurves): Array of flares containing magnitude time series in lsst passbands.
+        rng (numpy rng): Random number generator
+    """
+
+    save_peak_mag_distribution(flares)
+    save_mag_amp_distribution(flares)
+    save_simulated_distance_distribution(coordinates, rng)
+    save_simulated_l_distribution(coordinates, rng)
+    save_simulated_b_distribution(coordinates, rng)
     save_sky_map_with_distances(coordinates)
 
-def save_simulated_l_distribution(coordinates):
+def save_peak_mag_distribution(flares):
+    """
+    Generatres and saves a plot for distribution of the Peak magnitudes in all 6 LSST passbands 
+
+    Args:
+        flares (dictionary of lightcurves): Array of flares containing magnitude time series in lsst passbands.
+    """
+    
+    u_peaks = []
+    g_peaks = []
+    r_peaks = []
+    i_peaks = []
+    z_peaks = []
+    y_peaks = []
+
+    for flare in flares:
+        u_peaks.append(np.amax(flare['u'].flux))
+        g_peaks.append(np.amax(flare['g'].flux))
+        r_peaks.append(np.amax(flare['r'].flux))
+        i_peaks.append(np.amax(flare['i'].flux))
+        z_peaks.append(np.amax(flare['z'].flux))
+        y_peaks.append(np.amax(flare['y'].flux))
+    
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title('Distribution peak magnitudes in LSST passbands')
+    ax.hist(u_peaks, bins=20, histtype='step', facecolor='m', label = 'u band') 
+    ax.hist(g_peaks, bins=20, histtype='step', facecolor='g', label = 'g band') 
+    ax.hist(r_peaks, bins=20, histtype='step', facecolor='r', label = 'r band') 
+    ax.hist(i_peaks, bins=20, histtype='step', facecolor='c', label = 'i band') 
+    ax.hist(z_peaks, bins=20, histtype='step', facecolor='b', label = 'z band') 
+    ax.hist(y_peaks, bins=20, histtype='step', facecolor='y', label = 'y band') 
+    ax.set_xlabel('Peak Magnitude')
+    ax.set_ylabel('Number of m dwarfs')
+    plt.legend(loc='upper right')
+    plt.savefig("simulation_stats/peak_mag_distribution.pdf")
+
+def save_mag_amp_distribution(flares):
+    """
+    Generatres and saves a plot for distribution of the magnitude amplitudes in all 6 LSST passbands 
+
+    Args:
+        flares (dictionary of lightcurves): Array of flares containing magnitude time series in lsst passbands.
+    """
+
+    u_amps = []
+    g_amps = []
+    r_amps = []
+    i_amps = []
+    z_amps = []
+    y_amps = []
+
+    for flare in flares:
+        u_amps.append(np.amax(flare['u'].flux) - np.amin(flare['u'].flux))
+        g_amps.append(np.amax(flare['g'].flux) - np.amin(flare['g'].flux))
+        r_amps.append(np.amax(flare['r'].flux) - np.amin(flare['r'].flux))
+        i_amps.append(np.amax(flare['i'].flux) - np.amin(flare['i'].flux))
+        z_amps.append(np.amax(flare['z'].flux) - np.amin(flare['z'].flux))
+        y_amps.append(np.amax(flare['y'].flux) - np.amin(flare['y'].flux))
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title('Distribution magnitude amplitudes in LSST passbands')
+    ax.hist(u_amps, bins=20, histtype='step', facecolor='m', label = 'u band') 
+    ax.hist(g_amps, bins=20, histtype='step', facecolor='g', label = 'g band') 
+    ax.hist(r_amps, bins=20, histtype='step', facecolor='r', label = 'r band') 
+    ax.hist(i_amps, bins=20, histtype='step', facecolor='c', label = 'i band') 
+    ax.hist(z_amps, bins=20, histtype='step', facecolor='b', label = 'z band') 
+    ax.hist(y_amps, bins=20, histtype='step', facecolor='y', label = 'y band') 
+    ax.set_xlabel('Magnitude amplitude')
+    ax.set_ylabel('Number of m dwarfs')
+    plt.legend(loc='upper right')
+    plt.savefig("simulation_stats/mag_amp_distribution.pdf")
+
+
+def save_simulated_distance_distribution(coordinates, rng):
+    """
+    Generatres and saves a plot for distribution of the simulated distances vs the MW modelled distances.
+
+    Args:
+        coordinates (Astropy Sky coords): Array of coords saved to the LCLIB file.
+        rng (Numpy rng): Random number generator.
+    """
+
     mw = MWDensity()
-    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates)))
+    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
     ideal_coordinates = ideal_coordinates.galactic
 
     gal = coordinates.galactic
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot()
-    ax.hist(gal.l.value, bins=10, alpha = 0.5, label = 'Simulation generated') 
-    ax.hist(ideal_coordinates.l.value, bins=10, alpha = 0.5, label = 'Model generated')
+    ax.set_title('Distribution of distances for simulated flares vs MW model')
+    ax.hist(gal.distance.value, bins=20, histtype='step', label = 'Simulation generated') 
+    ax.hist(ideal_coordinates.distance.value, bins=20, histtype='step', label = 'MW Model generated')
+    ax.set_xlabel('Distance in kpc')
+    ax.set_ylabel('Number of m dwarfs')
+    plt.legend(loc='upper right')
+    plt.savefig("simulation_stats/dist_distribution.pdf")
+
+def save_simulated_l_distribution(coordinates, rng):
+    """
+    Generatres and saves a plot for distribution of the simulated galactic longitude vs the MW modelled galactic longitude.
+
+    Args:
+        coordinates (Astropy Sky coords): Array of coords saved to the LCLIB file.
+        rng (Numpy rng): Random number generator.
+    """
+
+    mw = MWDensity()
+    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
+    ideal_coordinates = ideal_coordinates.galactic
+
+    gal = coordinates.galactic
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title('Distribution of galactic longitude for simulated flares vs MW model')
+    ax.hist(gal.l.value, bins=20, histtype='step', label = 'Simulation generated') 
+    ax.hist(ideal_coordinates.l.value, bins=20, histtype='step', label = 'MW Model generated')
     ax.set_xlabel('Galactic longitude in degrees')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
     plt.savefig("simulation_stats/l_distribution.pdf")
 
-def save_simulated_b_distribution(coordinates):
+def save_simulated_b_distribution(coordinates, rng):
+    """
+    Generatres and saves a plot for distribution of the simulated galactic latitude vs the MW modelled galactic latitude.
+
+    Args:
+        coordinates (Astropy Sky coords): Array of coords saved to the LCLIB file.
+        rng (Numpy rng): Random number generator.
+    """
+
     mw = MWDensity()
-    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates)))
+    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
     ideal_coordinates = ideal_coordinates.galactic
 
     gal = coordinates.galactic
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot()
-    ax.hist(gal.b.value, bins=10, alpha = 0.5, label = 'Simulation generated') 
-    ax.hist(ideal_coordinates.b.value, bins=10, alpha = 0.5, label = 'Model generated')
+    ax.set_title('Distribution of galactic latitude for simulated flares vs MW model')
+    ax.hist(gal.b.value, bins=20, histtype='step', label = 'Simulation generated') 
+    ax.hist(ideal_coordinates.b.value, bins=20, histtype='step', label = 'MW Model generated')
     ax.set_xlabel('Galactic latitude in degrees')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
     plt.savefig("simulation_stats/b_distribution.pdf")
 
 def save_sky_map_with_distances(coordinates):
+    """
+    Plots the sky map fo simulated m dwarfs with distances which are written to the LCLIB
+
+    Args:
+        coordinates (Astropy Sky coords): Coordintaes of the m dwarf flares.
+    """
+
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111, projection="mollweide")
+    ax.set_title('Skymap for simulated m dwarf flare instances')
     scatter = ax.scatter(-coordinates.ra.wrap_at(180 * u.deg).radian, coordinates.dec.wrap_at(180 * u.deg).radian,c = coordinates.distance.value, s=3, vmin=0)
     ax.grid(True)
     ax.set_xticklabels(['10h', '8h', '6h', '4h', '2h', '0h', '22h', '20h', '18h', '16h', '14h'])
@@ -187,6 +324,7 @@ def plotGenricSkyMap(coords):
     Args:
         coords (numpy array): A numpy array of skycoord objects
     """
+    
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111, projection="mollweide")
     scatter = ax.scatter(-coords.ra.wrap_at(180 * u.deg).radian, coords.dec.wrap_at(180 * u.deg).radian, s=3, vmin=0)
@@ -201,6 +339,7 @@ def plotGenricSkyMapWithDistances(coords):
     Args:
         coords (numpy array): A numpy array of skycoord objects
     """
+
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111, projection="mollweide")
     scatter = ax.scatter(-coords.ra.wrap_at(180 * u.deg).radian, coords.dec.wrap_at(180 * u.deg).radian,c = coords.distance.value, s=3, vmin=0)

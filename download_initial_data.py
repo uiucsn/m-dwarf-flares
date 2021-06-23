@@ -11,6 +11,12 @@ LC_DATA_PATH = 'lc_data/KIC-{}.csv'
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
 def download_light_curve(KIC_ID):
+    """
+    Downloads and saves the light curve for the given KIC ID
+
+    Args:
+        KIC_ID (int): Kepler Input Catalogue ID.
+    """
     KIC = "KIC {}".format(KIC_ID)
     lcf = search_lightcurvefile(KIC, mission = 'Kepler').download_all()
     new_lcf =  LightCurveFileCollection([x for x in lcf if x.targetid == int(KIC_ID)])
@@ -18,6 +24,9 @@ def download_light_curve(KIC_ID):
     lc.to_csv(LC_DATA_PATH.format(KIC_ID))
 
 def download_dust_maps():
+    """
+    Fetches the sfd and bayestar dust maps
+    """
     dustmaps.sfd.fetch()
     dustmaps.bayestar.fetch()
 

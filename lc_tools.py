@@ -380,16 +380,16 @@ def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, sta
     Function to write generated model magnitudes to lclib entries.
 
     Args:
-        index ([type]): [description]
-        ra ([type]): [description]
-        dec ([type]): [description]
-        KIC_ID ([type]): [description]
-        flare_temp ([type]): [description]
-        star_temp ([type]): [description]
-        distance ([type]): [description]
-        start_time ([type]): [description]
-        end_time ([type]): [description]
-        mags ([type]): [description]
+        index (int): Index of the flare instance
+        ra (float): Right Ascension
+        dec (float): Declination
+        KIC_ID (int): Kepler Input Catalogue ID
+        flare_temp (float): Flare temperature
+        star_temp (float): Star temperature
+        distance (Astropy distance unit): Distance to the star.
+        start_time (float): Start time of the flare
+        end_time (float): End time of the flare
+        mags (dictionary of lightcurves): Magnitude time serires in LSST passbands.
     """
 
     event_marker = "#------------------------------\n"

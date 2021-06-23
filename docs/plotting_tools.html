@@ -1,0 +1,1033 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>plotting_tools API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>plotting_tools</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from astropy.io import fits
+from astropy.table import Table
+from astropy.coordinates import SkyCoord, CylindricalRepresentation
+from astropy import units as u
+from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
+
+import astropy
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+def save_simulation_plots(coordinates, flares, rng):
+    &#34;&#34;&#34;
+    Generates and saves the plots for the simulated flares that are saved to the LCLIB file.
+
+    Args:
+        coordinates (Astropy sky coords): Array of coords that are saved to the LCLIB
+        flares (dictionary of lightcurves): Array of flares containing magnitude time series in lsst passbands.
+        rng (numpy rng): Random number generator
+    &#34;&#34;&#34;
+
+    save_peak_mag_distribution(flares)
+    save_mag_amp_distribution(flares)
+    save_simulated_distance_distribution(coordinates, rng)
+    save_simulated_l_distribution(coordinates, rng)
+    save_simulated_b_distribution(coordinates, rng)
+    save_sky_map_with_distances(coordinates)
+
+def save_peak_mag_distribution(flares):
+    &#34;&#34;&#34;
+    Generatres and saves a plot for distribution of the Peak magnitudes in all 6 LSST passbands 
+
+    Args:
+        flares (dictionary of lightcurves): Array of flares containing magnitude time series in lsst passbands.
+    &#34;&#34;&#34;
+    
+    u_peaks = []
+    g_peaks = []
+    r_peaks = []
+    i_peaks = []
+    z_peaks = []
+    y_peaks = []
+
+    for flare in flares:
+        u_peaks.append(np.amax(flare[&#39;u&#39;].flux))
+        g_peaks.append(np.amax(flare[&#39;g&#39;].flux))
+        r_peaks.append(np.amax(flare[&#39;r&#39;].flux))
+        i_peaks.append(np.amax(flare[&#39;i&#39;].flux))
+        z_peaks.append(np.amax(flare[&#39;z&#39;].flux))
+        y_peaks.append(np.amax(flare[&#39;y&#39;].flux))
+    
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title(&#39;Distribution peak magnitudes in LSST passbands&#39;)
+    ax.hist(u_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;m&#39;, label = &#39;u band&#39;) 
+    ax.hist(g_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;g&#39;, label = &#39;g band&#39;) 
+    ax.hist(r_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;r&#39;, label = &#39;r band&#39;) 
+    ax.hist(i_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;c&#39;, label = &#39;i band&#39;) 
+    ax.hist(z_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;b&#39;, label = &#39;z band&#39;) 
+    ax.hist(y_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;y&#39;, label = &#39;y band&#39;) 
+    ax.set_xlabel(&#39;Peak Magnitude&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.legend(loc=&#39;upper right&#39;)
+    plt.savefig(&#34;simulation_stats/peak_mag_distribution.pdf&#34;)
+
+def save_mag_amp_distribution(flares):
+    &#34;&#34;&#34;
+    Generatres and saves a plot for distribution of the magnitude amplitudes in all 6 LSST passbands 
+
+    Args:
+        flares (dictionary of lightcurves): Array of flares containing magnitude time series in lsst passbands.
+    &#34;&#34;&#34;
+
+    u_amps = []
+    g_amps = []
+    r_amps = []
+    i_amps = []
+    z_amps = []
+    y_amps = []
+
+    for flare in flares:
+        u_amps.append(np.amax(flare[&#39;u&#39;].flux) - np.amin(flare[&#39;u&#39;].flux))
+        g_amps.append(np.amax(flare[&#39;g&#39;].flux) - np.amin(flare[&#39;g&#39;].flux))
+        r_amps.append(np.amax(flare[&#39;r&#39;].flux) - np.amin(flare[&#39;r&#39;].flux))
+        i_amps.append(np.amax(flare[&#39;i&#39;].flux) - np.amin(flare[&#39;i&#39;].flux))
+        z_amps.append(np.amax(flare[&#39;z&#39;].flux) - np.amin(flare[&#39;z&#39;].flux))
+        y_amps.append(np.amax(flare[&#39;y&#39;].flux) - np.amin(flare[&#39;y&#39;].flux))
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title(&#39;Distribution magnitude amplitudes in LSST passbands&#39;)
+    ax.hist(u_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;m&#39;, label = &#39;u band&#39;) 
+    ax.hist(g_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;g&#39;, label = &#39;g band&#39;) 
+    ax.hist(r_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;r&#39;, label = &#39;r band&#39;) 
+    ax.hist(i_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;c&#39;, label = &#39;i band&#39;) 
+    ax.hist(z_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;b&#39;, label = &#39;z band&#39;) 
+    ax.hist(y_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;y&#39;, label = &#39;y band&#39;) 
+    ax.set_xlabel(&#39;Magnitude amplitude&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.legend(loc=&#39;upper right&#39;)
+    plt.savefig(&#34;simulation_stats/mag_amp_distribution.pdf&#34;)
+
+
+def save_simulated_distance_distribution(coordinates, rng):
+    &#34;&#34;&#34;
+    Generatres and saves a plot for distribution of the simulated distances vs the MW modelled distances.
+
+    Args:
+        coordinates (Astropy Sky coords): Array of coords saved to the LCLIB file.
+        rng (Numpy rng): Random number generator.
+    &#34;&#34;&#34;
+
+    mw = MWDensity()
+    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
+    ideal_coordinates = ideal_coordinates.galactic
+
+    gal = coordinates.galactic
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title(&#39;Distribution of distances for simulated flares vs MW model&#39;)
+    ax.hist(gal.distance.value, bins=20, histtype=&#39;step&#39;, label = &#39;Simulation generated&#39;) 
+    ax.hist(ideal_coordinates.distance.value, bins=20, histtype=&#39;step&#39;, label = &#39;MW Model generated&#39;)
+    ax.set_xlabel(&#39;Distance in kpc&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.legend(loc=&#39;upper right&#39;)
+    plt.savefig(&#34;simulation_stats/dist_distribution.pdf&#34;)
+
+def save_simulated_l_distribution(coordinates, rng):
+    &#34;&#34;&#34;
+    Generatres and saves a plot for distribution of the simulated galactic longitude vs the MW modelled galactic longitude.
+
+    Args:
+        coordinates (Astropy Sky coords): Array of coords saved to the LCLIB file.
+        rng (Numpy rng): Random number generator.
+    &#34;&#34;&#34;
+
+    mw = MWDensity()
+    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
+    ideal_coordinates = ideal_coordinates.galactic
+
+    gal = coordinates.galactic
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title(&#39;Distribution of galactic longitude for simulated flares vs MW model&#39;)
+    ax.hist(gal.l.value, bins=20, histtype=&#39;step&#39;, label = &#39;Simulation generated&#39;) 
+    ax.hist(ideal_coordinates.l.value, bins=20, histtype=&#39;step&#39;, label = &#39;MW Model generated&#39;)
+    ax.set_xlabel(&#39;Galactic longitude in degrees&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.legend(loc=&#39;upper right&#39;)
+    plt.savefig(&#34;simulation_stats/l_distribution.pdf&#34;)
+
+def save_simulated_b_distribution(coordinates, rng):
+    &#34;&#34;&#34;
+    Generatres and saves a plot for distribution of the simulated galactic latitude vs the MW modelled galactic latitude.
+
+    Args:
+        coordinates (Astropy Sky coords): Array of coords saved to the LCLIB file.
+        rng (Numpy rng): Random number generator.
+    &#34;&#34;&#34;
+
+    mw = MWDensity()
+    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
+    ideal_coordinates = ideal_coordinates.galactic
+
+    gal = coordinates.galactic
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title(&#39;Distribution of galactic latitude for simulated flares vs MW model&#39;)
+    ax.hist(gal.b.value, bins=20, histtype=&#39;step&#39;, label = &#39;Simulation generated&#39;) 
+    ax.hist(ideal_coordinates.b.value, bins=20, histtype=&#39;step&#39;, label = &#39;MW Model generated&#39;)
+    ax.set_xlabel(&#39;Galactic latitude in degrees&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.legend(loc=&#39;upper right&#39;)
+    plt.savefig(&#34;simulation_stats/b_distribution.pdf&#34;)
+
+def save_sky_map_with_distances(coordinates):
+    &#34;&#34;&#34;
+    Plots the sky map fo simulated m dwarfs with distances which are written to the LCLIB
+
+    Args:
+        coordinates (Astropy Sky coords): Coordintaes of the m dwarf flares.
+    &#34;&#34;&#34;
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection=&#34;mollweide&#34;)
+    ax.set_title(&#39;Skymap for simulated m dwarf flare instances&#39;)
+    scatter = ax.scatter(-coordinates.ra.wrap_at(180 * u.deg).radian, coordinates.dec.wrap_at(180 * u.deg).radian,c = coordinates.distance.value, s=3, vmin=0)
+    ax.grid(True)
+    ax.set_xticklabels([&#39;10h&#39;, &#39;8h&#39;, &#39;6h&#39;, &#39;4h&#39;, &#39;2h&#39;, &#39;0h&#39;, &#39;22h&#39;, &#39;20h&#39;, &#39;18h&#39;, &#39;16h&#39;, &#39;14h&#39;])
+    plt.colorbar(scatter, label = &#34;Distance in kpc&#34;)
+    plt.savefig(&#34;simulation_stats/sky_map.pdf&#34;)
+
+def plotSkyMapFromSUPERBLINK():
+    &#34;&#34;&#34;
+    Plots the Sky Map for m dwarf population based on SUPERBLINK Survey
+    &#34;&#34;&#34;
+
+    df = astropy.io.ascii.read(&#39;data_files/aj403664t1_mrt.txt&#39;, quotechar=&#34;\s&#34;)
+    coords = SkyCoord(ra = df[&#39;RAdeg&#39;], dec = df[&#39;DEdeg&#39;])
+    distance = 1.0 / df[&#39;plx&#39;]
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection=&#34;mollweide&#34;)
+    scatter = ax.scatter(-coords.ra.wrap_at(180 * u.deg).radian, coords.dec.wrap_at(180 * u.deg).radian,c = distance, s=3, vmin=0)
+    ax.grid(True)
+    ax.set_xticklabels([&#39;10h&#39;, &#39;8h&#39;, &#39;6h&#39;, &#39;4h&#39;, &#39;2h&#39;, &#39;0h&#39;, &#39;22h&#39;, &#39;20h&#39;, &#39;18h&#39;, &#39;16h&#39;, &#39;14h&#39;])
+    plt.colorbar(scatter, label = &#34;Distance in pc&#34;)
+    plt.show()
+
+def plotLBDistributionSUPERBLINK():
+    &#34;&#34;&#34;
+    Plots a histogram for distribution of stars as a function of galactic latitude, longitude
+    and a 2D histogram heat map based on data from the SUPERBLINK survey.
+    &#34;&#34;&#34;
+
+    df = astropy.io.ascii.read(&#39;data_files/aj403664t1_mrt.txt&#39;, quotechar=&#34;\s&#34;)
+    coord = SkyCoord(df[&#39;RAdeg&#39;], df[&#39;DEdeg&#39;], frame=&#39;icrs&#39;, unit=&#39;deg&#39;)
+    galactic = coord.transform_to(&#39;galactic&#39;)
+
+    fig1, (ax1, ax2, ax3) = plt.subplots(1,3)
+
+    ax1.hist(galactic.b.value, bins=100, alpha = 0.5) 
+    ax1.set_title(&#39;Distribution of m dwarfs as a function of b&#39;)
+    ax1.set_xlabel(&#39;b in degrees&#39;)
+    ax1.set_ylabel(&#39;Number of m dwarfs&#39;)
+
+    ax2.hist(galactic.l.value, bins=100, alpha = 0.5) 
+    ax2.set_title(&#39;Distribution of m dwarfs as a function of b&#39;)
+    ax2.set_xlabel(&#39;l in degrees&#39;)
+    ax2.set_ylabel(&#39;Number of m dwarfs&#39;)
+
+    ax3.hist2d(galactic.l.value, galactic.b.value, cmap = &#39;plasma&#39;, bins = 20)
+    ax3.set_xlabel(&#34;Galactic Longitude in degrees&#34;)
+    ax3.set_ylabel(&#34;Galactic Latitude in degrees&#34;)
+
+    plt.show()
+
+def plotRaDecDistributionSUPERBLINK():
+    &#34;&#34;&#34;
+    Plots a histogram for distribution of stars as a function of RA, dec
+    and a 2D histogram heat map based on data from the SUPERBLINK survey.
+    &#34;&#34;&#34;
+
+    df = astropy.io.ascii.read(&#39;data_files/aj403664t1_mrt.txt&#39;, quotechar=&#34;\s&#34;)
+    coord = SkyCoord(df[&#39;RAdeg&#39;], df[&#39;DEdeg&#39;], frame=&#39;icrs&#39;, unit=&#39;deg&#39;)
+
+    fig1, ax1, ax2, ax3 = plt.subplots(1,3)
+
+    ax1.hist(coord.ra.value, bins=100, alpha = 0.5) 
+    ax1.set_title(&#39;Distribution of m dwarfs as a function of b&#39;)
+    ax1.set_xlabel(&#39;RA in degrees&#39;)
+    ax1.set_ylabel(&#39;Number of m dwarfs&#39;)
+
+    ax2.hist(coord.dec.value, bins=100, alpha = 0.5) 
+    ax2.set_title(&#39;Distribution of m dwarfs as a function of b&#39;)
+    ax2.set_xlabel(&#39;Dec in degrees&#39;)
+    ax2.set_ylabel(&#39;Number of m dwarfs&#39;)
+
+    ax3.hist2d(coord.ra.value, coord.dec.value, bins = 20)
+    ax3.set_xlabel(&#34;RA in degrees&#34;)
+    ax3.set_ylabel(&#34;Dec in degrees&#34;)
+
+    plt.show()
+
+def plotDistanceDistributionSUPERBLINK():
+    &#34;&#34;&#34;
+    Plots ditance distribution based on data form the SUPERBLINK survey.
+    &#34;&#34;&#34;
+    
+    table = astropy.io.ascii.read(&#39;data_files/aj403664t1_mrt.txt&#39;)
+    distance = np.sort(1.0 / table[(table[&#39;plx&#39;] &lt; 9) &amp; (~table[&#39;plx&#39;].mask)][&#39;plx&#39;])
+
+    fig1, ax1 = plt.subplots(1,1)
+    N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(distance, bins=100, alpha = 0.5) 
+    ax1.set_title(&#39;Distribution of m dwarfs as a function of distance&#39;)
+    ax1.set_xlabel(&#39;distance in pc&#39;)
+    ax1.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.show()
+
+def plot_effective_kepler_temps():
+    &#34;&#34;&#34;
+    Plots the histogram for Teff of stars based on the Kepler Input Catalouge data for the
+    541 flaring m dwarfs form the Yang 2017 paper.
+    &#34;&#34;&#34;
+
+    df = pd.read_csv(&#39;data_files/eff_temp.csv&#39;)
+    print(np.mean(df[&#39;teff&#39;]))
+    print(np.std(df[&#39;teff&#39;]))
+    count, bins, ignored = plt.hist(df[&#39;teff&#39;], bins=10, alpha = 0.5) 
+    plt.xlabel(&#39;Effective Temperature in Kelvin&#39;)
+    plt.ylabel(&#39;Number of m dwarfs&#39;)
+    plt.show()
+
+def plotGenericHistogram(data):
+    &#34;&#34;&#34;
+    A generic function to plot a histogram.
+
+    Args:
+        data ([Numpy array]): The 1D numpy array for which the histogram is to be plotted
+    &#34;&#34;&#34;
+
+    fig1, ax = plt.subplots(1,1)
+    N_amplitude, bins_amplitude, patches_amplitude = ax.hist(data, bins=100, alpha = 0.5) 
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.show()
+
+def plotGeneric2DHistogram(d1, d2):
+    &#34;&#34;&#34;
+    A generic function to plot a 2d histogram
+
+    Args:
+        d1 (numpy array): 1d numpy array along the x axis
+        d2 (numpy array): 1d numpy array along the y axis
+    &#34;&#34;&#34;
+
+    fig1, ax = plt.subplots(1,1)
+    ax.hist2d(d1, d2, bins = 20)
+    plt.show()
+
+def plotGenricSkyMap(coords):
+    &#34;&#34;&#34;
+    A generic function to plot a skymap for the given Sky coord array.
+
+    Args:
+        coords (numpy array): A numpy array of skycoord objects
+    &#34;&#34;&#34;
+    
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection=&#34;mollweide&#34;)
+    scatter = ax.scatter(-coords.ra.wrap_at(180 * u.deg).radian, coords.dec.wrap_at(180 * u.deg).radian, s=3, vmin=0)
+    ax.grid(True)
+    ax.set_xticklabels([&#39;10h&#39;, &#39;8h&#39;, &#39;6h&#39;, &#39;4h&#39;, &#39;2h&#39;, &#39;0h&#39;, &#39;22h&#39;, &#39;20h&#39;, &#39;18h&#39;, &#39;16h&#39;, &#39;14h&#39;])
+    plt.show()
+
+def plotGenricSkyMapWithDistances(coords):
+    &#34;&#34;&#34;
+    A genric function to plot a skymap for the given Sky coord array, with distances.
+
+    Args:
+        coords (numpy array): A numpy array of skycoord objects
+    &#34;&#34;&#34;
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection=&#34;mollweide&#34;)
+    scatter = ax.scatter(-coords.ra.wrap_at(180 * u.deg).radian, coords.dec.wrap_at(180 * u.deg).radian,c = coords.distance.value, s=3, vmin=0)
+    ax.grid(True)
+    ax.set_xticklabels([&#39;10h&#39;, &#39;8h&#39;, &#39;6h&#39;, &#39;4h&#39;, &#39;2h&#39;, &#39;0h&#39;, &#39;22h&#39;, &#39;20h&#39;, &#39;18h&#39;, &#39;16h&#39;, &#39;14h&#39;])
+    plt.colorbar(scatter, label = &#34;Distance in pc&#34;)
+    plt.show()
+
+def plotFlareFluxAmplitude():
+    &#34;&#34;&#34;
+    Plots the distribution for the reletive flux amplitude of all the flares in filtered_flares.csv
+    &#34;&#34;&#34;
+
+    df = pd.read_csv(&#39;data_files/filtered_flares.csv&#39;)
+    amp = df[&#39;flux_amp&#39;]
+    fig1, ax = plt.subplots(1,1)
+    N_amplitude, bins_amplitude, patches_amplitude = ax.hist(amp, bins=10, alpha = 0.5) 
+    ax.set_xlabel(&#39;Relative Flux Amplitude&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    ax.set_yscale(&#39;log&#39;)
+    plt.show()
+    </code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="plotting_tools.plotDistanceDistributionSUPERBLINK"><code class="name flex">
+<span>def <span class="ident">plotDistanceDistributionSUPERBLINK</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plots ditance distribution based on data form the SUPERBLINK survey.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plotDistanceDistributionSUPERBLINK():
+    &#34;&#34;&#34;
+    Plots ditance distribution based on data form the SUPERBLINK survey.
+    &#34;&#34;&#34;
+    
+    table = astropy.io.ascii.read(&#39;data_files/aj403664t1_mrt.txt&#39;)
+    distance = np.sort(1.0 / table[(table[&#39;plx&#39;] &lt; 9) &amp; (~table[&#39;plx&#39;].mask)][&#39;plx&#39;])
+
+    fig1, ax1 = plt.subplots(1,1)
+    N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(distance, bins=100, alpha = 0.5) 
+    ax1.set_title(&#39;Distribution of m dwarfs as a function of distance&#39;)
+    ax1.set_xlabel(&#39;distance in pc&#39;)
+    ax1.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.show()</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.plotFlareFluxAmplitude"><code class="name flex">
+<span>def <span class="ident">plotFlareFluxAmplitude</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plots the distribution for the reletive flux amplitude of all the flares in filtered_flares.csv</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plotFlareFluxAmplitude():
+    &#34;&#34;&#34;
+    Plots the distribution for the reletive flux amplitude of all the flares in filtered_flares.csv
+    &#34;&#34;&#34;
+
+    df = pd.read_csv(&#39;data_files/filtered_flares.csv&#39;)
+    amp = df[&#39;flux_amp&#39;]
+    fig1, ax = plt.subplots(1,1)
+    N_amplitude, bins_amplitude, patches_amplitude = ax.hist(amp, bins=10, alpha = 0.5) 
+    ax.set_xlabel(&#39;Relative Flux Amplitude&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    ax.set_yscale(&#39;log&#39;)
+    plt.show()</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.plotGeneric2DHistogram"><code class="name flex">
+<span>def <span class="ident">plotGeneric2DHistogram</span></span>(<span>d1, d2)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A generic function to plot a 2d histogram</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>d1</code></strong> :&ensp;<code>numpy array</code></dt>
+<dd>1d numpy array along the x axis</dd>
+<dt><strong><code>d2</code></strong> :&ensp;<code>numpy array</code></dt>
+<dd>1d numpy array along the y axis</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plotGeneric2DHistogram(d1, d2):
+    &#34;&#34;&#34;
+    A generic function to plot a 2d histogram
+
+    Args:
+        d1 (numpy array): 1d numpy array along the x axis
+        d2 (numpy array): 1d numpy array along the y axis
+    &#34;&#34;&#34;
+
+    fig1, ax = plt.subplots(1,1)
+    ax.hist2d(d1, d2, bins = 20)
+    plt.show()</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.plotGenericHistogram"><code class="name flex">
+<span>def <span class="ident">plotGenericHistogram</span></span>(<span>data)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A generic function to plot a histogram.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>[Numpy array]</code></dt>
+<dd>The 1D numpy array for which the histogram is to be plotted</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plotGenericHistogram(data):
+    &#34;&#34;&#34;
+    A generic function to plot a histogram.
+
+    Args:
+        data ([Numpy array]): The 1D numpy array for which the histogram is to be plotted
+    &#34;&#34;&#34;
+
+    fig1, ax = plt.subplots(1,1)
+    N_amplitude, bins_amplitude, patches_amplitude = ax.hist(data, bins=100, alpha = 0.5) 
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.show()</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.plotGenricSkyMap"><code class="name flex">
+<span>def <span class="ident">plotGenricSkyMap</span></span>(<span>coords)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A generic function to plot a skymap for the given Sky coord array.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>coords</code></strong> :&ensp;<code>numpy array</code></dt>
+<dd>A numpy array of skycoord objects</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plotGenricSkyMap(coords):
+    &#34;&#34;&#34;
+    A generic function to plot a skymap for the given Sky coord array.
+
+    Args:
+        coords (numpy array): A numpy array of skycoord objects
+    &#34;&#34;&#34;
+    
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection=&#34;mollweide&#34;)
+    scatter = ax.scatter(-coords.ra.wrap_at(180 * u.deg).radian, coords.dec.wrap_at(180 * u.deg).radian, s=3, vmin=0)
+    ax.grid(True)
+    ax.set_xticklabels([&#39;10h&#39;, &#39;8h&#39;, &#39;6h&#39;, &#39;4h&#39;, &#39;2h&#39;, &#39;0h&#39;, &#39;22h&#39;, &#39;20h&#39;, &#39;18h&#39;, &#39;16h&#39;, &#39;14h&#39;])
+    plt.show()</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.plotGenricSkyMapWithDistances"><code class="name flex">
+<span>def <span class="ident">plotGenricSkyMapWithDistances</span></span>(<span>coords)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A genric function to plot a skymap for the given Sky coord array, with distances.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>coords</code></strong> :&ensp;<code>numpy array</code></dt>
+<dd>A numpy array of skycoord objects</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plotGenricSkyMapWithDistances(coords):
+    &#34;&#34;&#34;
+    A genric function to plot a skymap for the given Sky coord array, with distances.
+
+    Args:
+        coords (numpy array): A numpy array of skycoord objects
+    &#34;&#34;&#34;
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection=&#34;mollweide&#34;)
+    scatter = ax.scatter(-coords.ra.wrap_at(180 * u.deg).radian, coords.dec.wrap_at(180 * u.deg).radian,c = coords.distance.value, s=3, vmin=0)
+    ax.grid(True)
+    ax.set_xticklabels([&#39;10h&#39;, &#39;8h&#39;, &#39;6h&#39;, &#39;4h&#39;, &#39;2h&#39;, &#39;0h&#39;, &#39;22h&#39;, &#39;20h&#39;, &#39;18h&#39;, &#39;16h&#39;, &#39;14h&#39;])
+    plt.colorbar(scatter, label = &#34;Distance in pc&#34;)
+    plt.show()</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.plotLBDistributionSUPERBLINK"><code class="name flex">
+<span>def <span class="ident">plotLBDistributionSUPERBLINK</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plots a histogram for distribution of stars as a function of galactic latitude, longitude
+and a 2D histogram heat map based on data from the SUPERBLINK survey.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plotLBDistributionSUPERBLINK():
+    &#34;&#34;&#34;
+    Plots a histogram for distribution of stars as a function of galactic latitude, longitude
+    and a 2D histogram heat map based on data from the SUPERBLINK survey.
+    &#34;&#34;&#34;
+
+    df = astropy.io.ascii.read(&#39;data_files/aj403664t1_mrt.txt&#39;, quotechar=&#34;\s&#34;)
+    coord = SkyCoord(df[&#39;RAdeg&#39;], df[&#39;DEdeg&#39;], frame=&#39;icrs&#39;, unit=&#39;deg&#39;)
+    galactic = coord.transform_to(&#39;galactic&#39;)
+
+    fig1, (ax1, ax2, ax3) = plt.subplots(1,3)
+
+    ax1.hist(galactic.b.value, bins=100, alpha = 0.5) 
+    ax1.set_title(&#39;Distribution of m dwarfs as a function of b&#39;)
+    ax1.set_xlabel(&#39;b in degrees&#39;)
+    ax1.set_ylabel(&#39;Number of m dwarfs&#39;)
+
+    ax2.hist(galactic.l.value, bins=100, alpha = 0.5) 
+    ax2.set_title(&#39;Distribution of m dwarfs as a function of b&#39;)
+    ax2.set_xlabel(&#39;l in degrees&#39;)
+    ax2.set_ylabel(&#39;Number of m dwarfs&#39;)
+
+    ax3.hist2d(galactic.l.value, galactic.b.value, cmap = &#39;plasma&#39;, bins = 20)
+    ax3.set_xlabel(&#34;Galactic Longitude in degrees&#34;)
+    ax3.set_ylabel(&#34;Galactic Latitude in degrees&#34;)
+
+    plt.show()</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.plotRaDecDistributionSUPERBLINK"><code class="name flex">
+<span>def <span class="ident">plotRaDecDistributionSUPERBLINK</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plots a histogram for distribution of stars as a function of RA, dec
+and a 2D histogram heat map based on data from the SUPERBLINK survey.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plotRaDecDistributionSUPERBLINK():
+    &#34;&#34;&#34;
+    Plots a histogram for distribution of stars as a function of RA, dec
+    and a 2D histogram heat map based on data from the SUPERBLINK survey.
+    &#34;&#34;&#34;
+
+    df = astropy.io.ascii.read(&#39;data_files/aj403664t1_mrt.txt&#39;, quotechar=&#34;\s&#34;)
+    coord = SkyCoord(df[&#39;RAdeg&#39;], df[&#39;DEdeg&#39;], frame=&#39;icrs&#39;, unit=&#39;deg&#39;)
+
+    fig1, ax1, ax2, ax3 = plt.subplots(1,3)
+
+    ax1.hist(coord.ra.value, bins=100, alpha = 0.5) 
+    ax1.set_title(&#39;Distribution of m dwarfs as a function of b&#39;)
+    ax1.set_xlabel(&#39;RA in degrees&#39;)
+    ax1.set_ylabel(&#39;Number of m dwarfs&#39;)
+
+    ax2.hist(coord.dec.value, bins=100, alpha = 0.5) 
+    ax2.set_title(&#39;Distribution of m dwarfs as a function of b&#39;)
+    ax2.set_xlabel(&#39;Dec in degrees&#39;)
+    ax2.set_ylabel(&#39;Number of m dwarfs&#39;)
+
+    ax3.hist2d(coord.ra.value, coord.dec.value, bins = 20)
+    ax3.set_xlabel(&#34;RA in degrees&#34;)
+    ax3.set_ylabel(&#34;Dec in degrees&#34;)
+
+    plt.show()</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.plotSkyMapFromSUPERBLINK"><code class="name flex">
+<span>def <span class="ident">plotSkyMapFromSUPERBLINK</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plots the Sky Map for m dwarf population based on SUPERBLINK Survey</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plotSkyMapFromSUPERBLINK():
+    &#34;&#34;&#34;
+    Plots the Sky Map for m dwarf population based on SUPERBLINK Survey
+    &#34;&#34;&#34;
+
+    df = astropy.io.ascii.read(&#39;data_files/aj403664t1_mrt.txt&#39;, quotechar=&#34;\s&#34;)
+    coords = SkyCoord(ra = df[&#39;RAdeg&#39;], dec = df[&#39;DEdeg&#39;])
+    distance = 1.0 / df[&#39;plx&#39;]
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection=&#34;mollweide&#34;)
+    scatter = ax.scatter(-coords.ra.wrap_at(180 * u.deg).radian, coords.dec.wrap_at(180 * u.deg).radian,c = distance, s=3, vmin=0)
+    ax.grid(True)
+    ax.set_xticklabels([&#39;10h&#39;, &#39;8h&#39;, &#39;6h&#39;, &#39;4h&#39;, &#39;2h&#39;, &#39;0h&#39;, &#39;22h&#39;, &#39;20h&#39;, &#39;18h&#39;, &#39;16h&#39;, &#39;14h&#39;])
+    plt.colorbar(scatter, label = &#34;Distance in pc&#34;)
+    plt.show()</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.plot_effective_kepler_temps"><code class="name flex">
+<span>def <span class="ident">plot_effective_kepler_temps</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plots the histogram for Teff of stars based on the Kepler Input Catalouge data for the
+541 flaring m dwarfs form the Yang 2017 paper.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_effective_kepler_temps():
+    &#34;&#34;&#34;
+    Plots the histogram for Teff of stars based on the Kepler Input Catalouge data for the
+    541 flaring m dwarfs form the Yang 2017 paper.
+    &#34;&#34;&#34;
+
+    df = pd.read_csv(&#39;data_files/eff_temp.csv&#39;)
+    print(np.mean(df[&#39;teff&#39;]))
+    print(np.std(df[&#39;teff&#39;]))
+    count, bins, ignored = plt.hist(df[&#39;teff&#39;], bins=10, alpha = 0.5) 
+    plt.xlabel(&#39;Effective Temperature in Kelvin&#39;)
+    plt.ylabel(&#39;Number of m dwarfs&#39;)
+    plt.show()</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.save_mag_amp_distribution"><code class="name flex">
+<span>def <span class="ident">save_mag_amp_distribution</span></span>(<span>flares)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generatres and saves a plot for distribution of the magnitude amplitudes in all 6 LSST passbands </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>flares</code></strong> :&ensp;<code>dictionary</code> of <code>lightcurves</code></dt>
+<dd>Array of flares containing magnitude time series in lsst passbands.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_mag_amp_distribution(flares):
+    &#34;&#34;&#34;
+    Generatres and saves a plot for distribution of the magnitude amplitudes in all 6 LSST passbands 
+
+    Args:
+        flares (dictionary of lightcurves): Array of flares containing magnitude time series in lsst passbands.
+    &#34;&#34;&#34;
+
+    u_amps = []
+    g_amps = []
+    r_amps = []
+    i_amps = []
+    z_amps = []
+    y_amps = []
+
+    for flare in flares:
+        u_amps.append(np.amax(flare[&#39;u&#39;].flux) - np.amin(flare[&#39;u&#39;].flux))
+        g_amps.append(np.amax(flare[&#39;g&#39;].flux) - np.amin(flare[&#39;g&#39;].flux))
+        r_amps.append(np.amax(flare[&#39;r&#39;].flux) - np.amin(flare[&#39;r&#39;].flux))
+        i_amps.append(np.amax(flare[&#39;i&#39;].flux) - np.amin(flare[&#39;i&#39;].flux))
+        z_amps.append(np.amax(flare[&#39;z&#39;].flux) - np.amin(flare[&#39;z&#39;].flux))
+        y_amps.append(np.amax(flare[&#39;y&#39;].flux) - np.amin(flare[&#39;y&#39;].flux))
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title(&#39;Distribution magnitude amplitudes in LSST passbands&#39;)
+    ax.hist(u_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;m&#39;, label = &#39;u band&#39;) 
+    ax.hist(g_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;g&#39;, label = &#39;g band&#39;) 
+    ax.hist(r_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;r&#39;, label = &#39;r band&#39;) 
+    ax.hist(i_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;c&#39;, label = &#39;i band&#39;) 
+    ax.hist(z_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;b&#39;, label = &#39;z band&#39;) 
+    ax.hist(y_amps, bins=20, histtype=&#39;step&#39;, facecolor=&#39;y&#39;, label = &#39;y band&#39;) 
+    ax.set_xlabel(&#39;Magnitude amplitude&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.legend(loc=&#39;upper right&#39;)
+    plt.savefig(&#34;simulation_stats/mag_amp_distribution.pdf&#34;)</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.save_peak_mag_distribution"><code class="name flex">
+<span>def <span class="ident">save_peak_mag_distribution</span></span>(<span>flares)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generatres and saves a plot for distribution of the Peak magnitudes in all 6 LSST passbands </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>flares</code></strong> :&ensp;<code>dictionary</code> of <code>lightcurves</code></dt>
+<dd>Array of flares containing magnitude time series in lsst passbands.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_peak_mag_distribution(flares):
+    &#34;&#34;&#34;
+    Generatres and saves a plot for distribution of the Peak magnitudes in all 6 LSST passbands 
+
+    Args:
+        flares (dictionary of lightcurves): Array of flares containing magnitude time series in lsst passbands.
+    &#34;&#34;&#34;
+    
+    u_peaks = []
+    g_peaks = []
+    r_peaks = []
+    i_peaks = []
+    z_peaks = []
+    y_peaks = []
+
+    for flare in flares:
+        u_peaks.append(np.amax(flare[&#39;u&#39;].flux))
+        g_peaks.append(np.amax(flare[&#39;g&#39;].flux))
+        r_peaks.append(np.amax(flare[&#39;r&#39;].flux))
+        i_peaks.append(np.amax(flare[&#39;i&#39;].flux))
+        z_peaks.append(np.amax(flare[&#39;z&#39;].flux))
+        y_peaks.append(np.amax(flare[&#39;y&#39;].flux))
+    
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title(&#39;Distribution peak magnitudes in LSST passbands&#39;)
+    ax.hist(u_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;m&#39;, label = &#39;u band&#39;) 
+    ax.hist(g_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;g&#39;, label = &#39;g band&#39;) 
+    ax.hist(r_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;r&#39;, label = &#39;r band&#39;) 
+    ax.hist(i_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;c&#39;, label = &#39;i band&#39;) 
+    ax.hist(z_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;b&#39;, label = &#39;z band&#39;) 
+    ax.hist(y_peaks, bins=20, histtype=&#39;step&#39;, facecolor=&#39;y&#39;, label = &#39;y band&#39;) 
+    ax.set_xlabel(&#39;Peak Magnitude&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.legend(loc=&#39;upper right&#39;)
+    plt.savefig(&#34;simulation_stats/peak_mag_distribution.pdf&#34;)</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.save_simulated_b_distribution"><code class="name flex">
+<span>def <span class="ident">save_simulated_b_distribution</span></span>(<span>coordinates, rng)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generatres and saves a plot for distribution of the simulated galactic latitude vs the MW modelled galactic latitude.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>coordinates</code></strong> :&ensp;<code>Astropy Sky coords</code></dt>
+<dd>Array of coords saved to the LCLIB file.</dd>
+<dt><strong><code>rng</code></strong> :&ensp;<code>Numpy rng</code></dt>
+<dd>Random number generator.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_simulated_b_distribution(coordinates, rng):
+    &#34;&#34;&#34;
+    Generatres and saves a plot for distribution of the simulated galactic latitude vs the MW modelled galactic latitude.
+
+    Args:
+        coordinates (Astropy Sky coords): Array of coords saved to the LCLIB file.
+        rng (Numpy rng): Random number generator.
+    &#34;&#34;&#34;
+
+    mw = MWDensity()
+    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
+    ideal_coordinates = ideal_coordinates.galactic
+
+    gal = coordinates.galactic
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title(&#39;Distribution of galactic latitude for simulated flares vs MW model&#39;)
+    ax.hist(gal.b.value, bins=20, histtype=&#39;step&#39;, label = &#39;Simulation generated&#39;) 
+    ax.hist(ideal_coordinates.b.value, bins=20, histtype=&#39;step&#39;, label = &#39;MW Model generated&#39;)
+    ax.set_xlabel(&#39;Galactic latitude in degrees&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.legend(loc=&#39;upper right&#39;)
+    plt.savefig(&#34;simulation_stats/b_distribution.pdf&#34;)</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.save_simulated_distance_distribution"><code class="name flex">
+<span>def <span class="ident">save_simulated_distance_distribution</span></span>(<span>coordinates, rng)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generatres and saves a plot for distribution of the simulated distances vs the MW modelled distances.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>coordinates</code></strong> :&ensp;<code>Astropy Sky coords</code></dt>
+<dd>Array of coords saved to the LCLIB file.</dd>
+<dt><strong><code>rng</code></strong> :&ensp;<code>Numpy rng</code></dt>
+<dd>Random number generator.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_simulated_distance_distribution(coordinates, rng):
+    &#34;&#34;&#34;
+    Generatres and saves a plot for distribution of the simulated distances vs the MW modelled distances.
+
+    Args:
+        coordinates (Astropy Sky coords): Array of coords saved to the LCLIB file.
+        rng (Numpy rng): Random number generator.
+    &#34;&#34;&#34;
+
+    mw = MWDensity()
+    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
+    ideal_coordinates = ideal_coordinates.galactic
+
+    gal = coordinates.galactic
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title(&#39;Distribution of distances for simulated flares vs MW model&#39;)
+    ax.hist(gal.distance.value, bins=20, histtype=&#39;step&#39;, label = &#39;Simulation generated&#39;) 
+    ax.hist(ideal_coordinates.distance.value, bins=20, histtype=&#39;step&#39;, label = &#39;MW Model generated&#39;)
+    ax.set_xlabel(&#39;Distance in kpc&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.legend(loc=&#39;upper right&#39;)
+    plt.savefig(&#34;simulation_stats/dist_distribution.pdf&#34;)</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.save_simulated_l_distribution"><code class="name flex">
+<span>def <span class="ident">save_simulated_l_distribution</span></span>(<span>coordinates, rng)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generatres and saves a plot for distribution of the simulated galactic longitude vs the MW modelled galactic longitude.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>coordinates</code></strong> :&ensp;<code>Astropy Sky coords</code></dt>
+<dd>Array of coords saved to the LCLIB file.</dd>
+<dt><strong><code>rng</code></strong> :&ensp;<code>Numpy rng</code></dt>
+<dd>Random number generator.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_simulated_l_distribution(coordinates, rng):
+    &#34;&#34;&#34;
+    Generatres and saves a plot for distribution of the simulated galactic longitude vs the MW modelled galactic longitude.
+
+    Args:
+        coordinates (Astropy Sky coords): Array of coords saved to the LCLIB file.
+        rng (Numpy rng): Random number generator.
+    &#34;&#34;&#34;
+
+    mw = MWDensity()
+    ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
+    ideal_coordinates = ideal_coordinates.galactic
+
+    gal = coordinates.galactic
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot()
+    ax.set_title(&#39;Distribution of galactic longitude for simulated flares vs MW model&#39;)
+    ax.hist(gal.l.value, bins=20, histtype=&#39;step&#39;, label = &#39;Simulation generated&#39;) 
+    ax.hist(ideal_coordinates.l.value, bins=20, histtype=&#39;step&#39;, label = &#39;MW Model generated&#39;)
+    ax.set_xlabel(&#39;Galactic longitude in degrees&#39;)
+    ax.set_ylabel(&#39;Number of m dwarfs&#39;)
+    plt.legend(loc=&#39;upper right&#39;)
+    plt.savefig(&#34;simulation_stats/l_distribution.pdf&#34;)</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.save_simulation_plots"><code class="name flex">
+<span>def <span class="ident">save_simulation_plots</span></span>(<span>coordinates, flares, rng)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generates and saves the plots for the simulated flares that are saved to the LCLIB file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>coordinates</code></strong> :&ensp;<code>Astropy sky coords</code></dt>
+<dd>Array of coords that are saved to the LCLIB</dd>
+<dt><strong><code>flares</code></strong> :&ensp;<code>dictionary</code> of <code>lightcurves</code></dt>
+<dd>Array of flares containing magnitude time series in lsst passbands.</dd>
+<dt><strong><code>rng</code></strong> :&ensp;<code>numpy rng</code></dt>
+<dd>Random number generator</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_simulation_plots(coordinates, flares, rng):
+    &#34;&#34;&#34;
+    Generates and saves the plots for the simulated flares that are saved to the LCLIB file.
+
+    Args:
+        coordinates (Astropy sky coords): Array of coords that are saved to the LCLIB
+        flares (dictionary of lightcurves): Array of flares containing magnitude time series in lsst passbands.
+        rng (numpy rng): Random number generator
+    &#34;&#34;&#34;
+
+    save_peak_mag_distribution(flares)
+    save_mag_amp_distribution(flares)
+    save_simulated_distance_distribution(coordinates, rng)
+    save_simulated_l_distribution(coordinates, rng)
+    save_simulated_b_distribution(coordinates, rng)
+    save_sky_map_with_distances(coordinates)</code></pre>
+</details>
+</dd>
+<dt id="plotting_tools.save_sky_map_with_distances"><code class="name flex">
+<span>def <span class="ident">save_sky_map_with_distances</span></span>(<span>coordinates)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plots the sky map fo simulated m dwarfs with distances which are written to the LCLIB</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>coordinates</code></strong> :&ensp;<code>Astropy Sky coords</code></dt>
+<dd>Coordintaes of the m dwarf flares.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_sky_map_with_distances(coordinates):
+    &#34;&#34;&#34;
+    Plots the sky map fo simulated m dwarfs with distances which are written to the LCLIB
+
+    Args:
+        coordinates (Astropy Sky coords): Coordintaes of the m dwarf flares.
+    &#34;&#34;&#34;
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection=&#34;mollweide&#34;)
+    ax.set_title(&#39;Skymap for simulated m dwarf flare instances&#39;)
+    scatter = ax.scatter(-coordinates.ra.wrap_at(180 * u.deg).radian, coordinates.dec.wrap_at(180 * u.deg).radian,c = coordinates.distance.value, s=3, vmin=0)
+    ax.grid(True)
+    ax.set_xticklabels([&#39;10h&#39;, &#39;8h&#39;, &#39;6h&#39;, &#39;4h&#39;, &#39;2h&#39;, &#39;0h&#39;, &#39;22h&#39;, &#39;20h&#39;, &#39;18h&#39;, &#39;16h&#39;, &#39;14h&#39;])
+    plt.colorbar(scatter, label = &#34;Distance in kpc&#34;)
+    plt.savefig(&#34;simulation_stats/sky_map.pdf&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="plotting_tools.plotDistanceDistributionSUPERBLINK" href="#plotting_tools.plotDistanceDistributionSUPERBLINK">plotDistanceDistributionSUPERBLINK</a></code></li>
+<li><code><a title="plotting_tools.plotFlareFluxAmplitude" href="#plotting_tools.plotFlareFluxAmplitude">plotFlareFluxAmplitude</a></code></li>
+<li><code><a title="plotting_tools.plotGeneric2DHistogram" href="#plotting_tools.plotGeneric2DHistogram">plotGeneric2DHistogram</a></code></li>
+<li><code><a title="plotting_tools.plotGenericHistogram" href="#plotting_tools.plotGenericHistogram">plotGenericHistogram</a></code></li>
+<li><code><a title="plotting_tools.plotGenricSkyMap" href="#plotting_tools.plotGenricSkyMap">plotGenricSkyMap</a></code></li>
+<li><code><a title="plotting_tools.plotGenricSkyMapWithDistances" href="#plotting_tools.plotGenricSkyMapWithDistances">plotGenricSkyMapWithDistances</a></code></li>
+<li><code><a title="plotting_tools.plotLBDistributionSUPERBLINK" href="#plotting_tools.plotLBDistributionSUPERBLINK">plotLBDistributionSUPERBLINK</a></code></li>
+<li><code><a title="plotting_tools.plotRaDecDistributionSUPERBLINK" href="#plotting_tools.plotRaDecDistributionSUPERBLINK">plotRaDecDistributionSUPERBLINK</a></code></li>
+<li><code><a title="plotting_tools.plotSkyMapFromSUPERBLINK" href="#plotting_tools.plotSkyMapFromSUPERBLINK">plotSkyMapFromSUPERBLINK</a></code></li>
+<li><code><a title="plotting_tools.plot_effective_kepler_temps" href="#plotting_tools.plot_effective_kepler_temps">plot_effective_kepler_temps</a></code></li>
+<li><code><a title="plotting_tools.save_mag_amp_distribution" href="#plotting_tools.save_mag_amp_distribution">save_mag_amp_distribution</a></code></li>
+<li><code><a title="plotting_tools.save_peak_mag_distribution" href="#plotting_tools.save_peak_mag_distribution">save_peak_mag_distribution</a></code></li>
+<li><code><a title="plotting_tools.save_simulated_b_distribution" href="#plotting_tools.save_simulated_b_distribution">save_simulated_b_distribution</a></code></li>
+<li><code><a title="plotting_tools.save_simulated_distance_distribution" href="#plotting_tools.save_simulated_distance_distribution">save_simulated_distance_distribution</a></code></li>
+<li><code><a title="plotting_tools.save_simulated_l_distribution" href="#plotting_tools.save_simulated_l_distribution">save_simulated_l_distribution</a></code></li>
+<li><code><a title="plotting_tools.save_simulation_plots" href="#plotting_tools.save_simulation_plots">save_simulation_plots</a></code></li>
+<li><code><a title="plotting_tools.save_sky_map_with_distances" href="#plotting_tools.save_sky_map_with_distances">save_sky_map_with_distances</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

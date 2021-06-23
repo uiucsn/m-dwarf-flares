@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>lc_tools API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>lc_tools</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import astropy
+from astropy.io import ascii
+import lightkurve as lk
+from lightkurve import search_lightcurvefile
+from lightkurve import LightCurveFileCollection
+import matplotlib.pyplot as plt
+import os.path
+import pandas as pd
+import numpy as np
+import datetime
+
+LC_DATA_PATH = &#39;lc_data/KIC-{}.csv&#39;
+FLARE_DATA_PATH = &#39;data_files/apjaa8ea2t3_mrt.txt&#39;
+FLARE_INSTANCES_PATH = &#39;flare_instances/KIC-{}/&#39;
+FLARE_INSTANCE = &#39;flare_instances/KIC-{kic}/{start}-{end}.csv&#39;
+
+
+def load_light_curve(KIC_ID):
+    &#34;&#34;&#34;
+    Function for loading light curve data and constructing a kepler light curve.
+    This function uses local data to construct the LightCurve, if possible. If 
+    not, the data is loaded using lightkurve and a local copy is saved in csv form.
+    Args:
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+    Returns:
+        Kepler Light Curve: A light curve for the object from Kepler.
+    &#34;&#34;&#34;
+
+    KIC = &#34;KIC {}&#34;.format(KIC_ID)
+    if os.path.isfile(LC_DATA_PATH.format(KIC_ID)):
+        df = pd.read_csv(LC_DATA_PATH.format(KIC_ID))
+        lc = lk.LightCurve(time = df[&#39;time&#39;], flux = df[&#39;flux&#39;], flux_err = df[&#39;flux_err&#39;])
+    else:
+        lcf = search_lightcurvefile(KIC, mission = &#39;Kepler&#39;).download_all()
+        new_lcf =  LightCurveFileCollection([x for x in lcf if x.targetid == int(KIC_ID)])
+        lc = new_lcf.SAP_FLUX.stitch()
+        lc.to_csv(LC_DATA_PATH.format(KIC_ID))
+    return lc
+
+def save_flare_instances(lc, KIC_ID):
+    &#34;&#34;&#34;
+    This function saves every instance of a flare for a given Kepler Input Catalog 
+    object in csv form.  It looks at flare instances from the apjaa8ea2t3_mrt.txt file.
+    Args:
+        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+    &#34;&#34;&#34;
+
+    # Reading flare data file.
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar=&#34;\s&#34;)
+
+    #Plotting points identified as flares.
+    for flare in flare_data:
+        if flare[&#39;KIC&#39;] != int(KIC_ID):
+            continue
+            
+        # Obtaining start and end indices for flare instances
+        flare_lc = get_flare_lc(lc,flare)
+
+        if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
+            os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
+
+        # Saving indiviual flare instances as csv files
+        flare_lc.to_csv(FLARE_INSTANCE.format(kic = KIC_ID, start = str(flare[&#39;St-BKJD&#39;]), end = str(flare[&#39;St-BKJD&#39;])))
+
+def all_flare_stats(lc, KIC_ID):
+    &#34;&#34;&#34;
+    Returns the flare statistics for all the flares belonging to a particular KIC.
+
+    Args:
+        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+
+    Returns:
+        tuple : tuple contatining the list of amplitude, area, duration, data for all the flares in a particular KIC object
+    &#34;&#34;&#34;
+
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar=&#34;\s&#34;)
+    duration = []
+    area = []
+    amplitude = []
+    data = []
+    for flare in flare_data:
+        if flare[&#39;KIC&#39;] != int(KIC_ID):
+            continue
+
+        flare_lc = get_flare_lc(lc,flare)
+        flux_arr = [flux - np.amin(flare_lc.flux) for flux in flare_lc.flux]
+
+        amp = np.amax(flux_arr)
+
+        duration.append(flare[&#39;End-BKJD&#39;] - flare[&#39;St-BKJD&#39;])
+        area.append(flare[&#39;Area&#39;])
+        amplitude.append(amp)
+        data.append((str(KIC_ID),flare[&#39;St-BKJD&#39;],flare[&#39;End-BKJD&#39;]))
+    return amplitude, area, duration, data
+
+def display_flare_plots(lc, KIC_ID):
+    &#34;&#34;&#34;
+    This function plots the flares for a given object from the Kepler Input Catalog.
+    It looks at flare instances from the apjaa8ea2t3_mrt.txt file.  
+    Args:
+        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+    &#34;&#34;&#34;
+
+    # Reading flare data file.
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar=&#34;\s&#34;)
+
+    #Plotting points identified as flares.
+    for flare in flare_data:
+
+        if flare[&#39;KIC&#39;] != int(KIC_ID):
+            continue
+        fig, (ax1, ax2, ax3) = plt.subplots(3)
+        fig.suptitle(&#39;Flare from {start} to {end}&#39;.format(start = str(flare[&#39;St-BKJD&#39;]), end = str(flare[&#39;End-BKJD&#39;])))
+
+        flare_lc = get_flare_lc(lc,flare)
+
+        # Full light curve plot
+        ax1.plot(lc.time, lc.flux)
+        ax1.set_ylabel(&#39;Relative flux&#39;)
+        ax1.set_xlim([flare[&#39;St-BKJD&#39;]-50,flare[&#39;End-BKJD&#39;]+50])
+        ax1.axvspan(flare[&#39;St-BKJD&#39;], flare[&#39;End-BKJD&#39;], color=&#39;red&#39;, alpha=0.2)
+        ax1.set_title(&#39;LC for KIC {}&#39;.format(str(KIC_ID)))
+
+        # Light curve of the flare
+        ax2.plot(lc.time, lc.flux, linestyle=&#39;-&#39;, marker=&#39;.&#39;)
+        ax2.axvspan(flare[&#39;St-BKJD&#39;], flare[&#39;End-BKJD&#39;], color=&#39;red&#39;, alpha=0.2)
+        ax2.set_ylabel(&#39;Relative flux&#39;)
+        ax2.set_xlim([flare[&#39;St-BKJD&#39;]-2,flare[&#39;End-BKJD&#39;]+2])
+
+        ax3.plot(flare_lc.time, flare_lc.flux, linestyle=&#39;-&#39;, marker=&#39;.&#39;)
+        ax3.axvspan(flare[&#39;St-BKJD&#39;], flare[&#39;End-BKJD&#39;], color=&#39;red&#39;, alpha=0.2)
+        ax3.set_xlabel(&#39;Time BKJD&#39;)
+        ax3.set_ylabel(&#39;Relative flux&#39;)
+
+        plt.show()
+
+def save_flare_stats(lc, KIC_ID):
+    &#34;&#34;&#34;
+    This function plots histograms for flare duration, area and amplitude for
+    a given Kelper Input Catalog Object. It also saves the plots. It looks at 
+    flare instances from the apjaa8ea2t3_mrt.txt file.
+    Args:
+        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+    &#34;&#34;&#34;
+
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar=&#34;\s&#34;)
+    
+    duration = []
+    flareArea = []
+    amplitude = []
+
+    for flare in flare_data:
+        if flare[&#39;KIC&#39;] != int(KIC_ID):
+            continue
+
+        flare_lc = get_flare_lc(lc,flare)
+        amp = np.amax(flare_lc.flux)
+
+        duration.append(flare[&#39;End-BKJD&#39;] - flare[&#39;St-BKJD&#39;])
+        flareArea.append(flare[&#39;Area&#39;])
+        amplitude.append(amp)
+
+    num_bins = 10
+
+    # Plotting flare amplitude stats.
+    fig1, (ax1, ax4) = plt.subplots(2,1,figsize=(15, 12))
+    fig1.suptitle(&#39;Flare Amplitude Statistics for KIC {}&#39;.format(KIC_ID))
+
+    N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(amplitude, bins=num_bins, alpha = 0.5) 
+    ax1.set_title(&#39;Normalized Amplitude distribution&#39;)
+    ax1.set_xlabel(&#39;Amplitude&#39;)
+    ax1.set_ylabel(&#39;Number of flares&#39;)
+
+    amplitude = np.sort(amplitude)
+    cumulativeAmp = np.arange(amplitude.size, 0, -1)
+    ax4.plot(amplitude, cumulativeAmp)
+    ax4.set_title(&#39;Normalized Amplitude distribution (Cumulative)&#39;)
+    ax4.set_xlabel(&#39;Amplitude&#39;)
+    ax4.set_ylabel(&#39;Number of flares with amplitude less than&#39;)
+
+    # Plotting flare duration stats.
+    fig2, (ax2, ax5) = plt.subplots(2,1,figsize=(15, 12))
+    fig2.suptitle(&#39;Flare Duration Statistics for KIC {}&#39;.format(KIC_ID))
+
+    N_duration, bins_duration, patches_duration = ax2.hist(duration, bins=num_bins, alpha = 0.5) 
+    ax2.set_title(&#39;Flare Duration distribution&#39;)
+    ax2.set_xlabel(&#39;Duration in days&#39;)
+    ax2.set_ylabel(&#39;Number of flares&#39;)
+    
+    duration = np.sort(duration)
+    cumulativeDuration = np.arange(duration.size, 0, -1)
+    ax5.plot(duration, cumulativeDuration) 
+    ax5.set_title(&#39;Flare Duration distribution (Cumulative)&#39;)
+    ax5.set_xlabel(&#39;Duration in days&#39;)
+    ax5.set_ylabel(&#39;Number of flares with duration less than&#39;)
+
+
+    # Plotting flare area stats.
+    fig3, (ax3, ax6) = plt.subplots(2,1,figsize=(15, 12))
+    fig3.suptitle(&#39;Flare Area Statistics for KIC {}&#39;.format(KIC_ID))
+
+    N_area, bins_area, patches_area = ax3.hist(flareArea, bins=num_bins, alpha=0.5) 
+    ax3.set_title(&#39;Flare Area Distribution&#39;)
+    ax3.set_xlabel(&#39;Flare Area&#39;)
+    ax3.set_ylabel(&#39;Number of flares&#39;)
+
+    flareArea = np.sort(flareArea)
+    cumulativeArea = np.arange(flareArea.size, 0, -1)
+    ax6.plot(amplitude, cumulativeArea)
+    ax6.set_title(&#39;Flare Area Distribution (Cumulative)&#39;)
+    ax6.set_xlabel(&#39;Flare Area&#39;)
+    ax6.set_ylabel(&#39;Number of flares with area less than&#39;)
+
+    if not os.path.isdir(&#39;obj_stats/KIC-{}/&#39;.format(KIC_ID)):
+        os.mkdir(&#39;obj_stats/KIC-{}/&#39;.format(KIC_ID))
+
+    fig1.savefig(&#39;obj_stats/KIC-{}/amplitude&#39;.format(KIC_ID))
+    fig2.savefig(&#39;obj_stats/KIC-{}/duration&#39;.format(KIC_ID))
+    fig3.savefig(&#39;obj_stats/KIC-{}/area&#39;.format(KIC_ID))
+
+def plot_all_flare_stats(amplitude, duration, area, num_bins):
+    &#34;&#34;&#34;
+    Plots and saves the amplitude, duration and area statistics for all the amplitudes, durations and flare areas from all the flares 
+    mentioned in the apjaa8ea2t3_mrt.txt file.
+
+    Args:
+        amplitude (list): A list contatining all the amplitudes
+        duration (list): A list containing all the durations
+        area (list): A list containing all the flare Areas
+        num_bins (int): Number of bins for the histograms.
+    &#34;&#34;&#34;
+
+    # Plotting flare amplitude stats.
+    fig1, ax1 = plt.subplots(1)
+
+    amplitude = np.array(amplitude)
+    amplitude = np.sort(amplitude)
+
+    N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(amplitude, bins=num_bins, alpha = 0.5) 
+    ax1.set_title(&#39;Normalized Amplitude distribution&#39;)
+    ax1.set_yscale(&#39;log&#39;)
+    ax1.set_xlabel(&#39;Amplitude&#39;)
+    ax1.set_ylabel(&#39;Number of flares&#39;)
+
+
+    # Plotting flare duration stats.
+    fig2, ax2 = plt.subplots(1)
+
+    duration = np.array(duration)
+    duration = np.sort(duration)
+
+    N_duration, bins_duration, patches_duration = ax2.hist(duration, bins=num_bins, alpha = 0.5) 
+    ax2.set_title(&#39;Flare Duration distribution&#39;)
+    ax2.set_yscale(&#39;log&#39;)
+    ax2.set_xlabel(&#39;Duration in days&#39;)
+    ax2.set_ylabel(&#39;Number of flares&#39;)
+
+    # Plotting flare area stats.
+    fig3, ax3 = plt.subplots(1)
+
+    area = np.array(area)
+    area = np.sort(area)
+
+    N_area, bins_area, patches_area = ax3.hist(area, bins=num_bins, alpha=0.5) 
+    ax3.set_title(&#39;Flare Area Distribution&#39;)
+    ax3.set_yscale(&#39;log&#39;)
+    ax3.set_xlabel(&#39;Flare Area&#39;)
+    ax3.set_ylabel(&#39;Number of flares&#39;)
+
+    fig1.savefig(&#39;amplitude&#39;)
+    fig2.savefig(&#39;duration&#39;)
+    fig3.savefig(&#39;area&#39;)
+
+    plt.show()
+
+def get_flare_lc(lc, flare):
+    &#34;&#34;&#34;
+    This function takes the Light Curve for a KIC object along with a flare instance
+    and returns a normalized light curve containing just the flare with one point prior
+    to and after it.
+    Args:
+        lc (Kepler light Curve object): A light curve for the object from Kepler.
+        flare (flare instance): A flare instances from the apjaa8ea2t3_mrt.txt file
+    Returns:
+        Kepler light curve object: A normalized light curve of the flare followed by a 
+        trailing and leading observation
+    &#34;&#34;&#34;
+
+    start_index = find_nearest_index(lc.time, flare[&#39;St-BKJD&#39;]) - 1
+    end_index = find_nearest_index(lc.time, flare[&#39;End-BKJD&#39;]) + 2
+    
+    if(start_index &lt; 0):
+        start_index = 0
+    
+
+    flare_time = lc.time[start_index:end_index]
+    flare_flux = lc.flux[start_index:end_index]
+    flare_err = lc.flux_err[start_index:end_index]
+
+    flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+    return flare_lc
+
+def get_flare_lc_from_time(lc, start_time, end_time):
+    &#34;&#34;&#34;
+    This function takes the Light Curve for a KIC object along with a flare instance
+    and returns a normalized light curve containing just the flare with one point prior
+    to and after it.
+    Args:
+        lc (Kepler light Curve object): A light curve for the object from Kepler.
+        flare (flare instance): A flare instances from the apjaa8ea2t3_mrt.txt file
+    Returns:
+        Kepler light curve object: A normalized light curve of the flare followed by a 
+        trailing and leading observation
+    &#34;&#34;&#34;
+
+    start_index = find_nearest_index(lc.time, start_time) - 1
+    end_index = find_nearest_index(lc.time, end_time) + 2
+    
+    if(start_index &lt; 0):
+        start_index = 0
+    
+
+    flare_time = lc.time[start_index:end_index]
+    flare_flux = lc.flux[start_index:end_index]
+    flare_err = lc.flux_err[start_index:end_index]
+
+    flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+    return flare_lc
+
+def get_normalized_lc(lc):
+    &#34;&#34;&#34;
+    This function takes the Light Curve for a KIC object along with a flare instance
+    and returns a normalized light curve containing just the flare with one point prior
+    to and after it.
+    Args:
+        lc (Kepler light Curve object): A light curve for the object from Kepler.
+        flare (flare instance): A flare instances from the apjaa8ea2t3_mrt.txt file
+    Returns:
+        Kepler light curve object: A normalized light curve of the flare followed by a 
+        trailing and leading observation
+    &#34;&#34;&#34;
+
+    flare_time = lc.time
+    flare_flux = lc.flux
+    flare_err = lc.flux_err
+    
+    min_flux = np.amin(flare_flux)
+    flare_flux = [flux - min_flux for flux in flare_flux]
+
+    flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+    return flare_lc
+
+def find_nearest_index(lc_time, value):
+    &#34;&#34;&#34;
+    This function takes a sorted array and a value and returns the index where
+    the value is found. If it can&#39;t find the value in the array, it returns the index of 
+    a neigbour value which is closest to it&#39;s magnitude (in absolute terms).
+    Args:
+        lc_time (numpy array): The array where the index for the value is to be found
+        value (float): The value to be found in the array
+    Returns:
+        int : Index of the value in the array or the index of it&#39;s closes neigbour.
+    &#34;&#34;&#34;
+
+    index = np.searchsorted(lc_time, value, side=&#34;left&#34;)
+
+    if index &gt; 0 and index == len(lc_time):
+        return index - 1
+    if index &gt; 0 and value - lc_time[index-1] &lt; lc_time[index] - value:
+        return index - 1
+    else:
+        return index
+
+def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, mags, output_file):
+    &#34;&#34;&#34;
+    Function to write generated model magnitudes to lclib entries.
+
+    Args:
+        index (int): Index of the flare instance
+        ra (float): Right Ascension
+        dec (float): Declination
+        KIC_ID (int): Kepler Input Catalogue ID
+        flare_temp (float): Flare temperature
+        star_temp (float): Star temperature
+        distance (Astropy distance unit): Distance to the star.
+        start_time (float): Start time of the flare
+        end_time (float): End time of the flare
+        mags (dictionary of lightcurves): Magnitude time serires in LSST passbands.
+    &#34;&#34;&#34;
+
+    event_marker = &#34;#------------------------------\n&#34;
+    start = &#34;START_EVENT: {}\n&#34;.format(index)
+    end = &#34;END_EVENT: {}\n&#34;.format(index)
+    nrow = &#34;NROW: {nrow} RA: {ra:.5f} DEC: {dec:.5f}.\n&#34;.format(nrow = len(mags[&#39;kep&#39;].time), 
+                                                                ra = ra.value, 
+                                                                dec = dec.value)
+    parameters = &#34;PARVAL: {KIC_ID} {start} {end} {f_temp:.2f} {s_temp:.2f} {dist:.7f}\n&#34;.format(KIC_ID = KIC_ID, 
+                                                                                    f_temp = flare_temp, 
+                                                                                    s_temp = star_temp, 
+                                                                                    dist = distance, 
+                                                                                    start = start_time, 
+                                                                                    end = end_time)
+    readings = &#34;&#34;
+
+    # For loop to add readings of the simulations to the text file
+    for i in range(len(mags[&#39;kep&#39;].flux)):
+        if i == 0:
+            readings += &#34;T:\t&#34;
+        else:
+            readings += &#34;S:\t&#34;
+        readings += &#34;{time:.5f}\t{u:.3f}\t{g:.3f}\t{r:.3f}\t{i:.3f}\t{z:.3f}\t{y:.3f}\n&#34;.format(time = mags[&#39;kep&#39;].time[i], kep = mags[&#39;kep&#39;].flux[i], u = mags[&#39;u&#39;].flux[i], g = mags[&#39;g&#39;].flux[i], r = mags[&#39;r&#39;].flux[i], i = mags[&#39;i&#39;].flux[i], z = mags[&#39;z&#39;].flux[i], y = mags[&#39;y&#39;].flux[i]) 
+
+    simulation = event_marker + start + nrow + parameters + readings + end
+    output_file.write(simulation)
+
+def add_LCLIB_header(count, output_file):
+    &#34;&#34;&#34;
+    Function to write the header of the lclib file.
+    &#34;&#34;&#34;
+    
+    header = (&#39;SURVEY: LSST\n&#39;
+              &#39;FILTERS: ugrizY\n&#39;
+              &#39;MODEL: m-dwarf flare model\n&#39;
+              &#39;RECUR_TYPE: NON-RECUR\n&#39;
+              &#39;NEVENT: {count}\n&#39;
+              &#39;MODEL_PARNAMES: KIC_ID, start_time, end_time,star_temp, flare_temp, distance.\n&#39;
+              &#39;COMMENT: Created on {date} at {time}\n&#39;
+              &#39;COMMENT: KIC_ID - Kepler Input Catalogue ID\n&#39;
+              &#39;COMMENT: flare_temp - Temperature of the flare for spectral modelling\n&#39;
+              &#39;COMMENT: star_temp - Temperature of the star for spectral modelling\n&#39;
+              &#39;COMMENT: distance - Distance to the star in parsec\n&#39;
+              &#39;COMMENT: start_time - Start time of the reference flare\n&#39;
+              &#39;COMMENT: end_time - End time of the\n&#39;
+              &#39;COMMENT: Order of PARVALS is Kepler Input Catalogue ID, flare start time (in BKJD), flare end time (in BKJD), flare temperature (in Kelvin), star temperature (in Kelvin), star distance.\n&#39;).format(count = count, 
+                                                              date = datetime.date.today().strftime(&#34;%B %d, %Y&#34;), 
+                                                              time = datetime.datetime.now().strftime(&#34;%H:%M:%S&#34;))
+    output_file.write(header)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="lc_tools.add_LCLIB_header"><code class="name flex">
+<span>def <span class="ident">add_LCLIB_header</span></span>(<span>count, output_file)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to write the header of the lclib file.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_LCLIB_header(count, output_file):
+    &#34;&#34;&#34;
+    Function to write the header of the lclib file.
+    &#34;&#34;&#34;
+    
+    header = (&#39;SURVEY: LSST\n&#39;
+              &#39;FILTERS: ugrizY\n&#39;
+              &#39;MODEL: m-dwarf flare model\n&#39;
+              &#39;RECUR_TYPE: NON-RECUR\n&#39;
+              &#39;NEVENT: {count}\n&#39;
+              &#39;MODEL_PARNAMES: KIC_ID, start_time, end_time,star_temp, flare_temp, distance.\n&#39;
+              &#39;COMMENT: Created on {date} at {time}\n&#39;
+              &#39;COMMENT: KIC_ID - Kepler Input Catalogue ID\n&#39;
+              &#39;COMMENT: flare_temp - Temperature of the flare for spectral modelling\n&#39;
+              &#39;COMMENT: star_temp - Temperature of the star for spectral modelling\n&#39;
+              &#39;COMMENT: distance - Distance to the star in parsec\n&#39;
+              &#39;COMMENT: start_time - Start time of the reference flare\n&#39;
+              &#39;COMMENT: end_time - End time of the\n&#39;
+              &#39;COMMENT: Order of PARVALS is Kepler Input Catalogue ID, flare start time (in BKJD), flare end time (in BKJD), flare temperature (in Kelvin), star temperature (in Kelvin), star distance.\n&#39;).format(count = count, 
+                                                              date = datetime.date.today().strftime(&#34;%B %d, %Y&#34;), 
+                                                              time = datetime.datetime.now().strftime(&#34;%H:%M:%S&#34;))
+    output_file.write(header)</code></pre>
+</details>
+</dd>
+<dt id="lc_tools.all_flare_stats"><code class="name flex">
+<span>def <span class="ident">all_flare_stats</span></span>(<span>lc, KIC_ID)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the flare statistics for all the flares belonging to a particular KIC.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lc</code></strong> :&ensp;<code>Kepler Light Curve Object</code></dt>
+<dd>A light curve for the object from Kepler.</dd>
+<dt><strong><code>KIC_ID</code></strong> :&ensp;<code>int</code></dt>
+<dd>The ID for the object from the Kepler survey. </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple </code></dt>
+<dd>tuple contatining the list of amplitude, area, duration, data for all the flares in a particular KIC object</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def all_flare_stats(lc, KIC_ID):
+    &#34;&#34;&#34;
+    Returns the flare statistics for all the flares belonging to a particular KIC.
+
+    Args:
+        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+
+    Returns:
+        tuple : tuple contatining the list of amplitude, area, duration, data for all the flares in a particular KIC object
+    &#34;&#34;&#34;
+
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar=&#34;\s&#34;)
+    duration = []
+    area = []
+    amplitude = []
+    data = []
+    for flare in flare_data:
+        if flare[&#39;KIC&#39;] != int(KIC_ID):
+            continue
+
+        flare_lc = get_flare_lc(lc,flare)
+        flux_arr = [flux - np.amin(flare_lc.flux) for flux in flare_lc.flux]
+
+        amp = np.amax(flux_arr)
+
+        duration.append(flare[&#39;End-BKJD&#39;] - flare[&#39;St-BKJD&#39;])
+        area.append(flare[&#39;Area&#39;])
+        amplitude.append(amp)
+        data.append((str(KIC_ID),flare[&#39;St-BKJD&#39;],flare[&#39;End-BKJD&#39;]))
+    return amplitude, area, duration, data</code></pre>
+</details>
+</dd>
+<dt id="lc_tools.display_flare_plots"><code class="name flex">
+<span>def <span class="ident">display_flare_plots</span></span>(<span>lc, KIC_ID)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This function plots the flares for a given object from the Kepler Input Catalog.
+It looks at flare instances from the apjaa8ea2t3_mrt.txt file.
+</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lc</code></strong> :&ensp;<code>Kepler Light Curve Object</code></dt>
+<dd>A light curve for the object from Kepler.</dd>
+<dt><strong><code>KIC_ID</code></strong> :&ensp;<code>int</code></dt>
+<dd>The ID for the object from the Kepler survey.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def display_flare_plots(lc, KIC_ID):
+    &#34;&#34;&#34;
+    This function plots the flares for a given object from the Kepler Input Catalog.
+    It looks at flare instances from the apjaa8ea2t3_mrt.txt file.  
+    Args:
+        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+    &#34;&#34;&#34;
+
+    # Reading flare data file.
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar=&#34;\s&#34;)
+
+    #Plotting points identified as flares.
+    for flare in flare_data:
+
+        if flare[&#39;KIC&#39;] != int(KIC_ID):
+            continue
+        fig, (ax1, ax2, ax3) = plt.subplots(3)
+        fig.suptitle(&#39;Flare from {start} to {end}&#39;.format(start = str(flare[&#39;St-BKJD&#39;]), end = str(flare[&#39;End-BKJD&#39;])))
+
+        flare_lc = get_flare_lc(lc,flare)
+
+        # Full light curve plot
+        ax1.plot(lc.time, lc.flux)
+        ax1.set_ylabel(&#39;Relative flux&#39;)
+        ax1.set_xlim([flare[&#39;St-BKJD&#39;]-50,flare[&#39;End-BKJD&#39;]+50])
+        ax1.axvspan(flare[&#39;St-BKJD&#39;], flare[&#39;End-BKJD&#39;], color=&#39;red&#39;, alpha=0.2)
+        ax1.set_title(&#39;LC for KIC {}&#39;.format(str(KIC_ID)))
+
+        # Light curve of the flare
+        ax2.plot(lc.time, lc.flux, linestyle=&#39;-&#39;, marker=&#39;.&#39;)
+        ax2.axvspan(flare[&#39;St-BKJD&#39;], flare[&#39;End-BKJD&#39;], color=&#39;red&#39;, alpha=0.2)
+        ax2.set_ylabel(&#39;Relative flux&#39;)
+        ax2.set_xlim([flare[&#39;St-BKJD&#39;]-2,flare[&#39;End-BKJD&#39;]+2])
+
+        ax3.plot(flare_lc.time, flare_lc.flux, linestyle=&#39;-&#39;, marker=&#39;.&#39;)
+        ax3.axvspan(flare[&#39;St-BKJD&#39;], flare[&#39;End-BKJD&#39;], color=&#39;red&#39;, alpha=0.2)
+        ax3.set_xlabel(&#39;Time BKJD&#39;)
+        ax3.set_ylabel(&#39;Relative flux&#39;)
+
+        plt.show()</code></pre>
+</details>
+</dd>
+<dt id="lc_tools.dump_modeled_data_to_LCLIB"><code class="name flex">
+<span>def <span class="ident">dump_modeled_data_to_LCLIB</span></span>(<span>index, ra, dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, mags, output_file)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to write generated model magnitudes to lclib entries.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>index</code></strong> :&ensp;<code>int</code></dt>
+<dd>Index of the flare instance</dd>
+<dt><strong><code>ra</code></strong> :&ensp;<code>float</code></dt>
+<dd>Right Ascension</dd>
+<dt><strong><code>dec</code></strong> :&ensp;<code>float</code></dt>
+<dd>Declination</dd>
+<dt><strong><code>KIC_ID</code></strong> :&ensp;<code>int</code></dt>
+<dd>Kepler Input Catalogue ID</dd>
+<dt><strong><code>flare_temp</code></strong> :&ensp;<code>float</code></dt>
+<dd>Flare temperature</dd>
+<dt><strong><code>star_temp</code></strong> :&ensp;<code>float</code></dt>
+<dd>Star temperature</dd>
+<dt><strong><code>distance</code></strong> :&ensp;<code>Astropy <a title="distance" href="distance.html">distance</a> unit</code></dt>
+<dd>Distance to the star.</dd>
+<dt><strong><code>start_time</code></strong> :&ensp;<code>float</code></dt>
+<dd>Start time of the flare</dd>
+<dt><strong><code>end_time</code></strong> :&ensp;<code>float</code></dt>
+<dd>End time of the flare</dd>
+<dt><strong><code>mags</code></strong> :&ensp;<code>dictionary</code> of <code>lightcurves</code></dt>
+<dd>Magnitude time serires in LSST passbands.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, mags, output_file):
+    &#34;&#34;&#34;
+    Function to write generated model magnitudes to lclib entries.
+
+    Args:
+        index (int): Index of the flare instance
+        ra (float): Right Ascension
+        dec (float): Declination
+        KIC_ID (int): Kepler Input Catalogue ID
+        flare_temp (float): Flare temperature
+        star_temp (float): Star temperature
+        distance (Astropy distance unit): Distance to the star.
+        start_time (float): Start time of the flare
+        end_time (float): End time of the flare
+        mags (dictionary of lightcurves): Magnitude time serires in LSST passbands.
+    &#34;&#34;&#34;
+
+    event_marker = &#34;#------------------------------\n&#34;
+    start = &#34;START_EVENT: {}\n&#34;.format(index)
+    end = &#34;END_EVENT: {}\n&#34;.format(index)
+    nrow = &#34;NROW: {nrow} RA: {ra:.5f} DEC: {dec:.5f}.\n&#34;.format(nrow = len(mags[&#39;kep&#39;].time), 
+                                                                ra = ra.value, 
+                                                                dec = dec.value)
+    parameters = &#34;PARVAL: {KIC_ID} {start} {end} {f_temp:.2f} {s_temp:.2f} {dist:.7f}\n&#34;.format(KIC_ID = KIC_ID, 
+                                                                                    f_temp = flare_temp, 
+                                                                                    s_temp = star_temp, 
+                                                                                    dist = distance, 
+                                                                                    start = start_time, 
+                                                                                    end = end_time)
+    readings = &#34;&#34;
+
+    # For loop to add readings of the simulations to the text file
+    for i in range(len(mags[&#39;kep&#39;].flux)):
+        if i == 0:
+            readings += &#34;T:\t&#34;
+        else:
+            readings += &#34;S:\t&#34;
+        readings += &#34;{time:.5f}\t{u:.3f}\t{g:.3f}\t{r:.3f}\t{i:.3f}\t{z:.3f}\t{y:.3f}\n&#34;.format(time = mags[&#39;kep&#39;].time[i], kep = mags[&#39;kep&#39;].flux[i], u = mags[&#39;u&#39;].flux[i], g = mags[&#39;g&#39;].flux[i], r = mags[&#39;r&#39;].flux[i], i = mags[&#39;i&#39;].flux[i], z = mags[&#39;z&#39;].flux[i], y = mags[&#39;y&#39;].flux[i]) 
+
+    simulation = event_marker + start + nrow + parameters + readings + end
+    output_file.write(simulation)</code></pre>
+</details>
+</dd>
+<dt id="lc_tools.find_nearest_index"><code class="name flex">
+<span>def <span class="ident">find_nearest_index</span></span>(<span>lc_time, value)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This function takes a sorted array and a value and returns the index where
+the value is found. If it can't find the value in the array, it returns the index of
+a neigbour value which is closest to it's magnitude (in absolute terms).</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lc_time</code></strong> :&ensp;<code>numpy array</code></dt>
+<dd>The array where the index for the value is to be found</dd>
+<dt><strong><code>value</code></strong> :&ensp;<code>float</code></dt>
+<dd>The value to be found in the array</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int </code></dt>
+<dd>Index of the value in the array or the index of it's closes neigbour.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_nearest_index(lc_time, value):
+    &#34;&#34;&#34;
+    This function takes a sorted array and a value and returns the index where
+    the value is found. If it can&#39;t find the value in the array, it returns the index of 
+    a neigbour value which is closest to it&#39;s magnitude (in absolute terms).
+    Args:
+        lc_time (numpy array): The array where the index for the value is to be found
+        value (float): The value to be found in the array
+    Returns:
+        int : Index of the value in the array or the index of it&#39;s closes neigbour.
+    &#34;&#34;&#34;
+
+    index = np.searchsorted(lc_time, value, side=&#34;left&#34;)
+
+    if index &gt; 0 and index == len(lc_time):
+        return index - 1
+    if index &gt; 0 and value - lc_time[index-1] &lt; lc_time[index] - value:
+        return index - 1
+    else:
+        return index</code></pre>
+</details>
+</dd>
+<dt id="lc_tools.get_flare_lc"><code class="name flex">
+<span>def <span class="ident">get_flare_lc</span></span>(<span>lc, flare)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This function takes the Light Curve for a KIC object along with a flare instance
+and returns a normalized light curve containing just the flare with one point prior
+to and after it.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lc</code></strong> :&ensp;<code>Kepler light Curve object</code></dt>
+<dd>A light curve for the object from Kepler.</dd>
+<dt><strong><code>flare</code></strong> :&ensp;<code>flare instance</code></dt>
+<dd>A flare instances from the apjaa8ea2t3_mrt.txt file</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Kepler light curve object</code></dt>
+<dd>A normalized light curve of the flare followed by a </dd>
+</dl>
+<p>trailing and leading observation</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_flare_lc(lc, flare):
+    &#34;&#34;&#34;
+    This function takes the Light Curve for a KIC object along with a flare instance
+    and returns a normalized light curve containing just the flare with one point prior
+    to and after it.
+    Args:
+        lc (Kepler light Curve object): A light curve for the object from Kepler.
+        flare (flare instance): A flare instances from the apjaa8ea2t3_mrt.txt file
+    Returns:
+        Kepler light curve object: A normalized light curve of the flare followed by a 
+        trailing and leading observation
+    &#34;&#34;&#34;
+
+    start_index = find_nearest_index(lc.time, flare[&#39;St-BKJD&#39;]) - 1
+    end_index = find_nearest_index(lc.time, flare[&#39;End-BKJD&#39;]) + 2
+    
+    if(start_index &lt; 0):
+        start_index = 0
+    
+
+    flare_time = lc.time[start_index:end_index]
+    flare_flux = lc.flux[start_index:end_index]
+    flare_err = lc.flux_err[start_index:end_index]
+
+    flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+    return flare_lc</code></pre>
+</details>
+</dd>
+<dt id="lc_tools.get_flare_lc_from_time"><code class="name flex">
+<span>def <span class="ident">get_flare_lc_from_time</span></span>(<span>lc, start_time, end_time)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This function takes the Light Curve for a KIC object along with a flare instance
+and returns a normalized light curve containing just the flare with one point prior
+to and after it.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lc</code></strong> :&ensp;<code>Kepler light Curve object</code></dt>
+<dd>A light curve for the object from Kepler.</dd>
+<dt><strong><code>flare</code></strong> :&ensp;<code>flare instance</code></dt>
+<dd>A flare instances from the apjaa8ea2t3_mrt.txt file</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Kepler light curve object</code></dt>
+<dd>A normalized light curve of the flare followed by a </dd>
+</dl>
+<p>trailing and leading observation</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_flare_lc_from_time(lc, start_time, end_time):
+    &#34;&#34;&#34;
+    This function takes the Light Curve for a KIC object along with a flare instance
+    and returns a normalized light curve containing just the flare with one point prior
+    to and after it.
+    Args:
+        lc (Kepler light Curve object): A light curve for the object from Kepler.
+        flare (flare instance): A flare instances from the apjaa8ea2t3_mrt.txt file
+    Returns:
+        Kepler light curve object: A normalized light curve of the flare followed by a 
+        trailing and leading observation
+    &#34;&#34;&#34;
+
+    start_index = find_nearest_index(lc.time, start_time) - 1
+    end_index = find_nearest_index(lc.time, end_time) + 2
+    
+    if(start_index &lt; 0):
+        start_index = 0
+    
+
+    flare_time = lc.time[start_index:end_index]
+    flare_flux = lc.flux[start_index:end_index]
+    flare_err = lc.flux_err[start_index:end_index]
+
+    flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+    return flare_lc</code></pre>
+</details>
+</dd>
+<dt id="lc_tools.get_normalized_lc"><code class="name flex">
+<span>def <span class="ident">get_normalized_lc</span></span>(<span>lc)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This function takes the Light Curve for a KIC object along with a flare instance
+and returns a normalized light curve containing just the flare with one point prior
+to and after it.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lc</code></strong> :&ensp;<code>Kepler light Curve object</code></dt>
+<dd>A light curve for the object from Kepler.</dd>
+<dt><strong><code>flare</code></strong> :&ensp;<code>flare instance</code></dt>
+<dd>A flare instances from the apjaa8ea2t3_mrt.txt file</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Kepler light curve object</code></dt>
+<dd>A normalized light curve of the flare followed by a </dd>
+</dl>
+<p>trailing and leading observation</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_normalized_lc(lc):
+    &#34;&#34;&#34;
+    This function takes the Light Curve for a KIC object along with a flare instance
+    and returns a normalized light curve containing just the flare with one point prior
+    to and after it.
+    Args:
+        lc (Kepler light Curve object): A light curve for the object from Kepler.
+        flare (flare instance): A flare instances from the apjaa8ea2t3_mrt.txt file
+    Returns:
+        Kepler light curve object: A normalized light curve of the flare followed by a 
+        trailing and leading observation
+    &#34;&#34;&#34;
+
+    flare_time = lc.time
+    flare_flux = lc.flux
+    flare_err = lc.flux_err
+    
+    min_flux = np.amin(flare_flux)
+    flare_flux = [flux - min_flux for flux in flare_flux]
+
+    flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+    return flare_lc</code></pre>
+</details>
+</dd>
+<dt id="lc_tools.load_light_curve"><code class="name flex">
+<span>def <span class="ident">load_light_curve</span></span>(<span>KIC_ID)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function for loading light curve data and constructing a kepler light curve.
+This function uses local data to construct the LightCurve, if possible. If
+not, the data is loaded using lightkurve and a local copy is saved in csv form.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>KIC_ID</code></strong> :&ensp;<code>int</code></dt>
+<dd>The ID for the object from the Kepler survey. </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Kepler Light Curve</code></dt>
+<dd>A light curve for the object from Kepler.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_light_curve(KIC_ID):
+    &#34;&#34;&#34;
+    Function for loading light curve data and constructing a kepler light curve.
+    This function uses local data to construct the LightCurve, if possible. If 
+    not, the data is loaded using lightkurve and a local copy is saved in csv form.
+    Args:
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+    Returns:
+        Kepler Light Curve: A light curve for the object from Kepler.
+    &#34;&#34;&#34;
+
+    KIC = &#34;KIC {}&#34;.format(KIC_ID)
+    if os.path.isfile(LC_DATA_PATH.format(KIC_ID)):
+        df = pd.read_csv(LC_DATA_PATH.format(KIC_ID))
+        lc = lk.LightCurve(time = df[&#39;time&#39;], flux = df[&#39;flux&#39;], flux_err = df[&#39;flux_err&#39;])
+    else:
+        lcf = search_lightcurvefile(KIC, mission = &#39;Kepler&#39;).download_all()
+        new_lcf =  LightCurveFileCollection([x for x in lcf if x.targetid == int(KIC_ID)])
+        lc = new_lcf.SAP_FLUX.stitch()
+        lc.to_csv(LC_DATA_PATH.format(KIC_ID))
+    return lc</code></pre>
+</details>
+</dd>
+<dt id="lc_tools.plot_all_flare_stats"><code class="name flex">
+<span>def <span class="ident">plot_all_flare_stats</span></span>(<span>amplitude, duration, area, num_bins)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plots and saves the amplitude, duration and area statistics for all the amplitudes, durations and flare areas from all the flares
+mentioned in the apjaa8ea2t3_mrt.txt file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>amplitude</code></strong> :&ensp;<code>list</code></dt>
+<dd>A list contatining all the amplitudes</dd>
+<dt><strong><code>duration</code></strong> :&ensp;<code>list</code></dt>
+<dd>A list containing all the durations</dd>
+<dt><strong><code>area</code></strong> :&ensp;<code>list</code></dt>
+<dd>A list containing all the flare Areas</dd>
+<dt><strong><code>num_bins</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of bins for the histograms.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_all_flare_stats(amplitude, duration, area, num_bins):
+    &#34;&#34;&#34;
+    Plots and saves the amplitude, duration and area statistics for all the amplitudes, durations and flare areas from all the flares 
+    mentioned in the apjaa8ea2t3_mrt.txt file.
+
+    Args:
+        amplitude (list): A list contatining all the amplitudes
+        duration (list): A list containing all the durations
+        area (list): A list containing all the flare Areas
+        num_bins (int): Number of bins for the histograms.
+    &#34;&#34;&#34;
+
+    # Plotting flare amplitude stats.
+    fig1, ax1 = plt.subplots(1)
+
+    amplitude = np.array(amplitude)
+    amplitude = np.sort(amplitude)
+
+    N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(amplitude, bins=num_bins, alpha = 0.5) 
+    ax1.set_title(&#39;Normalized Amplitude distribution&#39;)
+    ax1.set_yscale(&#39;log&#39;)
+    ax1.set_xlabel(&#39;Amplitude&#39;)
+    ax1.set_ylabel(&#39;Number of flares&#39;)
+
+
+    # Plotting flare duration stats.
+    fig2, ax2 = plt.subplots(1)
+
+    duration = np.array(duration)
+    duration = np.sort(duration)
+
+    N_duration, bins_duration, patches_duration = ax2.hist(duration, bins=num_bins, alpha = 0.5) 
+    ax2.set_title(&#39;Flare Duration distribution&#39;)
+    ax2.set_yscale(&#39;log&#39;)
+    ax2.set_xlabel(&#39;Duration in days&#39;)
+    ax2.set_ylabel(&#39;Number of flares&#39;)
+
+    # Plotting flare area stats.
+    fig3, ax3 = plt.subplots(1)
+
+    area = np.array(area)
+    area = np.sort(area)
+
+    N_area, bins_area, patches_area = ax3.hist(area, bins=num_bins, alpha=0.5) 
+    ax3.set_title(&#39;Flare Area Distribution&#39;)
+    ax3.set_yscale(&#39;log&#39;)
+    ax3.set_xlabel(&#39;Flare Area&#39;)
+    ax3.set_ylabel(&#39;Number of flares&#39;)
+
+    fig1.savefig(&#39;amplitude&#39;)
+    fig2.savefig(&#39;duration&#39;)
+    fig3.savefig(&#39;area&#39;)
+
+    plt.show()</code></pre>
+</details>
+</dd>
+<dt id="lc_tools.save_flare_instances"><code class="name flex">
+<span>def <span class="ident">save_flare_instances</span></span>(<span>lc, KIC_ID)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This function saves every instance of a flare for a given Kepler Input Catalog
+object in csv form.
+It looks at flare instances from the apjaa8ea2t3_mrt.txt file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lc</code></strong> :&ensp;<code>Kepler Light Curve Object</code></dt>
+<dd>A light curve for the object from Kepler.</dd>
+<dt><strong><code>KIC_ID</code></strong> :&ensp;<code>int</code></dt>
+<dd>The ID for the object from the Kepler survey.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_flare_instances(lc, KIC_ID):
+    &#34;&#34;&#34;
+    This function saves every instance of a flare for a given Kepler Input Catalog 
+    object in csv form.  It looks at flare instances from the apjaa8ea2t3_mrt.txt file.
+    Args:
+        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+    &#34;&#34;&#34;
+
+    # Reading flare data file.
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar=&#34;\s&#34;)
+
+    #Plotting points identified as flares.
+    for flare in flare_data:
+        if flare[&#39;KIC&#39;] != int(KIC_ID):
+            continue
+            
+        # Obtaining start and end indices for flare instances
+        flare_lc = get_flare_lc(lc,flare)
+
+        if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
+            os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
+
+        # Saving indiviual flare instances as csv files
+        flare_lc.to_csv(FLARE_INSTANCE.format(kic = KIC_ID, start = str(flare[&#39;St-BKJD&#39;]), end = str(flare[&#39;St-BKJD&#39;])))</code></pre>
+</details>
+</dd>
+<dt id="lc_tools.save_flare_stats"><code class="name flex">
+<span>def <span class="ident">save_flare_stats</span></span>(<span>lc, KIC_ID)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This function plots histograms for flare duration, area and amplitude for
+a given Kelper Input Catalog Object. It also saves the plots. It looks at
+flare instances from the apjaa8ea2t3_mrt.txt file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lc</code></strong> :&ensp;<code>Kepler Light Curve Object</code></dt>
+<dd>A light curve for the object from Kepler.</dd>
+<dt><strong><code>KIC_ID</code></strong> :&ensp;<code>int</code></dt>
+<dd>The ID for the object from the Kepler survey.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_flare_stats(lc, KIC_ID):
+    &#34;&#34;&#34;
+    This function plots histograms for flare duration, area and amplitude for
+    a given Kelper Input Catalog Object. It also saves the plots. It looks at 
+    flare instances from the apjaa8ea2t3_mrt.txt file.
+    Args:
+        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
+        KIC_ID (int): The ID for the object from the Kepler survey. 
+    &#34;&#34;&#34;
+
+    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar=&#34;\s&#34;)
+    
+    duration = []
+    flareArea = []
+    amplitude = []
+
+    for flare in flare_data:
+        if flare[&#39;KIC&#39;] != int(KIC_ID):
+            continue
+
+        flare_lc = get_flare_lc(lc,flare)
+        amp = np.amax(flare_lc.flux)
+
+        duration.append(flare[&#39;End-BKJD&#39;] - flare[&#39;St-BKJD&#39;])
+        flareArea.append(flare[&#39;Area&#39;])
+        amplitude.append(amp)
+
+    num_bins = 10
+
+    # Plotting flare amplitude stats.
+    fig1, (ax1, ax4) = plt.subplots(2,1,figsize=(15, 12))
+    fig1.suptitle(&#39;Flare Amplitude Statistics for KIC {}&#39;.format(KIC_ID))
+
+    N_amplitude, bins_amplitude, patches_amplitude = ax1.hist(amplitude, bins=num_bins, alpha = 0.5) 
+    ax1.set_title(&#39;Normalized Amplitude distribution&#39;)
+    ax1.set_xlabel(&#39;Amplitude&#39;)
+    ax1.set_ylabel(&#39;Number of flares&#39;)
+
+    amplitude = np.sort(amplitude)
+    cumulativeAmp = np.arange(amplitude.size, 0, -1)
+    ax4.plot(amplitude, cumulativeAmp)
+    ax4.set_title(&#39;Normalized Amplitude distribution (Cumulative)&#39;)
+    ax4.set_xlabel(&#39;Amplitude&#39;)
+    ax4.set_ylabel(&#39;Number of flares with amplitude less than&#39;)
+
+    # Plotting flare duration stats.
+    fig2, (ax2, ax5) = plt.subplots(2,1,figsize=(15, 12))
+    fig2.suptitle(&#39;Flare Duration Statistics for KIC {}&#39;.format(KIC_ID))
+
+    N_duration, bins_duration, patches_duration = ax2.hist(duration, bins=num_bins, alpha = 0.5) 
+    ax2.set_title(&#39;Flare Duration distribution&#39;)
+    ax2.set_xlabel(&#39;Duration in days&#39;)
+    ax2.set_ylabel(&#39;Number of flares&#39;)
+    
+    duration = np.sort(duration)
+    cumulativeDuration = np.arange(duration.size, 0, -1)
+    ax5.plot(duration, cumulativeDuration) 
+    ax5.set_title(&#39;Flare Duration distribution (Cumulative)&#39;)
+    ax5.set_xlabel(&#39;Duration in days&#39;)
+    ax5.set_ylabel(&#39;Number of flares with duration less than&#39;)
+
+
+    # Plotting flare area stats.
+    fig3, (ax3, ax6) = plt.subplots(2,1,figsize=(15, 12))
+    fig3.suptitle(&#39;Flare Area Statistics for KIC {}&#39;.format(KIC_ID))
+
+    N_area, bins_area, patches_area = ax3.hist(flareArea, bins=num_bins, alpha=0.5) 
+    ax3.set_title(&#39;Flare Area Distribution&#39;)
+    ax3.set_xlabel(&#39;Flare Area&#39;)
+    ax3.set_ylabel(&#39;Number of flares&#39;)
+
+    flareArea = np.sort(flareArea)
+    cumulativeArea = np.arange(flareArea.size, 0, -1)
+    ax6.plot(amplitude, cumulativeArea)
+    ax6.set_title(&#39;Flare Area Distribution (Cumulative)&#39;)
+    ax6.set_xlabel(&#39;Flare Area&#39;)
+    ax6.set_ylabel(&#39;Number of flares with area less than&#39;)
+
+    if not os.path.isdir(&#39;obj_stats/KIC-{}/&#39;.format(KIC_ID)):
+        os.mkdir(&#39;obj_stats/KIC-{}/&#39;.format(KIC_ID))
+
+    fig1.savefig(&#39;obj_stats/KIC-{}/amplitude&#39;.format(KIC_ID))
+    fig2.savefig(&#39;obj_stats/KIC-{}/duration&#39;.format(KIC_ID))
+    fig3.savefig(&#39;obj_stats/KIC-{}/area&#39;.format(KIC_ID))</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="lc_tools.add_LCLIB_header" href="#lc_tools.add_LCLIB_header">add_LCLIB_header</a></code></li>
+<li><code><a title="lc_tools.all_flare_stats" href="#lc_tools.all_flare_stats">all_flare_stats</a></code></li>
+<li><code><a title="lc_tools.display_flare_plots" href="#lc_tools.display_flare_plots">display_flare_plots</a></code></li>
+<li><code><a title="lc_tools.dump_modeled_data_to_LCLIB" href="#lc_tools.dump_modeled_data_to_LCLIB">dump_modeled_data_to_LCLIB</a></code></li>
+<li><code><a title="lc_tools.find_nearest_index" href="#lc_tools.find_nearest_index">find_nearest_index</a></code></li>
+<li><code><a title="lc_tools.get_flare_lc" href="#lc_tools.get_flare_lc">get_flare_lc</a></code></li>
+<li><code><a title="lc_tools.get_flare_lc_from_time" href="#lc_tools.get_flare_lc_from_time">get_flare_lc_from_time</a></code></li>
+<li><code><a title="lc_tools.get_normalized_lc" href="#lc_tools.get_normalized_lc">get_normalized_lc</a></code></li>
+<li><code><a title="lc_tools.load_light_curve" href="#lc_tools.load_light_curve">load_light_curve</a></code></li>
+<li><code><a title="lc_tools.plot_all_flare_stats" href="#lc_tools.plot_all_flare_stats">plot_all_flare_stats</a></code></li>
+<li><code><a title="lc_tools.save_flare_instances" href="#lc_tools.save_flare_instances">save_flare_instances</a></code></li>
+<li><code><a title="lc_tools.save_flare_stats" href="#lc_tools.save_flare_stats">save_flare_stats</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

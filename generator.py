@@ -32,9 +32,18 @@ RANDOM_SEED = 40
 PARAMETER_COUNT_MULTIPLIER = 50
 
 def run_generator(flare_count, file_path):
+    """
+    Runs the generator functions. Samples the respective distributions for the parameters and writes
+    simulated flare instances to an LCLIB file. 
+
+    Args:
+        flare_count (int): number of flares to be generated
+        file_path (int): Path of the file where the results need to be saved.
+    """
 
     number_of_nominal_flares = 0
     nominal_flare_indices = []
+    nominal_flare_instance = []
     rng = np.random.default_rng(RANDOM_SEED)
     parameter_count = PARAMETER_COUNT_MULTIPLIER * flare_count # Generating more parameters to avoid reloading of dust map and other files
 
@@ -78,17 +87,36 @@ def run_generator(flare_count, file_path):
                         'z': extinction_values['z'][i],
                         'y': extinction_values['y'][i],
                     }
-                    is_valid_flare = generate_model_flare_file(number_of_nominal_flares, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file)
+                    is_valid_flare, modeled_flare = generate_model_flare_file(number_of_nominal_flares, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file)
                     if is_valid_flare:
                         number_of_nominal_flares += 1
                         nominal_flare_indices.append(i)
+                        nominal_flare_instance.append(modeled_flare)
     output_file.close()
     nominal_coordinates = coord.SkyCoord(coordinates[nominal_flare_indices])
-    save_simulation_plots(nominal_coordinates)
+    print("7. Generating plots ...")
+    save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
 
 
 def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction, output_file):
+    """
+    Generates the model flare based on the parameters and saves to the LCLIB file if it makes the threshold cuts.
 
+    Args:
+        index (int): Index of the flare instance.
+        coordinates (Sky coord): Coordinates of the flare instance.
+        distance (astropy distance unit): Distance of the flare instance.
+        KIC_ID (int): Kepler Input Catalogue ID
+        start_time (float): Start time of the flare instance
+        end_time (float): End time of the flare instance
+        star_temp (float): Star temperature for spectrum modelling.
+        flare_temp (float): Flare temperature for flare modelling.
+        extinction (dictionary of floats): Extinction values in lsst passbands.
+        output_file (string): path of the output file.
+
+    Returns:
+        tuple: boolean, modelled flare
+    """
     # Loading the orignal flare light curve and normalizing it
     lc = load_light_curve(KIC_ID)
     flare_lc = get_flare_lc_from_time(lc, start_time, end_time)
@@ -109,20 +137,20 @@ def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, 
     if is_nominal_flare(model_mags_with_extinction):
         # Writing modelled data to LCLIB file if the flare is nominal
         dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction, output_file)
-        return True
+        return True, model_mags_with_extinction
     else:
-        return False
+        return False, model_mags_with_extinction
 
 def is_nominal_flare(flare):
     """
-    Checking if the generated flare is under the threshold for max magnitude and has a
+    Checking if the generated flare is under the threshold for max magnitude and has an
     amplitude greater than the threshold
 
     Args:
         flare (dicitonary): A dictionary of lightcurves in the LSST ugrizy and kep passbands
 
     Returns:
-        [boolean]: True if the flare is nominal, false otherwise.
+        [boolean]: True if the flare is nominal, False otherwise.
     """
     if np.any(flare['u'].flux >= PEAK_MAGNITUDE_THRESHOLD):
         # Checking if u band has magnitude greater than the PEAK_MAGNITUDE_THRESHOLD
@@ -286,5 +314,5 @@ if __name__ == "__main__":
     # Starting flare modelling process
     start_time = time.time()
     run_generator(args.flare_count, args.file_name)
-    print("--- Process completed in %s seconds. File saved. ---" % (int(time.time() - start_time)))
+    print("--- Simulations completed in %s seconds. Files saved. ---" % (int(time.time() - start_time)))
     
