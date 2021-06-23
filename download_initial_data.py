@@ -31,6 +31,7 @@ def download_dust_maps():
     dustmaps.bayestar.fetch()
 
 # 1. Downloading light curves and storing them
+print('Downloading light curves')
 df = pd.read_csv(FLARE_DATA_PATH)
 kic_id_array = np.unique(df['KIC'])
 index = 0
@@ -42,4 +43,7 @@ with progressbar.ProgressBar(max_value = len(kic_id_array)) as bar:
         bar.update(index)
 
 # 2. Downloading dust maps and storing them
+print('Downloading dust maps')
 download_dust_maps()
+
+print('Data downloaded!')

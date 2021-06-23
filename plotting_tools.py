@@ -49,15 +49,23 @@ def save_peak_mag_distribution(flares):
         z_peaks.append(np.amax(flare['z'].flux))
         y_peaks.append(np.amax(flare['y'].flux))
     
+    # Custom uniform binning
+    all_peaks = u_peaks + g_peaks + r_peaks + i_peaks + z_peaks + y_peaks
+
+    max_peak = max(all_peaks)
+    min_peak = min(all_peaks)
+    bin_width = (max_peak - min_peak) / 20
+    bins = np.arange(min_peak, max_peak + bin_width, bin_width)
+
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot()
     ax.set_title('Distribution peak magnitudes in LSST passbands')
-    ax.hist(u_peaks, bins=20, histtype='step', facecolor='m', label = 'u band') 
-    ax.hist(g_peaks, bins=20, histtype='step', facecolor='g', label = 'g band') 
-    ax.hist(r_peaks, bins=20, histtype='step', facecolor='r', label = 'r band') 
-    ax.hist(i_peaks, bins=20, histtype='step', facecolor='c', label = 'i band') 
-    ax.hist(z_peaks, bins=20, histtype='step', facecolor='b', label = 'z band') 
-    ax.hist(y_peaks, bins=20, histtype='step', facecolor='y', label = 'y band') 
+    ax.hist(u_peaks, bins=bins, histtype='step', facecolor='m', label = 'u band') 
+    ax.hist(g_peaks, bins=bins, histtype='step', facecolor='g', label = 'g band') 
+    ax.hist(r_peaks, bins=bins, histtype='step', facecolor='r', label = 'r band') 
+    ax.hist(i_peaks, bins=bins, histtype='step', facecolor='c', label = 'i band') 
+    ax.hist(z_peaks, bins=bins, histtype='step', facecolor='b', label = 'z band') 
+    ax.hist(y_peaks, bins=bins, histtype='step', facecolor='y', label = 'y band') 
     ax.set_xlabel('Peak Magnitude')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
@@ -86,15 +94,23 @@ def save_mag_amp_distribution(flares):
         z_amps.append(np.amax(flare['z'].flux) - np.amin(flare['z'].flux))
         y_amps.append(np.amax(flare['y'].flux) - np.amin(flare['y'].flux))
 
+    # Custom uniform binning
+    all_amps = u_amps + g_amps + r_amps + i_amps + z_amps + y_amps
+
+    max_amp = max(all_amps)
+    min_amp = min(all_amps)
+    bin_width = (max_amp - min_amp) / 20
+    bins = np.arange(min_amp, max_amp + bin_width, bin_width)
+
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot()
     ax.set_title('Distribution magnitude amplitudes in LSST passbands')
-    ax.hist(u_amps, bins=20, histtype='step', facecolor='m', label = 'u band') 
-    ax.hist(g_amps, bins=20, histtype='step', facecolor='g', label = 'g band') 
-    ax.hist(r_amps, bins=20, histtype='step', facecolor='r', label = 'r band') 
-    ax.hist(i_amps, bins=20, histtype='step', facecolor='c', label = 'i band') 
-    ax.hist(z_amps, bins=20, histtype='step', facecolor='b', label = 'z band') 
-    ax.hist(y_amps, bins=20, histtype='step', facecolor='y', label = 'y band') 
+    ax.hist(u_amps, bins=bins, histtype='step', facecolor='m', label = 'u band') 
+    ax.hist(g_amps, bins=bins, histtype='step', facecolor='g', label = 'g band') 
+    ax.hist(r_amps, bins=bins, histtype='step', facecolor='r', label = 'r band') 
+    ax.hist(i_amps, bins=bins, histtype='step', facecolor='c', label = 'i band') 
+    ax.hist(z_amps, bins=bins, histtype='step', facecolor='b', label = 'z band') 
+    ax.hist(y_amps, bins=bins, histtype='step', facecolor='y', label = 'y band') 
     ax.set_xlabel('Magnitude amplitude')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
@@ -113,13 +129,20 @@ def save_simulated_distance_distribution(coordinates, rng):
     mw = MWDensity()
     ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
     ideal_coordinates = ideal_coordinates.galactic
-
     gal = coordinates.galactic
+
+    # Custom uniform binning
+    all_distances = np.concatenate((ideal_coordinates.distance.value, gal.distance.value))
+    max_dist = np.amax(all_distances)
+    min_dist = np.amin(all_distances)
+    bin_width = (max_dist - min_dist) / 20
+    bins = np.arange(min_dist, max_dist + bin_width, bin_width)
+
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot()
     ax.set_title('Distribution of distances for simulated flares vs MW model')
-    ax.hist(gal.distance.value, bins=20, histtype='step', label = 'Simulation generated') 
-    ax.hist(ideal_coordinates.distance.value, bins=20, histtype='step', label = 'MW Model generated')
+    ax.hist(gal.distance.value, bins=bins, histtype='step', label = 'Simulation generated') 
+    ax.hist(ideal_coordinates.distance.value, bins=bins, histtype='step', label = 'MW Model generated')
     ax.set_xlabel('Distance in kpc')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
@@ -137,13 +160,20 @@ def save_simulated_l_distribution(coordinates, rng):
     mw = MWDensity()
     ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
     ideal_coordinates = ideal_coordinates.galactic
-
     gal = coordinates.galactic
+
+    # Custom uniform binning
+    all_l = np.concatenate((ideal_coordinates.l.value, gal.l.value))
+    max_l = np.amax(all_l)
+    min_l = np.amin(all_l)
+    bin_width = (max_l - min_l) / 20
+    bins=np.arange(min_l, max_l + bin_width, bin_width)
+
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot()
     ax.set_title('Distribution of galactic longitude for simulated flares vs MW model')
-    ax.hist(gal.l.value, bins=20, histtype='step', label = 'Simulation generated') 
-    ax.hist(ideal_coordinates.l.value, bins=20, histtype='step', label = 'MW Model generated')
+    ax.hist(gal.l.value, bins=bins, histtype='step', label = 'Simulation generated') 
+    ax.hist(ideal_coordinates.l.value, bins=bins, histtype='step', label = 'MW Model generated')
     ax.set_xlabel('Galactic longitude in degrees')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
@@ -161,13 +191,20 @@ def save_simulated_b_distribution(coordinates, rng):
     mw = MWDensity()
     ideal_coordinates = SkyCoord(mw.sample_eq(len(coordinates), rng))
     ideal_coordinates = ideal_coordinates.galactic
-
     gal = coordinates.galactic
+
+    # Custom uniform binning
+    all_b = np.concatenate((ideal_coordinates.b.value, gal.b.value))
+    max_b = np.amax(all_b)
+    min_b = np.amin(all_b)
+    bin_width = (max_b - min_b) / 20
+    bins = np.arange(min_b, max_b + bin_width, bin_width)
+
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot()
     ax.set_title('Distribution of galactic latitude for simulated flares vs MW model')
-    ax.hist(gal.b.value, bins=20, histtype='step', label = 'Simulation generated') 
-    ax.hist(ideal_coordinates.b.value, bins=20, histtype='step', label = 'MW Model generated')
+    ax.hist(gal.b.value, bins=bins, histtype='step', label = 'Simulation generated') 
+    ax.hist(ideal_coordinates.b.value, bins=bins, histtype='step', label = 'MW Model generated')
     ax.set_xlabel('Galactic latitude in degrees')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
