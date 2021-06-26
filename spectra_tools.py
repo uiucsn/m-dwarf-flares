@@ -207,26 +207,32 @@ def compute_band_intensity(band, temp):
     return intensity
 
 @lru_cache()
-def get_transmission(band):
+def get_transmission(band, n_grid=200):
     """
     Returns the transmission for a given lsst passband.
 
     Args:
         band (char): Letter corresponding to an lsst passband.
+        n_grid (int): Number of grid points
 
     Returns:
         [type]: [description]
     """
     lmbd, t = np.genfromtxt(f'filters/LSST_LSST.{band}.dat', unpack=True)
-    return lmbd, t
+    step = lmbd.size // n_grid or 1
+    return lmbd[::step], t[::step]
 
 @lru_cache()
-def get_kepler_transmission():
+def get_kepler_transmission(n_grid=200):
     """
     Returns the transmission for the kepler passband.
+
+    Args:
+        n_grid (int): Number of grid points
 
     Returns:
         [type]: [description]
     """
     lmbd, t = np.genfromtxt('filters/Kepler_Kepler.K.dat', unpack=True)
-    return lmbd, t
+    step = lmbd.size // n_grid or 1
+    return lmbd[::step], t[::step]
