@@ -1,9 +1,11 @@
-from astropy.coordinates import SkyCoord
+from functools import lru_cache
+
 import astropy.units as u
-from astropy.io import ascii
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from astropy.coordinates import SkyCoord
+from astropy.io import ascii
 from dustmaps.bayestar import BayestarQuery
 from dustmaps.sfd import SFDQuery, fetch
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
@@ -62,6 +64,12 @@ def get_extinction_after_symmetric_interpolation_with_sfd_factor(coordinates):
 
     return reddening_interpolated
 
+@lru_cache()
+def get_LSST_extinction():
+    df = pd.read_csv('data_files/LSST_rv_3_1.csv')
+    rv = pd.Series(df['value'].values,index=df['lsst_passband']).to_dict()
+    return rv
+
 def get_extinction_in_lsst_passbands(coordinates):
     """
     Computes extinction in lsst passbands after applying appropriate correction factors to 
@@ -74,8 +82,7 @@ def get_extinction_in_lsst_passbands(coordinates):
         dictionary: Extinction values in the lsst ugrizy passbands for the given coordinates.
     """
 
-    df = pd.read_csv('data_files/LSST_rv_3_1.csv')
-    rv = pd.Series(df['value'].values,index=df['lsst_passband']).to_dict()
+    rv = get_LSST_extinction()
 
     bayestar_coefficient = 0.884
     bayestar_reddening = get_extinction_after_symmetric_interpolation_with_sfd_factor(coordinates)

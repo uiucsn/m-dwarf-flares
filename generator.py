@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import astropy.coordinates as coord
 import numpy as np
 import pandas as pd
@@ -236,6 +238,9 @@ def get_uniformly_distributed_spherical_coordinates(radius, count, rng, chunk_si
     coordinates = coord.SkyCoord(ra=ra, dec=dec)
     return coordinates
 
+@lru_cache()
+def get_flare_data():
+    return pd.read_csv(FLARE_DATA_PATH)
 
 def get_random_flare_events(count, rng, threshold = 0):
     """
@@ -253,7 +258,7 @@ def get_random_flare_events(count, rng, threshold = 0):
     St_time = []
     End_time = []
 
-    df = pd.read_csv(FLARE_DATA_PATH)
+    df = get_flare_data()
     # Filtering flares with fluxes below the threshold
     df_filtered = df[df['flux_amp'] >= threshold]
     df_filtered.reset_index(drop=True, inplace = True)

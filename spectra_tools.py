@@ -1,8 +1,10 @@
-from astropy import units as u
+from functools import lru_cache
+
 import lightkurve as lk
 import numpy as np
-from scipy.integrate import simps
+from astropy import units as u
 from astropy.modeling.blackbody import blackbody_lambda as bb
+from scipy.integrate import simps
 
 passband_props = dict(
     u=dict(eff=3751.36, min=3205.54, max=4081.24, width=473.19),
@@ -204,6 +206,7 @@ def compute_band_intensity(band, temp):
     intensity = simps(x=lmbd, y=bb(lmbd * u.AA, T).value * t) / simps(x=lmbd, y=t)
     return intensity
 
+@lru_cache()
 def get_transmission(band):
     """
     Returns the transmission for a given lsst passband.
@@ -217,6 +220,7 @@ def get_transmission(band):
     lmbd, t = np.genfromtxt(f'filters/LSST_LSST.{band}.dat', unpack=True)
     return lmbd, t
 
+@lru_cache()
 def get_kepler_transmission():
     """
     Returns the transmission for the kepler passband.
