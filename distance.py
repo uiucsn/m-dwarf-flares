@@ -49,22 +49,12 @@ def get_mags_in_lsst_passbands(model_luminosities, distance):
         magnitudes: A dictionary of magnitude time sequences in lsst and kepler passbands.
     """
 
-    u_band = [((lum * u.Watt * u.s)/ (4 * math.pi * (distance)**2)).si.to(u.ABmag).value for lum in model_luminosities['u'].flux]
-    g_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance)**2)).si.to(u.ABmag).value for lum in model_luminosities['g'].flux]
-    r_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance)**2)).si.to(u.ABmag).value for lum in model_luminosities['r'].flux]
-    i_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance)**2)).si.to(u.ABmag).value for lum in model_luminosities['i'].flux]
-    z_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance)**2)).si.to(u.ABmag).value for lum in model_luminosities['z'].flux]
-    y_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance)**2)).si.to(u.ABmag).value for lum in model_luminosities['y'].flux]
-    kep_band = [((lum * u.Watt * u.s) / (4 * math.pi * (distance)**2)).si.to(u.ABmag).value for lum in model_luminosities['kep'].flux]
-
     dict = {
-        'u': lk.LightCurve(time = model_luminosities['u'].time, flux = u_band),
-        'g': lk.LightCurve(time = model_luminosities['g'].time, flux = g_band),
-        'r': lk.LightCurve(time = model_luminosities['r'].time, flux = r_band),
-        'i': lk.LightCurve(time = model_luminosities['i'].time, flux = i_band),
-        'z': lk.LightCurve(time = model_luminosities['z'].time, flux = z_band),
-        'y': lk.LightCurve(time = model_luminosities['y'].time, flux = y_band),
-        'kep': lk.LightCurve(time = model_luminosities['kep'].time, flux = kep_band),
+        band: lk.LightCurve(
+            time=model_lum.time,
+            flux=((model_lum.flux * u.Watt * u.s)/ (4 * math.pi * (distance)**2)).si.to(u.ABmag).value,
+        )
+        for band, model_lum in model_luminosities.items()
     }
 
     return dict
