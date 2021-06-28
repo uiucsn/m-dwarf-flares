@@ -30,10 +30,9 @@ PEAK_MAGNITUDE_THRESHOLD = 25
 # Minimum magnitude amplitude of the simulated flare in the u passband. Flares below this mag amplitude will be filtered out.
 U_BAND_AMPLITUDE_THRESHOLD = 0.1 
 
-RANDOM_SEED = 40
 PARAMETER_COUNT_MULTIPLIER = 50
 
-def run_generator(flare_count, file_path):
+def run_generator(flare_count, file_path, start_index, to_plot):
     """
     Runs the generator functions. Samples the respective distributions for the parameters and writes
     simulated flare instances to an LCLIB file. 
@@ -46,13 +45,15 @@ def run_generator(flare_count, file_path):
     number_of_nominal_flares = 0
     nominal_flare_indices = []
     nominal_flare_instance = []
-    rng = np.random.default_rng(RANDOM_SEED)
+    rng = np.random.default_rng(start_index)
     parameter_count = PARAMETER_COUNT_MULTIPLIER * flare_count # Generating more parameters to avoid reloading of dust map and other files
 
     with open(file_path, 'w') as output_file:
 
         # Adding lc lib to header
-        add_LCLIB_header(flare_count, output_file)
+        if start_index == 0:
+            add_LCLIB_header(flare_count, output_file)
+
         with progressbar.ProgressBar(max_value = flare_count) as bar:
             # While loop keeps executing until the number of flares generated matches the flare count
             while (number_of_nominal_flares < flare_count):
@@ -90,15 +91,17 @@ def run_generator(flare_count, file_path):
                         'z': extinction_values['z'][i],
                         'y': extinction_values['y'][i],
                     }
-                    is_valid_flare, modeled_flare = generate_model_flare_file(number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file)
+                    is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file)
                     if is_valid_flare:
                         number_of_nominal_flares += 1
-                        nominal_flare_indices.append(i)
-                        nominal_flare_instance.append(modeled_flare)
+                        if to_plot:
+                            nominal_flare_indices.append(i)
+                            nominal_flare_instance.append(modeled_flare)
     output_file.close()
     nominal_coordinates = coord.SkyCoord(coordinates[nominal_flare_indices])
-    print("7. Generating plots ...")
-    save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
+    if to_plot:
+        print("7. Generating plots ...")
+        save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
 
 
 def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction, output_file):
@@ -311,6 +314,11 @@ if __name__ == "__main__":
                             help = 'Number of flares to be generated')
     argparser.add_argument('--file_name', type = str, required = False, default = 'LCLIB_Mdwarf-flare-LSST.TEXT',
                             help = 'Name of the output LCLIB file. Should have a .TEXT extension (Default: LCLIB_Mdwarf-flare-LSST.TEXT)')
+    argparser.add_argument('--start_index', type = int, required = False, default = 0,
+                            help = 'Use this if you want to start your file with an event number other than 0. LCLIB header is not added for start indices other than 0 (Default: 0)')
+    argparser.add_argument('--generate_plots', required = False, action = 'store_true',
+                            help = 'Use this if you want to save plots based on the simulations. Please note that this might have memory implications. Plotting is disabled by default (Default: False)')
+
     args = argparser.parse_args()
 
     # Checking file name
@@ -320,6 +328,6 @@ if __name__ == "__main__":
 
     # Starting flare modelling process
     start_time = time.time()
-    run_generator(args.flare_count, args.file_name)
+    run_generator(args.flare_count, args.file_name, args.start_index, args.generate_plots)
     print("--- Simulations completed in %s seconds. Files saved. ---" % (int(time.time() - start_time)))
     
