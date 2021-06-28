@@ -32,7 +32,7 @@ U_BAND_AMPLITUDE_THRESHOLD = 0.1
 
 PARAMETER_COUNT_MULTIPLIER = 50
 
-def run_generator(flare_count, file_path, start_index, to_plot):
+def run_generator(flare_count, file_path, start_index, remove_header, to_plot):
     """
     Runs the generator functions. Samples the respective distributions for the parameters and writes
     simulated flare instances to an LCLIB file. 
@@ -51,7 +51,7 @@ def run_generator(flare_count, file_path, start_index, to_plot):
     with open(file_path, 'w') as output_file:
 
         # Adding lc lib to header
-        if start_index == 0:
+        if not remove_header:
             add_LCLIB_header(flare_count, output_file)
 
         with progressbar.ProgressBar(max_value = flare_count) as bar:
@@ -316,6 +316,8 @@ if __name__ == "__main__":
                             help = 'Name of the output LCLIB file. Should have a .TEXT extension (Default: LCLIB_Mdwarf-flare-LSST.TEXT)')
     argparser.add_argument('--start_index', type = int, required = False, default = 0,
                             help = 'Use this if you want to start your file with an event number other than 0. LCLIB header is not added for start indices other than 0 (Default: 0)')
+    argparser.add_argument('--remove_header', required = False, action = 'store_true',
+                            help = 'Use this if you want to remove the LCLIB header. (Default: False)')
     argparser.add_argument('--generate_plots', required = False, action = 'store_true',
                             help = 'Use this if you want to save plots based on the simulations. Please note that this might have memory implications. Plotting is disabled by default (Default: False)')
 
@@ -328,6 +330,6 @@ if __name__ == "__main__":
 
     # Starting flare modelling process
     start_time = time.time()
-    run_generator(args.flare_count, args.file_name, args.start_index, args.generate_plots)
+    run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots)
     print("--- Simulations completed in %s seconds. Files saved. ---" % (int(time.time() - start_time)))
     
