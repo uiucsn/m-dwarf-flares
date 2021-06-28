@@ -1,13 +1,15 @@
+import datetime
+import os.path
+from functools import lru_cache
+
 import astropy
-from astropy.io import ascii
 import lightkurve as lk
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from astropy.io import ascii
 from lightkurve import search_lightcurvefile
 from lightkurve import LightCurveFileCollection
-import matplotlib.pyplot as plt
-import os.path
-import pandas as pd
-import numpy as np
-import datetime
 
 LC_DATA_PATH = 'lc_data/KIC-{}.csv'
 FLARE_DATA_PATH = 'data_files/apjaa8ea2t3_mrt.txt'
@@ -15,6 +17,7 @@ FLARE_INSTANCES_PATH = 'flare_instances/KIC-{}/'
 FLARE_INSTANCE = 'flare_instances/KIC-{kic}/{start}-{end}.csv'
 
 
+@lru_cache(maxsize=512)
 def load_light_curve(KIC_ID):
     """
     Function for loading light curve data and constructing a kepler light curve.

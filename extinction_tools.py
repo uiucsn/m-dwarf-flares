@@ -1,12 +1,17 @@
-from astropy.coordinates import SkyCoord
+from functools import lru_cache
+
 import astropy.units as u
-from astropy.io import ascii
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from astropy.coordinates import SkyCoord
 from dustmaps.bayestar import BayestarQuery
-from dustmaps.sfd import SFDQuery, fetch
-from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
+from dustmaps.sfd import SFDQuery
+
+
+BAYESTAR = BayestarQuery(version='bayestar2019')
+SFD = SFDQuery()
+
 
 def get_extinction_after_symmetric_interpolation(coordinates):
     """
@@ -20,13 +25,11 @@ def get_extinction_after_symmetric_interpolation(coordinates):
         Bayestar 19 reddening values: The Reddeining values from the Bayestar 19 map.
     """
 
-    bayestar = BayestarQuery(version='bayestar2019')
-
     gal = coordinates.galactic
     mirrored_coordinates = SkyCoord(l = - 1 * gal.l, b = -1 * gal.b, distance = gal.distance, frame = 'galactic').icrs
 
-    reddening = bayestar(coordinates, mode='median')
-    reddening_mirrored = bayestar(mirrored_coordinates, mode='median')
+    reddening = BAYESTAR(coordinates, mode='median')
+    reddening_mirrored = BAYESTAR(mirrored_coordinates, mode='median')
 
     reddening_interpolated = np.where(np.isnan(reddening), reddening_mirrored, reddening)
 
@@ -44,16 +47,13 @@ def get_extinction_after_symmetric_interpolation_with_sfd_factor(coordinates):
         Bayestar 19 reddening values: The Reddeining values from the Bayestar 19 map.
     """
 
-    bayestar = BayestarQuery(version='bayestar2019')
-    sfd = SFDQuery()
-
     gal = coordinates.galactic
     mirrored_coordinates = SkyCoord(l = - 1 * gal.l, b = -1 * gal.b, distance = gal.distance, frame = 'galactic').icrs
 
-    reddening_bayes = bayestar(coordinates, mode='median')
-    reddening_bayes_mirrored = bayestar(mirrored_coordinates, mode='median')
-    reddening_sfd_norm = sfd(coordinates)
-    reddening_sfd_flip = sfd(mirrored_coordinates)
+    reddening_bayes = BAYESTAR(coordinates, mode='median')
+    reddening_bayes_mirrored = BAYESTAR(mirrored_coordinates, mode='median')
+    reddening_sfd_norm = SFD(coordinates)
+    reddening_sfd_flip = SFD(mirrored_coordinates)
 
     # This replaces any undefined proportionality factors (i.e 1 / 0) by 1
     sfd_factor = np.divide(reddening_sfd_norm, reddening_sfd_flip, out = np.ones_like(reddening_sfd_norm), where = reddening_sfd_flip != 0)
@@ -61,6 +61,12 @@ def get_extinction_after_symmetric_interpolation_with_sfd_factor(coordinates):
     reddening_interpolated = np.where(np.isnan(reddening_bayes), interpolated_reddening_3D, reddening_bayes)
 
     return reddening_interpolated
+
+@lru_cache()
+def get_LSST_extinction():
+    df = pd.read_csv('data_files/LSST_rv_3_1.csv')
+    rv = pd.Series(df['value'].values,index=df['lsst_passband']).to_dict()
+    return rv
 
 def get_extinction_in_lsst_passbands(coordinates):
     """
@@ -74,8 +80,7 @@ def get_extinction_in_lsst_passbands(coordinates):
         dictionary: Extinction values in the lsst ugrizy passbands for the given coordinates.
     """
 
-    df = pd.read_csv('data_files/LSST_rv_3_1.csv')
-    rv = pd.Series(df['value'].values,index=df['lsst_passband']).to_dict()
+    rv = get_LSST_extinction()
 
     bayestar_coefficient = 0.884
     bayestar_reddening = get_extinction_after_symmetric_interpolation_with_sfd_factor(coordinates)
