@@ -378,14 +378,14 @@ def find_nearest_index(lc_time, value):
     else:
         return index
 
-def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, mags, output_file):
+def dump_modeled_data_to_LCLIB(index, l, b, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, mags, output_file):
     """
     Function to write generated model magnitudes to lclib entries.
 
     Args:
         index (int): Index of the flare instance
-        ra (float): Right Ascension
-        dec (float): Declination
+        l (float): Galactic latitude in degrees
+        b (float): Galactic longitude in degrees
         KIC_ID (int): Kepler Input Catalogue ID
         flare_temp (float): Flare temperature
         star_temp (float): Star temperature
@@ -398,26 +398,27 @@ def dump_modeled_data_to_LCLIB(index, ra, dec, KIC_ID, start_time, end_time, sta
     event_marker = "#------------------------------\n"
     start = "START_EVENT: {}\n".format(index)
     end = "END_EVENT: {}\n".format(index)
-    nrow = "NROW: {nrow} RA: {ra:.5f} DEC: {dec:.5f}.\n".format(nrow = len(mags['kep'].time), 
-                                                                ra = ra.value, 
-                                                                dec = dec.value)
+    nrow = "NROW: {nrow} l: {l:.5f} b: {b:.5f}.\n".format(nrow = len(mags['kep'].time), 
+                                                            l = l.value, 
+                                                            b = b.value)
     parameters = "PARVAL: {KIC_ID} {start} {end} {f_temp:.2f} {s_temp:.2f} {dist:.7f}\n".format(KIC_ID = KIC_ID, 
                                                                                     f_temp = flare_temp, 
                                                                                     s_temp = star_temp, 
-                                                                                    dist = distance, 
+                                                                                    dist = distance.value, 
                                                                                     start = start_time, 
                                                                                     end = end_time)
+    angle_match = "ANGLEMATCH_b: {angle_match:.3f}\n".format(angle_match = np.max([5, 0.5 * np.abs(b.value)]))                                                                                    
     readings = ""
 
     # For loop to add readings of the simulations to the text file
     for i in range(len(mags['kep'].flux)):
         if i == 0:
-            readings += "T:\t"
+            readings += "T: "
         else:
-            readings += "S:\t"
-        readings += "{time:.5f}\t{u:.3f}\t{g:.3f}\t{r:.3f}\t{i:.3f}\t{z:.3f}\t{y:.3f}\n".format(time = mags['kep'].time[i], kep = mags['kep'].flux[i], u = mags['u'].flux[i], g = mags['g'].flux[i], r = mags['r'].flux[i], i = mags['i'].flux[i], z = mags['z'].flux[i], y = mags['y'].flux[i]) 
+            readings += "S: "
+        readings += "{time:>10.5f} {u:>10.3f} {g:>10.3f} {r:>10.3f} {i:>10.3f} {z:>10.3f} {y:>10.3f}\n".format(time = mags['kep'].time[i], kep = mags['kep'].flux[i], u = mags['u'].flux[i], g = mags['g'].flux[i], r = mags['r'].flux[i], i = mags['i'].flux[i], z = mags['z'].flux[i], y = mags['y'].flux[i]) 
 
-    simulation = event_marker + start + nrow + parameters + readings + end
+    simulation = event_marker + start + nrow + parameters + angle_match + readings + end
     output_file.write(simulation)
 
 def add_LCLIB_header(count, output_file):
@@ -427,18 +428,24 @@ def add_LCLIB_header(count, output_file):
     
     header = ('SURVEY: LSST\n'
               'FILTERS: ugrizY\n'
-              'MODEL: m-dwarf flare model\n'
+              'MODEL: m-Dwarf-Flare-Model\n'
               'RECUR_TYPE: NON-RECUR\n'
-              'NEVENT: {count}\n'
-              'MODEL_PARNAMES: KIC_ID, start_time, end_time,star_temp, flare_temp, distance.\n'
-              'COMMENT: Created on {date} at {time}\n'
-              'COMMENT: KIC_ID - Kepler Input Catalogue ID\n'
-              'COMMENT: flare_temp - Temperature of the flare for spectral modelling\n'
-              'COMMENT: star_temp - Temperature of the star for spectral modelling\n'
-              'COMMENT: distance - Distance to the star in parsec\n'
-              'COMMENT: start_time - Start time of the reference flare\n'
-              'COMMENT: end_time - End time of the\n'
-              'COMMENT: Order of PARVALS is Kepler Input Catalogue ID, flare start time (in BKJD), flare end time (in BKJD), flare temperature (in Kelvin), star temperature (in Kelvin), star distance.\n').format(count = count, 
-                                                              date = datetime.date.today().strftime("%B %d, %Y"), 
-                                                              time = datetime.datetime.now().strftime("%H:%M:%S"))
+              'MODEL_PARNAMES: KIC_ID,start_time,end_time,flare_temp,star_temp,distance.\n'
+              'NEVENT: {count}\n\n'
+              'DOCUMENTATION:\n'
+              'PURPOSE: m Dwarf Flare model, Based on Kepler light curves and estimated distances from Gaia\n'
+              'REF:\n'
+              '- AUTHOR: Ved Shah\n'
+              'USAGE_KEY: GENMODEL\n'
+              'NOTES:\n'
+              '- Flare instances were taken from Yang et al. (2017)\n'
+              '- Distance data was taken from A Bailer Jones et al. (2021)\n'
+              'NOTES:\n'  
+              '- KIC_ID - Kepler Input Catalogue ID\n'
+              '- flare_temp - Temperature of the flare for spectral modelling (in K)\n'
+              '- star_temp - Temperature of the star for spectral modelling (in K)\n'
+              '- distance - Distance to the star (in kpc)\n'
+              '- start_time - Start time of the reference flare (in BKJD)\n'
+              '- end_time - End time of the reference flare (in BKJD)\n'
+              'DOCUMENTATION_END:\n\n').format(count = count)
     output_file.write(header)

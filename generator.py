@@ -61,6 +61,7 @@ def run_generator(flare_count, file_path):
 
                 print("1. Sampling coordinates of stars ...")
                 coordinates = get_realistically_distributed_spherical_coordinates(parameter_count, rng)
+                galactic_coordinates = coord.SkyCoord(coordinates).galactic
                 distances = coordinates.distance
                 
                 print("2. Computing extinction values in lsst passbands ...")
@@ -89,7 +90,7 @@ def run_generator(flare_count, file_path):
                         'z': extinction_values['z'][i],
                         'y': extinction_values['y'][i],
                     }
-                    is_valid_flare, modeled_flare = generate_model_flare_file(number_of_nominal_flares, coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file)
+                    is_valid_flare, modeled_flare = generate_model_flare_file(number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file)
                     if is_valid_flare:
                         number_of_nominal_flares += 1
                         nominal_flare_indices.append(i)
@@ -100,13 +101,14 @@ def run_generator(flare_count, file_path):
     save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
 
 
-def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction, output_file):
+def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction, output_file):
     """
     Generates the model flare based on the parameters and saves to the LCLIB file if it makes the threshold cuts.
 
     Args:
         index (int): Index of the flare instance.
         coordinates (Sky coord): Coordinates of the flare instance.
+        galactic_coordinates (Sky coord): Galactic Coordinates of the flare instance.
         distance (astropy distance unit): Distance of the flare instance.
         KIC_ID (int): Kepler Input Catalogue ID
         start_time (float): Start time of the flare instance
@@ -138,7 +140,7 @@ def generate_model_flare_file(index, coordinates, distance, KIC_ID, start_time, 
 
     if is_nominal_flare(model_mags_with_extinction):
         # Writing modelled data to LCLIB file if the flare is nominal
-        dump_modeled_data_to_LCLIB(index, coordinates.ra, coordinates.dec, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction, output_file)
+        dump_modeled_data_to_LCLIB(index, galactic_coordinates.l, galactic_coordinates.b, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction, output_file)
         return True, model_mags_with_extinction
     else:
         return False, model_mags_with_extinction
@@ -307,7 +309,7 @@ if __name__ == "__main__":
     description='Generates a LCLIB file with simulated flare instances')
     argparser.add_argument('flare_count', type = int,
                             help = 'Number of flares to be generated')
-    argparser.add_argument('--file_name', type = str, required = False, default = 'LCLIB_Mdwarf-flare-LSSTA.TEXT',
+    argparser.add_argument('--file_name', type = str, required = False, default = 'LCLIB_Mdwarf-flare-LSST.TEXT',
                             help = 'Name of the output LCLIB file. Should have a .TEXT extension (Default: LCLIB_Mdwarf-flare-LSST.TEXT)')
     args = argparser.parse_args()
 
