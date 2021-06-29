@@ -320,6 +320,8 @@ if __name__ == "__main__":
                             help = 'Use this if you want to remove the LCLIB header. (Default: False)')
     argparser.add_argument('--generate_plots', required = False, action = 'store_true',
                             help = 'Use this if you want to save plots based on the simulations. Please note that this might have memory implications. Plotting is disabled by default (Default: False)')
+    argparser.add_argument('--header_only', required = False, action = 'store_true',
+                            help = 'Use this if you want only want to generate a LCLIB header. This does not generate any flares and thus cannot be used with --generate_plots to save plots. (Default: False)')
 
     args = argparser.parse_args()
 
@@ -327,9 +329,15 @@ if __name__ == "__main__":
     if not args.file_name.endswith(".TEXT"):
         print('Output file must be a .TEXT file')
         sys.exit(1)
-
-    # Starting flare modelling process
-    start_time = time.time()
-    run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots)
-    print("--- Simulations completed in %s seconds. Files saved. ---" % (int(time.time() - start_time)))
+    
+    if args.header_only:
+        with open(args.file_name, 'w') as output_file:
+            add_LCLIB_header(args.flare_count, output_file)
+        print('Created a header file. Exiting without flare simulation')
+        sys.exit(1)
+    else:
+        # Starting flare modelling process
+        start_time = time.time()
+        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots)
+        print("--- Simulations completed in %s seconds. File(s) saved. ---" % (int(time.time() - start_time)))
     
