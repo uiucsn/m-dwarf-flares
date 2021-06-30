@@ -26,7 +26,14 @@ NUMBER_OF_NOMINAL_FLARES = 0
 # Minimum Relative Flux Amplitude of the flares. Flares below this relative flux amplitude will be filtered out.
 MIN_RELATIVE_FLUX_AMPLITUDE = 0.01 
 # Maximum magnitude for a flare in the LSST u passband. Flares above this mag value will be filtered out.
-PEAK_MAGNITUDE_THRESHOLD = 25 
+PEAK_MAGNITUDE_THRESHOLD = {
+    'u': 23.66 + 1,
+    'g': 24.69 + 1,
+    'r': 24.06 + 1,
+    'i': 23.45 + 1,
+    'z': 22.54 + 1,
+    'y': 21.62 + 1,
+}
 # Minimum magnitude amplitude of the simulated flare in the u passband. Flares below this mag amplitude will be filtered out.
 U_BAND_AMPLITUDE_THRESHOLD = 0.1 
 
@@ -159,8 +166,11 @@ def is_nominal_flare(flare):
     Returns:
         [boolean]: True if the flare is nominal, False otherwise.
     """
-    if np.any(flare['u'].flux >= PEAK_MAGNITUDE_THRESHOLD):
-        # Checking if u band has magnitude greater than the PEAK_MAGNITUDE_THRESHOLD
+    if np.any(flare['u'].flux >= PEAK_MAGNITUDE_THRESHOLD['u']) or np.any(flare['g'].flux >= PEAK_MAGNITUDE_THRESHOLD['g']) or \
+       np.any(flare['r'].flux >= PEAK_MAGNITUDE_THRESHOLD['r']) or np.any(flare['i'].flux >= PEAK_MAGNITUDE_THRESHOLD['i']) or \
+       np.any(flare['z'].flux >= PEAK_MAGNITUDE_THRESHOLD['z']) or np.any(flare['y'].flux >= PEAK_MAGNITUDE_THRESHOLD['y']):
+       
+        # Checking if any band has magnitude greater than the PEAK_MAGNITUDE_THRESHOLD values
         return False
     if np.ptp(flare['u'].flux) <= U_BAND_AMPLITUDE_THRESHOLD:
         # Checking if u band has amplitude less than U_BAND_AMPLITUDE
