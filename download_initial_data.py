@@ -1,3 +1,4 @@
+import os
 from multiprocessing import Pool
 
 import dustmaps.sfd
@@ -6,6 +7,7 @@ import lightkurve as lk
 import numpy as np
 import pandas as pd
 import progressbar
+import requests
 from lightkurve import search_lightcurvefile
 from lightkurve import LightCurveFileCollection
 
@@ -33,6 +35,24 @@ def download_dust_maps():
     dustmaps.bayestar.fetch()
 
 
+def download_kic():
+    dir_path = 'data_files'
+    if not os.path.exists(dir_path):
+        raise ValueError(f'{dir_path} is not found, run from the project root or create a folder')
+    file_path = os.path.join(dir_path, 'kepler_kic_v10.csv.gz')
+    url = 'https://archive.stsci.edu/pub/kepler/catalogs/kepler_kic_v10.csv.gz'
+    chunk_size = 8192
+    with requests.get(url, stream=True) as resp:
+        resp.raise_for_status()
+        size = int(resp.headers['content-length'])
+        if os.path.exists(file_path) and os.stat(file_path).st_size == size:
+            return
+        with open(file_path, 'wb') as fh, progressbar.ProgressBar(max_value=size) as bar:
+            for i, chunk in enumerate(resp.iter_content(chunk_size=chunk_size)):
+                fh.write(chunk)
+                bar.update(i * chunk_size)
+
+
 def main():
     # 1. Downloading light curves and storing them
     print('Downloading light curves')
@@ -49,6 +69,10 @@ def main():
     # 2. Downloading dust maps and storing them
     print('Downloading dust maps')
     download_dust_maps()
+
+    # 3. Downloading KIC file if it doesn't exist
+    print('Downloading KIC')
+    download_kic()
 
     print('Data downloaded!')
 
