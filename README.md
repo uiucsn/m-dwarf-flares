@@ -20,7 +20,7 @@ To download and save the light curves and dust maps, run
 
 Alternatively, `generator.py ` will download the light curves and store them as required. However the dust maps will need to be fetched manually. You can use the code from `download_initial_data.py` to do this.
 
-Table 1 and Table 2 are already included in the repository. The Kepler Input Catalogue will need to be downloaded and placed in the data_files directory for all the functions to work correctly.
+Table 1 and Table 2 are already included in the repository. The Kepler Input Catalogue will be downloaded by this script too, or can be downloaded manually and placed in the data_files directory for all the functions to work correctly.
 
 ____
 
