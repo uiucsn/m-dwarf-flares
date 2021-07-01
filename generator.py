@@ -166,10 +166,9 @@ def is_nominal_flare(flare):
     Returns:
         [boolean]: True if the flare is nominal, False otherwise.
     """
-    if np.any(flare['u'].flux >= PEAK_MAGNITUDE_THRESHOLD['u']) and np.any(flare['g'].flux >= PEAK_MAGNITUDE_THRESHOLD['g']) and \
-       np.any(flare['r'].flux >= PEAK_MAGNITUDE_THRESHOLD['r']) and np.any(flare['i'].flux >= PEAK_MAGNITUDE_THRESHOLD['i']) and \
-       np.any(flare['z'].flux >= PEAK_MAGNITUDE_THRESHOLD['z']) and np.any(flare['y'].flux >= PEAK_MAGNITUDE_THRESHOLD['y']):
-
+    
+    passbands = ['u','g','r','i','z','y']
+    if all(np.all(flare[passband].flux > PEAK_MAGNITUDE_THRESHOLD[passband]) for passband in passbands):
         # Checking if all bands have magnitude greater than the correspnding PEAK_MAGNITUDE_THRESHOLD values. 
         # Sim is nominal if even one passband has 
         return False
