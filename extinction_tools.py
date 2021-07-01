@@ -9,8 +9,14 @@ from dustmaps.bayestar import BayestarQuery
 from dustmaps.sfd import SFDQuery
 
 
-BAYESTAR = BayestarQuery(version='bayestar2019')
-SFD = SFDQuery()
+@lru_cache()
+def bayestar_query():
+    return BayestarQuery(version='bayestar2019')
+
+
+@lru_cache()
+def sfd_query():
+    return SFDQuery()
 
 
 def get_extinction_after_symmetric_interpolation(coordinates):
@@ -28,8 +34,8 @@ def get_extinction_after_symmetric_interpolation(coordinates):
     gal = coordinates.galactic
     mirrored_coordinates = SkyCoord(l = - 1 * gal.l, b = -1 * gal.b, distance = gal.distance, frame = 'galactic').icrs
 
-    reddening = BAYESTAR(coordinates, mode='median')
-    reddening_mirrored = BAYESTAR(mirrored_coordinates, mode='median')
+    reddening = bayestar_query()(coordinates, mode='median')
+    reddening_mirrored = bayestar_query()(mirrored_coordinates, mode='median')
 
     reddening_interpolated = np.where(np.isnan(reddening), reddening_mirrored, reddening)
 
@@ -50,10 +56,10 @@ def get_extinction_after_symmetric_interpolation_with_sfd_factor(coordinates):
     gal = coordinates.galactic
     mirrored_coordinates = SkyCoord(l = - 1 * gal.l, b = -1 * gal.b, distance = gal.distance, frame = 'galactic').icrs
 
-    reddening_bayes = BAYESTAR(coordinates, mode='median')
-    reddening_bayes_mirrored = BAYESTAR(mirrored_coordinates, mode='median')
-    reddening_sfd_norm = SFD(coordinates)
-    reddening_sfd_flip = SFD(mirrored_coordinates)
+    reddening_bayes = bayestar_query()(coordinates, mode='median')
+    reddening_bayes_mirrored = bayestar_query()(mirrored_coordinates, mode='median')
+    reddening_sfd_norm = sfd_query()(coordinates)
+    reddening_sfd_flip = sfd_query()(mirrored_coordinates)
 
     # This replaces any undefined proportionality factors (i.e 1 / 0) by 1
     sfd_factor = np.divide(reddening_sfd_norm, reddening_sfd_flip, out = np.ones_like(reddening_sfd_norm), where = reddening_sfd_flip != 0)
