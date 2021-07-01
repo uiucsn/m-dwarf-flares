@@ -21,10 +21,9 @@ FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 # Do not change these values
 KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
 KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS = 161.37182827551771
-NUMBER_OF_NOMINAL_FLARES = 0
 
 # Minimum Relative Flux Amplitude of the flares. Flares below this relative flux amplitude will be filtered out.
-MIN_RELATIVE_FLUX_AMPLITUDE = 0.01 
+MIN_RELATIVE_FLUX_AMPLITUDE = 0.01
 # Maximum magnitude for a flare in the LSST u passband. Flares above this mag value will be filtered out.
 PEAK_MAGNITUDE_THRESHOLD = {
     'u': 23.66 + 1,
@@ -50,6 +49,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot):
     """
 
     number_of_nominal_flares = 0
+    number_of_simulated_flares = 0
     nominal_flare_indices = []
     nominal_flare_instance = []
     rng = np.random.default_rng(start_index)
@@ -89,6 +89,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot):
                     # Breaking out of the loop if the correct number of flares are generated
                     bar.update(number_of_nominal_flares)
                     if (number_of_nominal_flares == flare_count):
+                        number_of_simulated_flares = i
                         break
                     extinction = {
                         'u': extinction_values['u'][i],
@@ -105,8 +106,9 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot):
                             nominal_flare_indices.append(i)
                             nominal_flare_instance.append(modeled_flare)
     output_file.close()
-    nominal_coordinates = coord.SkyCoord(coordinates[nominal_flare_indices])
+    print("{:2f} %% of the simulations passed the LSST observation thresholds".format((number_of_nominal_flares / number_of_simulated_flares) * 100))
     if to_plot:
+        nominal_coordinates = coord.SkyCoord(coordinates[nominal_flare_indices])
         print("7. Generating plots ...")
         save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
 
@@ -131,6 +133,7 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
     Returns:
         tuple: boolean, modelled flare
     """
+
     # Loading the orignal flare light curve and normalizing it
     lc = load_light_curve(KIC_ID)
     flare_lc = get_flare_lc_from_time(lc, start_time, end_time)
@@ -166,7 +169,7 @@ def is_nominal_flare(flare):
     Returns:
         [boolean]: True if the flare is nominal, False otherwise.
     """
-    
+
     passbands = ['u','g','r','i','z','y']
     if all(np.all(flare[passband].flux > PEAK_MAGNITUDE_THRESHOLD[passband]) for passband in passbands):
         # Checking if all bands have magnitude greater than the correspnding PEAK_MAGNITUDE_THRESHOLD values. 
@@ -178,30 +181,33 @@ def is_nominal_flare(flare):
 
     return True
 
-def get_number_of_expected_flares(radius, duration):
+def get_number_of_expected_flares():
     """
-    Computes the number of expected flares for a sphere of given radius during a given time period.
-    This is based on data from the Kepler Space telescope and SUPERBLINK survey.
-
-    Args:
-        radius (float): Radius of sphere in parsec
-        duration (float): Duration in days
+    Computes the number of expected flares that can be observed by LSST per day.
 
     Returns:
-        int : An estimate of the number of flares expcted during this time period in the sphere
+        int : An estimate of the number of flares per day that fall within the LSST magnitude limits.
     """
     TOTAL_KEPLER_M_DWARF_COUNT = 4664
     TOTAL_KEPLER_DURATION_IN_DAYS = 1460
-    TOTAL_FLARE_INSTANCES_COUNT = 103187
+    TOTAL_KEPLER_FLARE_COUNT = 103187
 
-    LOCAL_RADIUS = 20
-    NUMBER_OF_LOCAL_M_DWARFS = 1082
+    # Estimated number of m dwarfs in solar neighbourhood
+    N_M_DWARF = 24.8 * (10 ** 9)
 
-    flare_density = (NUMBER_OF_LOCAL_M_DWARFS / (4/3 * math.pi * LOCAL_RADIUS**2)) * (TOTAL_FLARE_INSTANCES_COUNT / (TOTAL_KEPLER_M_DWARF_COUNT * TOTAL_KEPLER_DURATION_IN_DAYS))
-    volume = 4/3 * math.pi * (radius ** 3)
-    flare_count = math.floor(flare_density * volume * duration)
+    # Fraction of simulated flares that fall within the LSST thresholds
+    LSST_VISIBILITY_FRACTION = .1170
 
-    return flare_count
+    # Unit: Number of flares per m dwarf per day
+    flares_per_star_per_day = TOTAL_KEPLER_FLARE_COUNT / (TOTAL_KEPLER_M_DWARF_COUNT * TOTAL_KEPLER_DURATION_IN_DAYS)
+
+    # Unit: Total number of flares per day
+    total_flares_per_day = flares_per_star_per_day * N_M_DWARF
+
+    # Unit: Total number of flares per day potentially visible to LSST
+    flare_count = total_flares_per_day * LSST_VISIBILITY_FRACTION
+
+    return int(flare_count)
 
 def get_realistically_distributed_spherical_coordinates(count, rng):
     """
