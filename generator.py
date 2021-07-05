@@ -34,7 +34,7 @@ PEAK_MAGNITUDE_THRESHOLD = {
     'y': 21.62 + 1,
 }
 # Minimum magnitude amplitude of the simulated flare in the u passband. Flares below this mag amplitude will be filtered out.
-U_BAND_AMPLITUDE_THRESHOLD = 0.1 
+BAND_AMPLITUDE_THRESHOLD = 0.1
 
 PARAMETER_COUNT_MULTIPLIER = 50
 
@@ -171,15 +171,11 @@ def is_nominal_flare(flare):
     """
 
     passbands = ['u','g','r','i','z','y']
-    if all(np.all(flare[passband].flux > PEAK_MAGNITUDE_THRESHOLD[passband]) for passband in passbands):
-        # Checking if all bands have magnitude greater than the correspnding PEAK_MAGNITUDE_THRESHOLD values. 
-        # Sim is nominal if even one passband has 
-        return False
-    if np.ptp(flare['u'].flux) <= U_BAND_AMPLITUDE_THRESHOLD:
-        # Checking if u band has amplitude less than U_BAND_AMPLITUDE
-        return False
-
-    return True
+    # Checking if all bands have magnitude greater than the correspnding PEAK_MAGNITUDE_THRESHOLD values. 
+    # Sim is nominal if even one passband has 
+    peak_mag_is_bright = (np.any(flare[passband].flux <= PEAK_MAGNITUDE_THRESHOLD[passband]) for passband in passbands)
+    ampl_is_high = (np.ptp(flare[passband].flux) > BAND_AMPLITUDE_THRESHOLD for passband in passbands)
+    return any(peak and ampl for peak, ampl in zip(peak_mag_is_bright, ampl_is_high))
 
 def get_number_of_expected_flares():
     """
