@@ -86,10 +86,10 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot):
                 
                 print("6. Commencing flare modelling ...")
                 for i in range(parameter_count):
-                    # Breaking out of the loop if the correct number of flares are generated
                     bar.update(number_of_nominal_flares)
+                    number_of_simulated_flares += 1 
+                    # Breaking out of the loop if the correct number of flares are generated
                     if (number_of_nominal_flares == flare_count):
-                        number_of_simulated_flares = i
                         break
                     extinction = {
                         'u': extinction_values['u'][i],
@@ -106,7 +106,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot):
                             nominal_flare_indices.append(i)
                             nominal_flare_instance.append(modeled_flare)
     output_file.close()
-    print("{:2f} %% of the simulations passed the LSST observation thresholds".format((number_of_nominal_flares / number_of_simulated_flares) * 100))
+    print(int((flare_count * 100) / number_of_simulated_flares),'%','of the simulated flares passed the threshold cuts')
     if to_plot:
         nominal_coordinates = coord.SkyCoord(coordinates[nominal_flare_indices])
         print("7. Generating plots ...")
@@ -196,7 +196,7 @@ def get_number_of_expected_flares():
     N_M_DWARF = 24.8 * (10 ** 9)
 
     # Fraction of simulated flares that fall within the LSST thresholds
-    LSST_VISIBILITY_FRACTION = .1170
+    LSST_VISIBILITY_FRACTION = .34
 
     # Unit: Number of flares per m dwarf per day
     flares_per_star_per_day = TOTAL_KEPLER_FLARE_COUNT / (TOTAL_KEPLER_M_DWARF_COUNT * TOTAL_KEPLER_DURATION_IN_DAYS)
