@@ -39,7 +39,7 @@ BAND_AMPLITUDE_THRESHOLD = 0.1
 
 PARAMETER_COUNT_MULTIPLIER = 50
 
-def run_generator(flare_count, file_path, start_index, remove_header, to_plot):
+def run_generator(flare_count, file_path, start_index, remove_header, to_plot, use_dpf):
     """
     Runs the generator functions. Samples the respective distributions for the parameters and writes
     simulated flare instances to an LCLIB file. 
@@ -100,7 +100,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot):
                         'z': extinction_values['z'][i],
                         'y': extinction_values['y'][i],
                     }
-                    is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file)
+                    is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file, use_dpf)
                     if is_valid_flare:
                         number_of_nominal_flares += 1
                         if to_plot:
@@ -114,7 +114,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot):
         save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
 
 
-def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction, output_file):
+def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction, output_file, use_dpf):
     """
     Generates the model flare based on the parameters and saves to the LCLIB file if it makes the threshold cuts.
 
@@ -152,14 +152,14 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
     model_mags = get_mags_in_lsst_passbands(model_luminosities, distance)
     model_mags_with_extinction = apply_extinction_to_lsst_mags(model_mags, extinction)
 
-    if is_nominal_flare(model_mags_with_extinction):
+    if is_nominal_flare(model_mags_with_extinction, use_dpf):
         # Writing modelled data to LCLIB file if the flare is nominal
         dump_modeled_data_to_LCLIB(index, galactic_coordinates.l, galactic_coordinates.b, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction, output_file)
         return True, model_mags_with_extinction
     else:
         return False, model_mags_with_extinction
 
-def is_nominal_flare(flare):
+def is_nominal_flare(flare, use_dpf):
     """
     Checking if the generated flare is under the threshold for max magnitude and has an
     amplitude greater than the threshold
@@ -172,15 +172,35 @@ def is_nominal_flare(flare):
     """
 
     passbands = ['u','g','r','i','z','y']
+
+    if use_dpf:
+        min_mag = {}
+        max_mag = {}
+        for passband in passbands:
+            min_mag[passband] = np.amin(flare[passband].flux)
+            max_mag[passband] = np.amax(flare[passband].flux)
+
+        dict = {passband: (min_mag[passband] - 
+                    2.5 * math.log10(
+                        10 ** (
+                            0.4 * (max_mag[passband] - min_mag[passband])
+                        ) 
+                        - 1
+                    )
+                ) for passband in passbands}
+
+        return any(dict[passband] <= PEAK_MAGNITUDE_THRESHOLD[passband] for passband in passbands)
     
-    # Checking if all bands have atleast one magnitude value greater than the correspnding PEAK_MAGNITUDE_THRESHOLD values. 
-    peak_mag_is_bright = (np.any(flare[passband].flux <= PEAK_MAGNITUDE_THRESHOLD[passband]) for passband in passbands)
+    else:
+        # Checking if all bands have atleast one magnitude value greater than the correspnding PEAK_MAGNITUDE_THRESHOLD values. 
+        peak_mag_is_bright = (np.any(flare[passband].flux <= PEAK_MAGNITUDE_THRESHOLD[passband]) for passband in passbands)
 
-    # Checking if all passbands have amplitude greater than the BAND_AMPLITUDE_THRESHOLD
-    ampl_is_high = (np.ptp(flare[passband].flux) > BAND_AMPLITUDE_THRESHOLD for passband in passbands)
+        # Checking if all passbands have amplitude greater than the BAND_AMPLITUDE_THRESHOLD
+        ampl_is_high = (np.ptp(flare[passband].flux) > BAND_AMPLITUDE_THRESHOLD for passband in passbands)
 
-    # Returns true if there is atleast one passband that statisfies both of the above conditions
-    return any(peak and ampl for peak, ampl in zip(peak_mag_is_bright, ampl_is_high))
+        # Returns true if there is atleast one passband that statisfies both of the above conditions
+        return any(peak and ampl for peak, ampl in zip(peak_mag_is_bright, ampl_is_high))
+        
 
 def get_number_of_expected_flares():
     """
@@ -331,6 +351,8 @@ if __name__ == "__main__":
                             help = 'Number of flares to be generated')
     argparser.add_argument('--file_name', type = str, required = False, default = 'LCLIB_Mdwarf-flare-LSST.TEXT',
                             help = 'Name of the output LCLIB file. Should have a .TEXT extension (Default: LCLIB_Mdwarf-flare-LSST.TEXT)')
+    argparser.add_argument('--use_dpf', required = False, action = 'store_true',
+                            help = 'Use this if you want to use differential photometry for filtering. Standard filtering is used by default. (Default: False)')
     argparser.add_argument('--start_index', type = int, required = False, default = 0,
                             help = 'Use this if you want to start your file with an event number other than 0. LCLIB header is not added for start indices other than 0 (Default: 0)')
     argparser.add_argument('--remove_header', required = False, action = 'store_true',
@@ -355,6 +377,6 @@ if __name__ == "__main__":
     else:
         # Starting flare modelling process
         start_time = time.time()
-        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots)
+        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots, args.use_dpf)
         print("--- Simulations completed in %s seconds. File(s) saved. ---" % (int(time.time() - start_time)))
     
