@@ -23,21 +23,24 @@ FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
 KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS = 161.37182827551771
 
-# Minimum Relative Flux Amplitude of the flares. Flares below this relative flux amplitude will be filtered out.
+# Minimum Relative Flux Amplitude of the flares. Flares below this relative flux amplitude will be filtered out. This is a performance optimization.
 MIN_RELATIVE_FLUX_AMPLITUDE = 0.01
+
 # Maximum magnitude for a flare in the LSST u passband. Flares above this mag value will be filtered out.
+PEAK_MAGNITUDE_TOLERANCE = 0.5
 PEAK_MAGNITUDE_THRESHOLD = {
-    'u': 23.66 + 1,
-    'g': 24.69 + 1,
-    'r': 24.06 + 1,
-    'i': 23.45 + 1,
-    'z': 22.54 + 1,
-    'y': 21.62 + 1,
+    'u': 23.66 + PEAK_MAGNITUDE_TOLERANCE,
+    'g': 24.69 + PEAK_MAGNITUDE_TOLERANCE,
+    'r': 24.06 + PEAK_MAGNITUDE_TOLERANCE,
+    'i': 23.45 + PEAK_MAGNITUDE_TOLERANCE,
+    'z': 22.54 + PEAK_MAGNITUDE_TOLERANCE,
+    'y': 21.62 + PEAK_MAGNITUDE_TOLERANCE,
 }
 # Minimum magnitude amplitude of the simulated flare in the u passband. Flares below this mag amplitude will be filtered out.
-BAND_AMPLITUDE_THRESHOLD = 0.1
+BAND_AMPLITUDE_THRESHOLD = 0.2
 
-PARAMETER_COUNT_MULTIPLIER = 50
+# Generating new parameters is an expernsive process. One way to speed it up is 
+PARAMETER_COUNT_MULTIPLIER = 75
 
 def run_generator(flare_count, file_path, start_index, remove_header, to_plot, use_dpf):
     """
@@ -180,7 +183,7 @@ def is_nominal_flare(flare, use_dpf):
             min_mag[passband] = np.amin(flare[passband].flux)
             max_mag[passband] = np.amax(flare[passband].flux)
 
-        dict = {passband: (min_mag[passband] - 
+        dict = {passband: (max_mag[passband] - 
                     2.5 * math.log10(
                         10 ** (
                             0.4 * (max_mag[passband] - min_mag[passband])
@@ -214,7 +217,7 @@ def get_number_of_expected_flares():
     TOTAL_KEPLER_FLARE_COUNT = 103187
 
     # Estimated number of m dwarfs in solar neighbourhood
-    N_M_DWARF = 24.8 * (10 ** 9)
+    N_M_DWARF = 24.8 * (10e9)
 
     # Fraction of simulated flares that fall within the LSST thresholds
     LSST_VISIBILITY_FRACTION = .34
