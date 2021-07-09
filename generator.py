@@ -1,5 +1,6 @@
 from functools import lru_cache
 from astropy import units as u
+from astropy.modeling.models import BlackBody
 
 import astropy.coordinates as coord
 import numpy as np
@@ -42,7 +43,7 @@ BAND_AMPLITUDE_THRESHOLD = 0.2
 # Generating new parameters is an expernsive process. One way to speed it up is 
 PARAMETER_COUNT_MULTIPLIER = 75
 
-def run_generator(flare_count, file_path, start_index, remove_header, to_plot, use_dpf):
+def run_generator(flare_count, file_path, start_index, remove_header, to_plot, use_dpf, use_balmer_jump):
     """
     Runs the generator functions. Samples the respective distributions for the parameters and writes
     simulated flare instances to an LCLIB file. 
@@ -85,9 +86,10 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
                 print("4. Sampling star temperature ...")
                 star_temp = get_normally_distributed_star_temp(parameter_count, rng)
                 
-                print("5. Sampling flare temperature ...")
-                flare_temp = get_normally_distributed_flare_temp(parameter_count, rng)
-                
+                print("5. Sampling flare temperatures ...")
+                flare_temp_low = get_normally_distributed_flare_temp_low(parameter_count, rng)
+                flare_temp_high = get_normally_distributed_flare_temp_high(parameter_count, rng)
+
                 print("6. Commencing flare modelling ...")
                 for i in range(parameter_count):
                     bar.update(number_of_nominal_flares)
@@ -103,7 +105,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
                         'z': extinction_values['z'][i],
                         'y': extinction_values['y'][i],
                     }
-                    is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file, use_dpf)
+                    is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp_low[i], flare_temp_high[i], extinction, output_file, use_dpf, use_balmer_jump)
                     if is_valid_flare:
                         number_of_nominal_flares += 1
                         if to_plot:
@@ -117,7 +119,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
         save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
 
 
-def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction, output_file, use_dpf):
+def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp_low, flare_temp_high, extinction, output_file, use_dpf, use_balmer_jump):
     """
     Generates the model flare based on the parameters and saves to the LCLIB file if it makes the threshold cuts.
 
@@ -137,6 +139,24 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
     Returns:
         tuple: boolean, modelled flare
     """
+    # Modelling of flare spectra
+    cutoff_wavelenght = 3645 * u.AA
+    if use_balmer_jump:
+        # If balmer jump option is selcted, the spectrum model combines two differnt blacbodies.
+        def get_flare_spectrum(lmbd):
+            bb_low = BlackBody(temperature=flare_temp_low*u.K)
+            bb_high = BlackBody(temperature=flare_temp_high*u.K)
+            flux = np.where(lmbd > cutoff_wavelenght, bb_low(lmbd), bb_high(lmbd))
+            return flux
+    else:
+        def get_flare_spectrum(lmbd):
+            bb = BlackBody(temperature=flare_temp_low*u.K)
+            return bb(lmbd)
+
+    # Modelling of star spectra
+    def get_star_spectrum(lmbd):
+        bb = BlackBody(temperature=star_temp*u.K)
+        return bb(lmbd)
 
     # Loading the orignal flare light curve and normalizing it
     lc = load_light_curve(KIC_ID)
@@ -147,8 +167,8 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
     luminosity = get_stellar_luminosity(KIC_ID).si  
 
     # Modelling the spetra and fitting the flare on the nominal stellar luminosity
-    flare_luminosities = get_flare_luminosities_in_lsst_passbands(new_lc, KIC_ID, flare_temp, luminosity)
-    baseline_luminosities = get_baseline_luminosity_in_lsst_passband(new_lc, KIC_ID, star_temp, luminosity)
+    flare_luminosities = get_flare_luminosities_in_lsst_passbands(new_lc, KIC_ID, get_flare_spectrum, luminosity)
+    baseline_luminosities = get_baseline_luminosity_in_lsst_passband(new_lc, KIC_ID, get_star_spectrum, luminosity)
     model_luminosities = fit_flare_on_base(flare_luminosities, baseline_luminosities)
 
     # Converting luminosity to distances based on distances and applying extinction
@@ -157,7 +177,7 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
 
     if is_nominal_flare(model_mags_with_extinction, use_dpf):
         # Writing modelled data to LCLIB file if the flare is nominal
-        dump_modeled_data_to_LCLIB(index, galactic_coordinates.l, galactic_coordinates.b, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction, output_file)
+        dump_modeled_data_to_LCLIB(index, galactic_coordinates.l, galactic_coordinates.b, KIC_ID, start_time, end_time, star_temp, flare_temp_low, flare_temp_high, distance, model_mags_with_extinction, output_file)
         return True, model_mags_with_extinction
     else:
         return False, model_mags_with_extinction
@@ -333,7 +353,7 @@ def get_normally_distributed_star_temp(count, rng):
     return rng.normal(KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS, KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS, count)
 
 
-def get_normally_distributed_flare_temp(count, rng):
+def get_normally_distributed_flare_temp_low(count, rng):
     """
     Returns a numpy array of flare temperatures modelled after a normal distribution.
 
@@ -346,6 +366,19 @@ def get_normally_distributed_flare_temp(count, rng):
 
     return rng.normal(9000, 1000, count)
 
+def get_normally_distributed_flare_temp_high(count, rng):
+    """
+    Returns a numpy array of flare temperatures modelled after a normal distribution.
+
+    Args:
+        count (int): Length of numpy array to be returned
+
+    Returns:
+        numpy array: numpy array containing the flare temperatures with length = count
+    """
+
+    return rng.normal(35000, 3000, count)
+
 if __name__ == "__main__":
     # Getting Arguments
     argparser = argparse.ArgumentParser(
@@ -356,6 +389,8 @@ if __name__ == "__main__":
                             help = 'Name of the output LCLIB file. Should have a .TEXT extension (Default: LCLIB_Mdwarf-flare-LSST.TEXT)')
     argparser.add_argument('--use_dpf', required = False, action = 'store_true',
                             help = 'Use this if you want to use differential photometry for filtering. Standard filtering is used by default. (Default: False)')
+    argparser.add_argument('--add_balmer_jump', required = False, action = 'store_true',
+                            help = 'Use this if you want to add a balmer jump to the spectra of the flare. (Default: False)')
     argparser.add_argument('--start_index', type = int, required = False, default = 0,
                             help = 'Use this if you want to start your file with an event number other than 0. LCLIB header is not added for start indices other than 0 (Default: 0)')
     argparser.add_argument('--remove_header', required = False, action = 'store_true',
@@ -380,6 +415,6 @@ if __name__ == "__main__":
     else:
         # Starting flare modelling process
         start_time = time.time()
-        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots, args.use_dpf)
+        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots, args.use_dpf,  args.add_balmer_jump)
         print("--- Simulations completed in %s seconds. File(s) saved. ---" % (int(time.time() - start_time)))
     

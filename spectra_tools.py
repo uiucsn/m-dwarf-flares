@@ -17,7 +17,7 @@ passband_props = dict(
 
 bands = tuple(passband_props)
 
-def get_baseline_luminosity_in_lsst_passband(flare_lc, KIC_ID, temp, luminosity):
+def get_baseline_luminosity_in_lsst_passband(flare_lc, KIC_ID, spectrum, luminosity):
     """
     Returns the baseline luminosities for all six LSST passbands and the Kepler band based 
     on distance data from Gaia DR3, magnitude data in the Kepler band, and spectrum data
@@ -33,16 +33,15 @@ def get_baseline_luminosity_in_lsst_passband(flare_lc, KIC_ID, temp, luminosity)
         Dictionary : A dictionary with baseline luminosity values in all 6 LSST passbands
         and the Kepler passband.
     """
-    T = temp * u.K
     lmbd, t = get_kepler_transmission()
-    intensityKepler = simps(x=lmbd, y=bb(lmbd * u.AA, T).value * t) / simps(x=lmbd, y=t)
+    intensityKepler = simps(x=lmbd, y=spectrum(lmbd * u.AA).value * t) / simps(x=lmbd, y=t)
 
-    intensity_u = compute_band_intensity("u", temp)
-    intensity_g = compute_band_intensity("g", temp)
-    intensity_r = compute_band_intensity("r", temp)
-    intensity_i = compute_band_intensity("i", temp)
-    intensity_z = compute_band_intensity("z", temp)
-    intensity_y = compute_band_intensity("y", temp)
+    intensity_u = compute_band_intensity("u", spectrum)
+    intensity_g = compute_band_intensity("g", spectrum)
+    intensity_r = compute_band_intensity("r", spectrum)
+    intensity_i = compute_band_intensity("i", spectrum)
+    intensity_z = compute_band_intensity("z", spectrum)
+    intensity_y = compute_band_intensity("y", spectrum)
 
     kep_band = luminosity.value
     u_band = luminosity.value * (intensity_u / intensityKepler)
@@ -64,38 +63,7 @@ def get_baseline_luminosity_in_lsst_passband(flare_lc, KIC_ID, temp, luminosity)
     }
     return dict
 
-def get_spectra_data(flare_lc, KIC_ID, temp):
-
-    T = temp * u.K
-    lmbd, t = get_kepler_transmission()
-    intensityKepler = simps(x=lmbd, y=bb(lmbd * u.AA, T).value * t) / simps(x=lmbd, y=t)
-
-    intensity_u = compute_band_intensity("u", temp)
-    intensity_g = compute_band_intensity("g", temp)
-    intensity_r = compute_band_intensity("r", temp)
-    intensity_i = compute_band_intensity("i", temp)
-    intensity_z = compute_band_intensity("z", temp)
-    intensity_y = compute_band_intensity("y", temp)
-
-    u_band = flare_lc.flux * (intensity_u / intensityKepler)
-    g_band = flare_lc.flux * (intensity_g / intensityKepler)
-    r_band = flare_lc.flux * (intensity_r / intensityKepler)
-    i_band = flare_lc.flux * (intensity_i / intensityKepler)
-    z_band = flare_lc.flux * (intensity_z / intensityKepler)
-    y_band = flare_lc.flux * (intensity_y / intensityKepler)
-
-    dict = {
-        'u': lk.LightCurve(time = flare_lc.time, flux = u_band, flux_err = flare_lc.flux_err),
-        'g': lk.LightCurve(time = flare_lc.time, flux = g_band, flux_err = flare_lc.flux_err),
-        'r': lk.LightCurve(time = flare_lc.time, flux = r_band, flux_err = flare_lc.flux_err),
-        'i': lk.LightCurve(time = flare_lc.time, flux = i_band, flux_err = flare_lc.flux_err),
-        'z': lk.LightCurve(time = flare_lc.time, flux = z_band, flux_err = flare_lc.flux_err),
-        'y': lk.LightCurve(time = flare_lc.time, flux = y_band, flux_err = flare_lc.flux_err),
-        'kep': flare_lc,
-    }
-    return dict
-
-def get_flare_luminosities_in_lsst_passbands(flare_lc, KIC_ID, temp, luminosity):
+def get_flare_luminosities_in_lsst_passbands(flare_lc, KIC_ID, spectrum, luminosity):
     """
     Returns the flare luminosities for all six LSST passbands and the Kepler band based 
     on distance data from Gaia DR3, magnitude data in the Kepler band, and spectrum data
@@ -112,16 +80,15 @@ def get_flare_luminosities_in_lsst_passbands(flare_lc, KIC_ID, temp, luminosity)
         and the Kepler passband.
     """
 
-    T = temp * u.K
     lmbd, t = get_kepler_transmission()
-    intensityKepler = simps(x=lmbd, y=bb(lmbd * u.AA, T).value * t) / simps(x=lmbd, y=t)
+    intensityKepler = simps(x=lmbd, y=spectrum(lmbd * u.AA).value * t) / simps(x=lmbd, y=t)
 
-    intensity_u = compute_band_intensity("u", temp)
-    intensity_g = compute_band_intensity("g", temp)
-    intensity_r = compute_band_intensity("r", temp)
-    intensity_i = compute_band_intensity("i", temp)
-    intensity_z = compute_band_intensity("z", temp)
-    intensity_y = compute_band_intensity("y", temp)
+    intensity_u = compute_band_intensity("u", spectrum)
+    intensity_g = compute_band_intensity("g", spectrum)
+    intensity_r = compute_band_intensity("r", spectrum)
+    intensity_i = compute_band_intensity("i", spectrum)
+    intensity_z = compute_band_intensity("z", spectrum)
+    intensity_y = compute_band_intensity("y", spectrum)
 
     kep_band = flare_lc.flux * luminosity.value
     u_band = flare_lc.flux * luminosity.value * (intensity_u / intensityKepler)
@@ -189,7 +156,7 @@ def fit_flare_on_base(flare, base):
     }
     return dict
     
-def compute_band_intensity(band, temp):
+def compute_band_intensity(band, spectrum):
     """
     Computes the intensity in a particular lsst passband at a certain temperature, 
     modelled after a black body.
@@ -201,9 +168,8 @@ def compute_band_intensity(band, temp):
     Returns:
         Intensity: Internsity in the given passband at the given temperature.
     """
-    T = temp * u.K
     lmbd, t = get_transmission(band)
-    intensity = simps(x=lmbd, y=bb(lmbd * u.AA, T).value * t) / simps(x=lmbd, y=t)
+    intensity = simps(x=lmbd, y=spectrum(lmbd * u.AA).value * t) / simps(x=lmbd, y=t)
     return intensity
 
 @lru_cache()
