@@ -12,7 +12,7 @@ import requests
 from lightkurve import search_lightcurvefile
 from lightkurve import LightCurveFileCollection
 
-LC_DATA_PATH = 'temp/KIC-{}.csv'
+LC_DATA_PATH = 'lc_data/KIC-{}.csv'
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
 def download_light_curve(KIC_ID):
