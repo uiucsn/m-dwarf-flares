@@ -1,3 +1,4 @@
+
 import os
 from multiprocessing import Pool
 
@@ -17,15 +18,16 @@ FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 def download_light_curve(KIC_ID):
     """
     Downloads and saves the light curve for the given KIC ID
-
     Args:
         KIC_ID (int): Kepler Input Catalogue ID.
     """
+
     KIC = "KIC {}".format(KIC_ID)
-    lcf = search_lightcurvefile(KIC, mission = 'Kepler').download_all()
-    new_lcf =  LightCurveFileCollection([x for x in lcf if x.targetid == int(KIC_ID)])
-    lc = new_lcf.SAP_FLUX.stitch()
-    lc.to_csv(LC_DATA_PATH.format(KIC_ID))
+    if not os.path.isfile(LC_DATA_PATH.format(KIC_ID)):
+        lcf = search_lightcurvefile(KIC, mission = 'Kepler').download_all()
+        new_lcf =  LightCurveFileCollection([x for x in lcf if x.targetid == int(KIC_ID)])
+        lc = new_lcf.SAP_FLUX.stitch()
+        lc.to_csv(LC_DATA_PATH.format(KIC_ID))
 
 def download_dust_maps():
     """
@@ -38,7 +40,7 @@ def download_dust_maps():
 def download_kic():
     dir_path = 'data_files'
     if not os.path.exists(dir_path):
-        raise ValueError(f'{dir_path} is not found, run from the project root or create a folder')
+        raise ValueError('{} is not found, run from the project root or create a folder'.format(dir_path))
     file_path = os.path.join(dir_path, 'kepler_kic_v10.csv.gz')
     url = 'https://archive.stsci.edu/pub/kepler/catalogs/kepler_kic_v10.csv.gz'
     chunk_size = 8192
@@ -52,7 +54,6 @@ def download_kic():
                 fh.write(chunk)
                 bar.update(i * chunk_size)
 
-
 def main():
     # 1. Downloading light curves and storing them
     print('Downloading light curves')
@@ -61,8 +62,8 @@ def main():
     index = 0
 
     with progressbar.ProgressBar(max_value = len(kic_id_array)) as bar:
-        with Pool(processes=16) as pool:
-            for index, _ in enumerate(pool.imap(download_light_curve, kic_id_array)):
+            for kic_id in kic_id_array:
+                download_light_curve(kic_id)
                 index += 1
                 bar.update(index)
 

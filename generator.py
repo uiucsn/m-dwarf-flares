@@ -1,5 +1,6 @@
-from functools import lru_cache
+from functools import lru_cache, partial
 from astropy import units as u
+from astropy.modeling.models import BlackBody
 
 import astropy.coordinates as coord
 import numpy as np
@@ -42,7 +43,7 @@ BAND_AMPLITUDE_THRESHOLD = 0.2
 # Generating new parameters is an expernsive process. One way to speed it up is 
 PARAMETER_COUNT_MULTIPLIER = 75
 
-def run_generator(flare_count, file_path, start_index, remove_header, to_plot, use_dpf):
+def run_generator(flare_count, file_path, start_index, remove_header, to_plot, use_dpf, spectrum_type):
     """
     Runs the generator functions. Samples the respective distributions for the parameters and writes
     simulated flare instances to an LCLIB file. 
@@ -82,12 +83,12 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
                 print("3. Obtaining reference flares ...")
                 kic_id, start_time, end_time = get_random_flare_events(parameter_count, rng, MIN_RELATIVE_FLUX_AMPLITUDE)
                 
-                print("4. Sampling star temperature ...")
-                star_temp = get_normally_distributed_star_temp(parameter_count, rng)
+                print("4. Building star spectrum functions ...")
+                star_spectrum_functions = get_star_spectrum_function(parameter_count, rng)
                 
-                print("5. Sampling flare temperature ...")
-                flare_temp = get_normally_distributed_flare_temp(parameter_count, rng)
-                
+                print("5. Building flare spectrum functions ...")
+                flare_spectrum_functions = get_flare_spectrum_function(spectrum_type, parameter_count, rng)
+
                 print("6. Commencing flare modelling ...")
                 for i in range(parameter_count):
                     bar.update(number_of_nominal_flares)
@@ -103,7 +104,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
                         'z': extinction_values['z'][i],
                         'y': extinction_values['y'][i],
                     }
-                    is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_temp[i], flare_temp[i], extinction, output_file, use_dpf)
+                    is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction, output_file, use_dpf)
                     if is_valid_flare:
                         number_of_nominal_flares += 1
                         if to_plot:
@@ -117,7 +118,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
         save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
 
 
-def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_temp, flare_temp, extinction, output_file, use_dpf):
+def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_spectrun_function, flare_spectrum_function, extinction, output_file, use_dpf):
     """
     Generates the model flare based on the parameters and saves to the LCLIB file if it makes the threshold cuts.
 
@@ -147,8 +148,8 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
     luminosity = get_stellar_luminosity(KIC_ID).si  
 
     # Modelling the spetra and fitting the flare on the nominal stellar luminosity
-    flare_luminosities = get_flare_luminosities_in_lsst_passbands(new_lc, KIC_ID, flare_temp, luminosity)
-    baseline_luminosities = get_baseline_luminosity_in_lsst_passband(new_lc, KIC_ID, star_temp, luminosity)
+    flare_luminosities = get_flare_luminosities_in_lsst_passbands(new_lc, KIC_ID, flare_spectrum_function, luminosity)
+    baseline_luminosities = get_baseline_luminosity_in_lsst_passband(new_lc, KIC_ID, star_spectrun_function, luminosity)
     model_luminosities = fit_flare_on_base(flare_luminosities, baseline_luminosities)
 
     # Converting luminosity to distances based on distances and applying extinction
@@ -157,7 +158,19 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
 
     if is_nominal_flare(model_mags_with_extinction, use_dpf):
         # Writing modelled data to LCLIB file if the flare is nominal
-        dump_modeled_data_to_LCLIB(index, galactic_coordinates.l, galactic_coordinates.b, KIC_ID, start_time, end_time, star_temp, flare_temp, distance, model_mags_with_extinction, output_file)
+
+        star_temp = star_spectrun_function.keywords['temp']
+
+        if 'temp' in flare_spectrum_function.keywords.keys():
+            # Assigning the same high and low temps for a simple blacbody mmodel
+            flare_temp_low = flare_spectrum_function.keywords['temp']
+            flare_temp_high = flare_spectrum_function.keywords['temp']
+        else:
+            # Assigning the different high and low temps for a blacbody mmodel with balmer jump
+            flare_temp_low = flare_spectrum_function.keywords['temp_low']
+            flare_temp_high = flare_spectrum_function.keywords['temp_high']
+
+        dump_modeled_data_to_LCLIB(index, galactic_coordinates.l, galactic_coordinates.b, KIC_ID, start_time, end_time, star_temp, flare_temp_low, flare_temp_high, distance, model_mags_with_extinction, output_file)
         return True, model_mags_with_extinction
     else:
         return False, model_mags_with_extinction
@@ -203,7 +216,46 @@ def is_nominal_flare(flare, use_dpf):
 
         # Returns true if there is atleast one passband that statisfies both of the above conditions
         return any(peak and ampl for peak, ampl in zip(peak_mag_is_bright, ampl_is_high))
-        
+
+def get_star_spectrum_function(parameter_count, rng):
+
+    star_temp = get_normally_distributed_star_temp(parameter_count, rng)
+    function_wrappers = []
+    for i in range(parameter_count):
+        function_wrappers.append(partial(build_spectrum_bb_simple, temp=star_temp[i]))
+    return function_wrappers
+
+def get_flare_spectrum_function(spectrum_type, parameter_count, rng):
+
+    if spectrum_type == 'bb_simple':
+        flare_temp = get_normally_distributed_flare_temp_low(parameter_count, rng)
+        function_wrappers = []
+        for i in range(parameter_count):
+            function_wrappers.append(partial(build_spectrum_bb_simple, temp=flare_temp[i]))
+        return function_wrappers
+
+    elif spectrum_type == 'bb_balmer_jump':
+        flare_temp_low = get_normally_distributed_flare_temp_low(parameter_count, rng)
+        flare_temp_high = get_normally_distributed_flare_temp_high(parameter_count, rng)
+        function_wrappers = []
+        for i in range(parameter_count):
+            function_wrappers.append(partial(build_spectrum_bb_balmer_jump, temp_low=flare_temp_low[i], temp_high=flare_temp_high[i]))
+        return function_wrappers
+
+    raise ValueError(f'Spectrum type {spectrum_type} is not supported')
+
+def build_spectrum_bb_simple(lmbd, temp):
+
+    bb = BlackBody(temperature=temp*u.K)
+    return bb(lmbd)
+
+def build_spectrum_bb_balmer_jump(lmbd, temp_low, temp_high):
+
+    cutoff_wavelenght = 3645 * u.AA
+    bb_low = BlackBody(temperature=temp_low*u.K)
+    bb_high = BlackBody(temperature=temp_high*u.K)
+    flux = np.where(lmbd > cutoff_wavelenght, bb_low(lmbd), bb_high(lmbd))
+    return flux
 
 def get_number_of_expected_flares():
     """
@@ -220,7 +272,7 @@ def get_number_of_expected_flares():
     N_M_DWARF = 24.8 * (10e9)
 
     # Fraction of simulated flares that fall within the LSST thresholds
-    LSST_VISIBILITY_FRACTION = .34
+    LSST_VISIBILITY_FRACTION = .08
 
     # Unit: Number of flares per m dwarf per day
     flares_per_star_per_day = TOTAL_KEPLER_FLARE_COUNT / (TOTAL_KEPLER_M_DWARF_COUNT * TOTAL_KEPLER_DURATION_IN_DAYS)
@@ -333,7 +385,7 @@ def get_normally_distributed_star_temp(count, rng):
     return rng.normal(KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS, KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS, count)
 
 
-def get_normally_distributed_flare_temp(count, rng):
+def get_normally_distributed_flare_temp_low(count, rng):
     """
     Returns a numpy array of flare temperatures modelled after a normal distribution.
 
@@ -346,12 +398,27 @@ def get_normally_distributed_flare_temp(count, rng):
 
     return rng.normal(9000, 1000, count)
 
+def get_normally_distributed_flare_temp_high(count, rng):
+    """
+    Returns a numpy array of flare temperatures modelled after a normal distribution.
+
+    Args:
+        count (int): Length of numpy array to be returned
+
+    Returns:
+        numpy array: numpy array containing the flare temperatures with length = count
+    """
+
+    return rng.normal(35000, 3000, count)
+
 if __name__ == "__main__":
     # Getting Arguments
     argparser = argparse.ArgumentParser(
     description='Generates a LCLIB file with simulated flare instances')
     argparser.add_argument('flare_count', type = int,
                             help = 'Number of flares to be generated')
+    argparser.add_argument('flare_spectrum_type', type = str,
+                            help = 'Type of model used for flare spectral modeling. bb_simple or bb_balmer_jump are currently supported.')
     argparser.add_argument('--file_name', type = str, required = False, default = 'LCLIB_Mdwarf-flare-LSST.TEXT',
                             help = 'Name of the output LCLIB file. Should have a .TEXT extension (Default: LCLIB_Mdwarf-flare-LSST.TEXT)')
     argparser.add_argument('--use_dpf', required = False, action = 'store_true',
@@ -369,7 +436,12 @@ if __name__ == "__main__":
 
     # Checking file name
     if not args.file_name.endswith(".TEXT"):
-        print('Output file must be a .TEXT file')
+        print('Output file must be a .TEXT file. Aborting simulation process.')
+        sys.exit(1)
+    
+    # Checking if the spectral model is supported.
+    if args.flare_spectrum_type not in ['bb_simple', 'bb_balmer_jump']:
+        print('The spectrum model passed is not supported. Aborting simulation process.')    
         sys.exit(1)
     
     if args.header_only:
@@ -380,6 +452,6 @@ if __name__ == "__main__":
     else:
         # Starting flare modelling process
         start_time = time.time()
-        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots, args.use_dpf)
+        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots, args.use_dpf,  args.flare_spectrum_type)
         print("--- Simulations completed in %s seconds. File(s) saved. ---" % (int(time.time() - start_time)))
     
