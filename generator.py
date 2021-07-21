@@ -272,7 +272,7 @@ def get_number_of_expected_flares():
     N_M_DWARF = 24.8 * (10e9)
 
     # Fraction of simulated flares that fall within the LSST thresholds
-    LSST_VISIBILITY_FRACTION = .34
+    LSST_VISIBILITY_FRACTION = .08
 
     # Unit: Number of flares per m dwarf per day
     flares_per_star_per_day = TOTAL_KEPLER_FLARE_COUNT / (TOTAL_KEPLER_M_DWARF_COUNT * TOTAL_KEPLER_DURATION_IN_DAYS)
