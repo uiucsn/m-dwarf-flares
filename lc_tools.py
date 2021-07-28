@@ -346,15 +346,21 @@ def get_normalized_lc(lc):
         Kepler light curve object: A normalized light curve of the flare followed by a 
         trailing and leading observation
     """
-
-    flare_time = lc.time
-    flare_flux = lc.flux
-    flare_err = lc.flux_err
     
-    min_flux = np.amin(flare_flux)
-    flare_flux = [flux - min_flux for flux in flare_flux]
+    # m = (y1 - y2) / (x1 - x2) : Equation of slope
+    slope = (lc.flux[-1] - lc.flux[0]) / (lc.time[-1] - lc.time[0])
 
-    flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
+    # y = m (x - x1) + y1 : Equation of line
+    base_flux = slope * (lc.time - lc.time[0]) + lc.flux[0]
+    
+    flare_flux = lc.flux - base_flux
+    flare_flux = np.where(flare_flux > 0, flare_flux, 0)
+    # This should already be 0 but we are adding it to address floating point problems
+    # First and last point in the lc lib should be equal and represent stellar luminosity.
+    flare_flux[[0,-1]] = 0
+
+
+    flare_lc = lk.LightCurve(time = lc.time, flux = flare_flux, flux_err = lc.flux_err) 
     return flare_lc
 
 def find_nearest_index(lc_time, value):
