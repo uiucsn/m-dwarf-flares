@@ -334,7 +334,7 @@ def get_flare_lc_from_time(lc, start_time, end_time):
     flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
     return flare_lc
 
-def get_normalized_lc(lc):
+def get_normalized_lc(lc, start_time, end_time):
     """
     This function takes the Light Curve for a KIC object along with a flare instance
     and returns a normalized light curve containing just the flare with one point prior
@@ -347,19 +347,18 @@ def get_normalized_lc(lc):
         trailing and leading observation
     """
     
-    # m = (y1 - y2) / (x1 - x2)
+    # m = (y1 - y2) / (x1 - x2) : Equation of slope
     slope = (lc.flux[-1] - lc.flux[0]) / (lc.time[-1] - lc.time[0])
-    
-    # y = m (x - x1) + y1
+
+    # y = m (x - x1) + y1 : Equation of line
     base_flux = slope * (lc.time - lc.time[0]) + lc.flux[0]
     
     flare_flux = lc.flux - base_flux
     flare_flux = np.where(flare_flux > 0, flare_flux, 0)
+    # This should already be 0 but we are adding it to address floating point problems
+    # First and last point in the lc lib should be equal and represent stellar luminosity.
+    flare_flux[[0,-1]] = 0
 
-    plt.plot(lc.time, lc.flux)
-    plt.plot(lc.time, base_flux)
-    plt.plot(lc.time, flare_flux)
-    plt.show()
 
     flare_lc = lk.LightCurve(time = lc.time, flux = flare_flux, flux_err = lc.flux_err) 
     return flare_lc

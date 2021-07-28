@@ -130,29 +130,14 @@ def fit_flare_on_base(flare, base):
     y_band = flare['y'].flux + base['y']
     kep_band = flare['kep'].flux + base['kep']
 
-    # Adding baseline stellar luminosity observations before and after the flare for LCLIB
-    u_band = np.concatenate([[base['u']],u_band,[base['u']]])
-    g_band = np.concatenate([[base['g']],g_band,[base['g']]])
-    r_band = np.concatenate([[base['r']],r_band,[base['r']]])
-    i_band = np.concatenate([[base['i']],i_band,[base['i']]])
-    z_band = np.concatenate([[base['z']],z_band,[base['z']]])
-    y_band = np.concatenate([[base['y']],y_band,[base['y']]])
-    kep_band =  np.concatenate([[base['kep']],kep_band,[base['kep']]])
-
-    # Adding times for the new luminosity points
-    start_time = np.amin(flare['kep'].time)
-    end_time = np.amax(flare['kep'].time)
-    delta_t = (end_time - start_time) / len(flare['kep'].time)
-    time =  np.concatenate([[start_time - delta_t],flare['kep'].time,[end_time + delta_t]])
-
     dict = {
-        'u': lk.LightCurve(time = time, flux = u_band),
-        'g': lk.LightCurve(time = time, flux = g_band),
-        'r': lk.LightCurve(time = time, flux = r_band),
-        'i': lk.LightCurve(time = time, flux = i_band),
-        'z': lk.LightCurve(time = time, flux = z_band),
-        'y': lk.LightCurve(time = time, flux = y_band),
-        'kep': lk.LightCurve(time = time, flux = kep_band),
+        'u': lk.LightCurve(time = flare['kep'].time, flux = u_band),
+        'g': lk.LightCurve(time = flare['kep'].time, flux = g_band),
+        'r': lk.LightCurve(time = flare['kep'].time, flux = r_band),
+        'i': lk.LightCurve(time = flare['kep'].time, flux = i_band),
+        'z': lk.LightCurve(time = flare['kep'].time, flux = z_band),
+        'y': lk.LightCurve(time = flare['kep'].time, flux = y_band),
+        'kep': lk.LightCurve(time = flare['kep'].time, flux = kep_band),
     }
     return dict
     
