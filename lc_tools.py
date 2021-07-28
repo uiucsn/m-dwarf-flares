@@ -334,7 +334,7 @@ def get_flare_lc_from_time(lc, start_time, end_time):
     flare_lc = lk.LightCurve(time = flare_time, flux = flare_flux, flux_err = flare_err) 
     return flare_lc
 
-def get_normalized_lc(lc, start_time, end_time):
+def get_normalized_lc(lc):
     """
     This function takes the Light Curve for a KIC object along with a flare instance
     and returns a normalized light curve containing just the flare with one point prior
