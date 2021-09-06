@@ -112,7 +112,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
                             nominal_flare_indices.append(i)
                             nominal_flare_instance.append(modeled_flare)
                         if extract_features:
-                            extract_features_in_lsst_passbands(modeled_flare)
+                            extract_features_in_lsst_passbands(modeled_flare, start_index + number_of_nominal_flares)
     output_file.close()
     print(int((flare_count * 100) / number_of_simulated_flares),'%','of the simulated flares passed the threshold cuts')
     if to_plot:

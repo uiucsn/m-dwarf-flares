@@ -15,10 +15,23 @@ FLARE_DATA_PATH = 'data_files/apjaa8ea2t3_mrt.txt'
 FLARE_INSTANCES_PATH = 'flare_instances/KIC-{}/'
 FLARE_INSTANCE = 'flare_instances/KIC-{kic}/{start}-{end}.csv'
 
-def extract_features_in_lsst_passbands(lc_dict):
+labels = ['StdDeviation', 'Skew', 'Kurtosis', 'EtaE', 'StetsonK', 'Amplitude', 'Beyond1Std', 'Beyond2Std', 'Beyond3Std', 'MagnitudePercentageRatio', 'Cusum']
+tables = {
+    'u': pd.DataFrame(columns=labels),
+    'g': pd.DataFrame(columns=labels),
+    'r': pd.DataFrame(columns=labels),
+    'i': pd.DataFrame(columns=labels),
+    'z': pd.DataFrame(columns=labels),
+    'y': pd.DataFrame(columns=labels),
+    'kep': pd.DataFrame(columns=labels),
+}
+
+def extract_features_in_lsst_passbands(lc_dict, index):
     for passband in lc_dict.keys():
-        print(passband)
-        get_lc_features(lc_dict[passband])
+        features = get_lc_features(lc_dict[passband])
+        tables[passband].loc[index] = features
+        tables[passband].to_csv('simulation_features/{}.csv'.format(passband))
+
 
 def get_lc_features(lcf):
 
@@ -50,12 +63,6 @@ def get_lc_features(lcf):
     cusum = lc.Cusum()
     
     extr = lc.Extractor(std, skew, kurtosis, etaE, stetsonK, amplitude, beyond_1_std, beyond_2_std, beyond_3_std, magnitude_percentile_ratio, cusum)
+    return extr(t, m, sigma)
 
-    print(f'Half-amplitude is {amplitude(t, m, sigma).item()}')
-    print(f'Fraction of observations beyond 2 std from mean is {beyond_2_std(t, m, sigma).item()}')
-    print(f'Eta E fit is {etaE(t, m, sigma).item()}')
-    print(f'All features: {extr(t, m, sigma)}')
-
-if __name__=="__main__":
-    get_features()
 
