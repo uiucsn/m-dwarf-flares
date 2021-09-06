@@ -17,6 +17,7 @@ from distance import get_stellar_luminosity, get_mags_in_lsst_passbands
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 from plotting_tools import save_simulation_plots
 from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
+from feature_extraction import extract_features_in_lsst_passbands
 
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
@@ -25,7 +26,7 @@ KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
 KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS = 161.37182827551771
 
 # Minimum Relative Flux Amplitude of the flares. Flares below this relative flux amplitude will be filtered out. This is a performance optimization.
-MIN_RELATIVE_FLUX_AMPLITUDE = 0.01
+MIN_RELATIVE_FLUX_AMPLITUDE = 0
 
 # Maximum magnitude for a flare in the LSST u passband. Flares above this mag value will be filtered out.
 PEAK_MAGNITUDE_TOLERANCE = 0.5
@@ -110,6 +111,8 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
                         if to_plot:
                             nominal_flare_indices.append(i)
                             nominal_flare_instance.append(modeled_flare)
+                        if True:
+                            extract_features_in_lsst_passbands(modeled_flare)
     output_file.close()
     print(int((flare_count * 100) / number_of_simulated_flares),'%','of the simulated flares passed the threshold cuts')
     if to_plot:
@@ -429,6 +432,8 @@ if __name__ == "__main__":
                             help = 'Use this if you want to remove the LCLIB header. (Default: False)')
     argparser.add_argument('--generate_plots', required = False, action = 'store_true',
                             help = 'Use this if you want to save plots based on the simulations. Please note that this might have memory implications. Plotting is disabled by default (Default: False)')
+    argparser.add_argument('--extract_features', required = False, action = 'store_true',
+                            help = 'Use this if you want to save the features of the simulated flares. Please note that this comes with a performance penalty. Feature extraction is disabled by default (Default: False)')
     argparser.add_argument('--header_only', required = False, action = 'store_true',
                             help = 'Use this if you want only want to generate a LCLIB header. This does not generate any flares and thus cannot be used with --generate_plots to save plots. (Default: False)')
 
