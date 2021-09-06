@@ -44,7 +44,7 @@ BAND_AMPLITUDE_THRESHOLD = 0.2
 # Generating new parameters is an expernsive process. One way to speed it up is 
 PARAMETER_COUNT_MULTIPLIER = 75
 
-def run_generator(flare_count, file_path, start_index, remove_header, to_plot, use_dpf, spectrum_type):
+def run_generator(flare_count, file_path, start_index, remove_header, to_plot, use_dpf, spectrum_type, extract_features):
     """
     Runs the generator functions. Samples the respective distributions for the parameters and writes
     simulated flare instances to an LCLIB file. 
@@ -111,7 +111,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
                         if to_plot:
                             nominal_flare_indices.append(i)
                             nominal_flare_instance.append(modeled_flare)
-                        if True:
+                        if extract_features:
                             extract_features_in_lsst_passbands(modeled_flare)
     output_file.close()
     print(int((flare_count * 100) / number_of_simulated_flares),'%','of the simulated flares passed the threshold cuts')
@@ -457,6 +457,6 @@ if __name__ == "__main__":
     else:
         # Starting flare modelling process
         start_time = time.time()
-        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots, args.use_dpf,  args.flare_spectrum_type)
+        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots, args.use_dpf,  args.flare_spectrum_type, args.extract_features)
         print("--- Simulations completed in %s seconds. File(s) saved. ---" % (int(time.time() - start_time)))
     
