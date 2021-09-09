@@ -119,6 +119,8 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
         nominal_coordinates = coord.SkyCoord(coordinates[nominal_flare_indices])
         print("7. Generating plots ...")
         save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
+    if extract_features:
+        print("8. Generating feature plots ...")
 
 
 def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_spectrun_function, flare_spectrum_function, extinction, output_file, use_dpf):
