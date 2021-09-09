@@ -65,4 +65,32 @@ def get_lc_features(lcf):
     extr = lc.Extractor(std, skew, kurtosis, etaE, stetsonK, amplitude, beyond_1_std, beyond_2_std, beyond_3_std, magnitude_percentile_ratio, cusum)
     return extr(t, m, sigma)
 
+def plot_all_feature_distributions():
+    for passband in ['u','g','r','i','z','y','kep']:
+        tables[passband] = pd.read_csv('simulation_features/{}.csv'.format(passband))
+    
+    for column in tables['u'].columns:
+        all_data = tables['u'][column] + tables['g'][column] + tables['r'][column] + tables['i'][column] + tables['z'][column] + tables['y'][column]
 
+        # max_amp = max(all_data)
+        # min_amp = min(all_data)
+        # bin_width = (max_amp - min_amp) / 20
+        # bins = np.arange(min_amp, max_amp + bin_width, bin_width)
+
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot()
+        ax.set_title('Distribution of {} in LSST passbands'.format(column))
+        ax.hist(tables['u'][column], histtype='step', facecolor='m', label = 'u band') 
+        ax.hist(tables['g'][column], histtype='step', facecolor='g', label = 'g band') 
+        ax.hist(tables['r'][column], histtype='step', facecolor='r', label = 'r band') 
+        ax.hist(tables['i'][column], histtype='step', facecolor='c', label = 'i band') 
+        ax.hist(tables['z'][column], histtype='step', facecolor='b', label = 'z band') 
+        ax.hist(tables['y'][column], histtype='step', facecolor='y', label = 'y band') 
+        ax.hist(tables['kep'][column], histtype='step', label = 'kepler band') 
+        ax.set_xlabel(column)
+        ax.set_ylabel('Number of m dwarfs')
+        plt.legend(loc='upper right')
+        plt.savefig("feature_distribution/{}_distribution.pdf".format(column))
+
+if __name__ == "__main__":
+    plot_all_feature_distributions()

@@ -245,7 +245,6 @@ def get_flare_spectrum_function(spectrum_type, parameter_count, rng):
             function_wrappers.append(partial(build_spectrum_bb_balmer_jump, temp_low=flare_temp_low[i], temp_high=flare_temp_high[i]))
         return function_wrappers
 
-    raise ValueError(f'Spectrum type {spectrum_type} is not supported')
 
 def build_spectrum_bb_simple(lmbd, temp):
 
