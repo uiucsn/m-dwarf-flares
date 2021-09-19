@@ -77,19 +77,29 @@ def plot_all_feature_distributions():
         # bin_width = (max_amp - min_amp) / 20
         # bins = np.arange(min_amp, max_amp + bin_width, bin_width)
 
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot()
-        ax.set_title('Distribution of {} in LSST passbands'.format(column))
-        ax.hist(tables['u'][column], histtype='step', facecolor='m', label = 'u band') 
-        ax.hist(tables['g'][column], histtype='step', facecolor='g', label = 'g band') 
-        ax.hist(tables['r'][column], histtype='step', facecolor='r', label = 'r band') 
-        ax.hist(tables['i'][column], histtype='step', facecolor='c', label = 'i band') 
-        ax.hist(tables['z'][column], histtype='step', facecolor='b', label = 'z band') 
-        ax.hist(tables['y'][column], histtype='step', facecolor='y', label = 'y band') 
-        ax.hist(tables['kep'][column], histtype='step', label = 'kepler band') 
-        ax.set_xlabel(column)
-        ax.set_ylabel('Number of m dwarfs')
-        plt.legend(loc='upper right')
+        fig, ax = plt.subplots(2, 3, constrained_layout=True,
+                        sharex=True, sharey=True)
+
+        fig.suptitle('Distribution of {0} in LSST passbands. x axis = {0}'.format(column))
+
+        ax[0][0].hist(tables['u'][column], histtype='step', color='m', label = 'u band') 
+        ax[0][1].hist(tables['g'][column], histtype='step', color='g', label = 'g band') 
+        ax[0][2].hist(tables['r'][column], histtype='step', color='r', label = 'r band') 
+        ax[1][0].hist(tables['i'][column], histtype='step', color='c', label = 'i band') 
+        ax[1][1].hist(tables['z'][column], histtype='step', color='b', label = 'z band') 
+        ax[1][2].hist(tables['y'][column], histtype='step', color='y', label = 'y band') 
+
+        ax[0][0].legend(loc='upper right')
+        ax[0][1].legend(loc='upper right')
+        ax[0][2].legend(loc='upper right')
+        ax[1][0].legend(loc='upper right')
+        ax[1][1].legend(loc='upper right')
+        ax[1][2].legend(loc='upper right')
+
+        plt.xlabel(column)
+        plt.ylabel("Number of m dwarfs")
+        
+        
         plt.savefig("feature_distribution/{}_distribution.pdf".format(column))
 
 if __name__ == "__main__":

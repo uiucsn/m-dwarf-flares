@@ -17,7 +17,7 @@ from distance import get_stellar_luminosity, get_mags_in_lsst_passbands
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 from plotting_tools import save_simulation_plots
 from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
-from feature_extraction import extract_features_in_lsst_passbands
+from feature_extraction import extract_features_in_lsst_passbands, plot_all_feature_distributions
 
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
@@ -121,6 +121,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
         save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
     if extract_features:
         print("8. Generating feature plots ...")
+        #plot_all_feature_distributions()
 
 
 def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_spectrun_function, flare_spectrum_function, extinction, output_file, use_dpf):
