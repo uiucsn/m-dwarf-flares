@@ -114,14 +114,14 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
                         if extract_features:
                             extract_features_in_lsst_passbands(modeled_flare, start_index + number_of_nominal_flares)
     output_file.close()
-    print(int((flare_count * 100) / number_of_simulated_flares),'%','of the simulated flares passed the threshold cuts')
     if to_plot:
         nominal_coordinates = coord.SkyCoord(coordinates[nominal_flare_indices])
         print("7. Generating plots ...")
         save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
     if extract_features:
         print("8. Generating feature plots ...")
-        #plot_all_feature_distributions()
+        plot_all_feature_distributions()
+    print(int((flare_count * 100) / number_of_simulated_flares),'%','of the simulated flares passed the threshold cuts')
 
 
 def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_spectrun_function, flare_spectrum_function, extinction, output_file, use_dpf):

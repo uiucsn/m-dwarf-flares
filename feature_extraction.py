@@ -70,15 +70,8 @@ def plot_all_feature_distributions():
         tables[passband] = pd.read_csv('simulation_features/{}.csv'.format(passband))
     
     for column in tables['u'].columns:
-        all_data = tables['u'][column] + tables['g'][column] + tables['r'][column] + tables['i'][column] + tables['z'][column] + tables['y'][column]
 
-        # max_amp = max(all_data)
-        # min_amp = min(all_data)
-        # bin_width = (max_amp - min_amp) / 20
-        # bins = np.arange(min_amp, max_amp + bin_width, bin_width)
-
-        fig, ax = plt.subplots(2, 3, constrained_layout=True,
-                        sharex=True, sharey=True)
+        fig, ax = plt.subplots(2, 3, constrained_layout=True, sharex=True, sharey=True)
 
         fig.suptitle('Distribution of {0} in LSST passbands. x axis = {0}'.format(column))
 
