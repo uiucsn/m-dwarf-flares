@@ -27,6 +27,9 @@ KEPLER_STD_EFFECTIVE_TEMP_FOR_M_DWARFS = 161.37182827551771
 # Minimum Relative Flux Amplitude of the flares. Flares below this relative flux amplitude will be filtered out. This is a performance optimization.
 MIN_RELATIVE_FLUX_AMPLITUDE = 0.01
 
+# Maximum gap between two flare data points in days.
+MAX_TIME_GAP_IN_FLARE = 0.1
+
 # Maximum magnitude for a flare in the LSST u passband. Flares above this mag value will be filtered out.
 PEAK_MAGNITUDE_TOLERANCE = 0.5
 PEAK_MAGNITUDE_THRESHOLD = {
@@ -156,7 +159,7 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
     model_mags = get_mags_in_lsst_passbands(model_luminosities, distance)
     model_mags_with_extinction = apply_extinction_to_lsst_mags(model_mags, extinction)
 
-    if is_nominal_flare(model_mags_with_extinction, use_dpf):
+    if is_nominal_flare(model_mags_with_extinction, use_dpf) and flare_has_nominal_cadence(model_mags_with_extinction):
         # Writing modelled data to LCLIB file if the flare is nominal
 
         star_temp = star_spectrun_function.keywords['temp']
@@ -174,6 +177,27 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
         return True, model_mags_with_extinction
     else:
         return False, model_mags_with_extinction
+
+def flare_has_nominal_cadence(flare):
+    """
+    Checking if the flare has nominal cadence. Computes the time gap between every pair of observations
+    in a flare and returns true if the maximum time gap between two data points is less than 
+    MAX_TIME_GAP_IN_FLARE, false otherwise.
+
+    Args:
+        flare ([dictionary of lc's]): A dictionary of lc's in LSST passbands.
+
+    Returns:
+        [boolean]: A boolean if the flare cadence is normal or not.
+    """
+    
+    time = flare['u'].time
+    diff = [time[n + 1] - time[n] for n in range(len(time)-1)]
+
+    if max(diff) < MAX_TIME_GAP_IN_FLARE:
+        return True
+    else:
+        return False
 
 def is_nominal_flare(flare, use_dpf):
     """
