@@ -192,12 +192,9 @@ def flare_has_nominal_cadence(flare):
     """
     
     time = flare['u'].time
-    diff = [time[n + 1] - time[n] for n in range(len(time)-1)]
+    diff = time[1:] - time[:-1]
 
-    if max(diff) < MAX_TIME_GAP_IN_FLARE:
-        return True
-    else:
-        return False
+    return np.max(diff) < MAX_TIME_GAP_IN_FLARE
 
 def is_nominal_flare(flare, use_dpf):
     """
