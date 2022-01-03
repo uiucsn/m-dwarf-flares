@@ -17,6 +17,7 @@ from distance import get_stellar_luminosity, get_mags_in_lsst_passbands
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 from plotting_tools import save_simulation_plots
 from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
+from m_dwarf_flare import mDwarfFlare
 
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
@@ -43,7 +44,7 @@ BAND_AMPLITUDE_THRESHOLD = 0.2
 # Generating new parameters is an expernsive process. One way to speed it up is 
 PARAMETER_COUNT_MULTIPLIER = 75
 
-def run_generator(flare_count, file_path, start_index, remove_header, to_plot, use_dpf, spectrum_type):
+def run_generator(flare_count, file_path, start_index, remove_header, to_plot, use_dpf, spectrum_type, pickle_path):
     """
     Runs the generator functions. Samples the respective distributions for the parameters and writes
     simulated flare instances to an LCLIB file. 
@@ -106,10 +107,13 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
                     }
                     is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction, output_file, use_dpf)
                     if is_valid_flare:
-                        number_of_nominal_flares += 1
+                        if pickle_path != '':
+                            flare = mDwarfFlare(start_index + number_of_nominal_flares, modeled_flare, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction)
+                            flare.pickle_flare_instance(pickle_path)
                         if to_plot:
                             nominal_flare_indices.append(i)
                             nominal_flare_instance.append(modeled_flare)
+                        number_of_nominal_flares += 1
     output_file.close()
     print(int((flare_count * 100) / number_of_simulated_flares),'%','of the simulated flares passed the threshold cuts')
     if to_plot:
@@ -423,6 +427,8 @@ if __name__ == "__main__":
                             help = 'Name of the output LCLIB file. Should have a .TEXT extension (Default: LCLIB_Mdwarf-flare-LSST.TEXT)')
     argparser.add_argument('--use_dpf', required = False, action = 'store_true',
                             help = 'Use this if you want to use differential photometry for filtering. Standard filtering is used by default. (Default: False)')
+    argparser.add_argument('--pickle_flare_instances', type = str, required = False, default='',
+                            help = 'Path of directory where you want to store all the nominal flare simulations. (Default: Write to LCLIB only)')
     argparser.add_argument('--start_index', type = int, required = False, default = 0,
                             help = 'Use this if you want to start your file with an event number other than 0. LCLIB header is not added for start indices other than 0 (Default: 0)')
     argparser.add_argument('--remove_header', required = False, action = 'store_true',
@@ -452,6 +458,6 @@ if __name__ == "__main__":
     else:
         # Starting flare modelling process
         start_time = time.time()
-        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots, args.use_dpf,  args.flare_spectrum_type)
+        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots, args.use_dpf,  args.flare_spectrum_type, args.pickle_flare_instances)
         print("--- Simulations completed in %s seconds. File(s) saved. ---" % (int(time.time() - start_time)))
     
