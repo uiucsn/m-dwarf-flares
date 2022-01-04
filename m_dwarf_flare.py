@@ -1,5 +1,6 @@
 import pickle
 import matplotlib.pyplot as plt
+from pygit2 import Repository
 
 class mDwarfFlare:
 
@@ -26,6 +27,8 @@ class mDwarfFlare:
             # Assigning the different high and low temps for a blacbody mmodel with balmer jump
             self.flare_temp_low = flare_spectrum_function.keywords['temp_low']
             self.flare_temp_high = flare_spectrum_function.keywords['temp_high']
+        
+        self.git_commit = Repository('.git').head.peel().hex
 
     def pickle_flare_instance(self, path):
         filename = path + '/flare_sim_' + str(self.index) + '.pkl'

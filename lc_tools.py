@@ -10,6 +10,7 @@ import pandas as pd
 from astropy.io import ascii
 from lightkurve import search_lightcurvefile
 from lightkurve import LightCurveFileCollection
+from pygit2 import Repository
 
 LC_DATA_PATH = 'lc_data/KIC-{}.csv'
 FLARE_DATA_PATH = 'data_files/apjaa8ea2t3_mrt.txt'
@@ -432,7 +433,7 @@ def add_LCLIB_header(count, output_file):
     """
     Function to write the header of the lclib file.
     """
-    
+    git_commit = Repository('.git').head.peel().hex
     header = ('SURVEY: LSST\n'
               'FILTERS: ugrizY\n'
               'MODEL: m-Dwarf-Flare-Model\n'
@@ -441,6 +442,7 @@ def add_LCLIB_header(count, output_file):
               'NEVENT: {count}\n\n'
               'DOCUMENTATION:\n'
               '  PURPOSE: m Dwarf Flare model, Based on Kepler light curves and estimated distances from Gaia\n'
+              '  Git commit hash: {commit_number} (For version tracking)\n'
               '  REF:\n'
               '  - AUTHOR: Ved Shah\n'
               '  USAGE_KEY: GENMODEL\n'
@@ -454,5 +456,5 @@ def add_LCLIB_header(count, output_file):
               '  - distance - Distance to the star (in kpc)\n'
               '  - start_time - Start time of the reference flare (in BKJD)\n'
               '  - end_time - End time of the reference flare (in BKJD)\n'
-              'DOCUMENTATION_END:\n\n').format(count = count)
+              'DOCUMENTATION_END:\n\n').format(count = count, commit_number = git_commit)
     output_file.write(header)
