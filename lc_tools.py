@@ -10,7 +10,6 @@ import pandas as pd
 from astropy.io import ascii
 from lightkurve import search_lightcurvefile
 from lightkurve import LightCurveFileCollection
-from pygit2 import Repository
 
 LC_DATA_PATH = 'lc_data/KIC-{}.csv'
 FLARE_DATA_PATH = 'data_files/apjaa8ea2t3_mrt.txt'
@@ -433,7 +432,7 @@ def add_LCLIB_header(count, output_file):
     """
     Function to write the header of the lclib file.
     """
-    git_commit = Repository(os.path.dirname(os.path.abspath(__file__))).head.peel().hex
+
     header = ('SURVEY: LSST\n'
               'FILTERS: ugrizY\n'
               'MODEL: m-Dwarf-Flare-Model\n'
@@ -446,15 +445,15 @@ def add_LCLIB_header(count, output_file):
               '  - AUTHOR: Ved Shah\n'
               '  USAGE_KEY: GENMODEL\n'
               '  NOTES:\n'
-              '  - Git commit hash: {commit_number} (For version tracking)\n'
               '  - Flare instances were taken from Yang et al. (2017)\n'
               '  - Distance data was taken from A Bailer Jones et al. (2021)\n'
               '  PARAMS:\n'  
               '  - KIC_ID - Kepler Input Catalogue ID\n'
-              '  - flare_temp - Temperature of the flare for spectral modelling (in K)\n'
+              '  - flare_temp_low - Temperature of the flare for spectral modelling with wavelength > balmer (in K)\n'
+              '  - flare_temp_high - Temperature of the flare for spectral modelling with wavelength < balmer (in K)\n'
               '  - star_temp - Temperature of the star for spectral modelling (in K)\n'
               '  - distance - Distance to the star (in kpc)\n'
               '  - start_time - Start time of the reference flare (in BKJD)\n'
               '  - end_time - End time of the reference flare (in BKJD)\n'
-              'DOCUMENTATION_END:\n\n').format(count = count, commit_number = git_commit)
+              'DOCUMENTATION_END:\n\n').format(count = count)
     output_file.write(header)
