@@ -38,7 +38,7 @@ class MDwarfFlare:
 
         # Making a directory if it does not already exist
         os.makedirs(dir_path, exist_ok=True)
-        filename = os.path.join(f'flare_sim_{self.index}.pkl')
+        filename = os.path.join(dir_path, f'flare_sim_{self.index}.pkl')
         with open(filename, 'wb') as outp:  # Overwrites any existing file.
             pickle.dump(self, outp, PICKLE_PROTOCOL)
 
