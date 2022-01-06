@@ -433,7 +433,7 @@ def add_LCLIB_header(count, output_file):
     """
     Function to write the header of the lclib file.
     """
-    git_commit = Repository('.git').head.peel().hex
+    git_commit = Repository(os.path.dirname(os.path.abspath(__file__))).head.peel().hex
     header = ('SURVEY: LSST\n'
               'FILTERS: ugrizY\n'
               'MODEL: m-Dwarf-Flare-Model\n'
