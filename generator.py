@@ -17,7 +17,7 @@ from distance import get_stellar_luminosity, get_mags_in_lsst_passbands
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
 from plotting_tools import save_simulation_plots
 from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
-from m_dwarf_flare import mDwarfFlare
+from m_dwarf_flare import MDwarfFlare
 
 FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
@@ -108,7 +108,7 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
                     is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction, output_file, use_dpf)
                     if is_valid_flare:
                         if pickle_path != '':
-                            flare = mDwarfFlare(start_index + number_of_nominal_flares, modeled_flare, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction)
+                            flare = MDwarfFlare(start_index + number_of_nominal_flares, modeled_flare, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction)
                             flare.pickle_flare_instance(pickle_path)
                         if to_plot:
                             nominal_flare_indices.append(i)
@@ -165,7 +165,7 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
 
         star_temp = star_spectrun_function.keywords['temp']
 
-        if 'temp' in flare_spectrum_function.keywords.keys():
+        if 'temp' in flare_spectrum_function.keywords:
             # Assigning the same high and low temps for a simple blacbody mmodel
             flare_temp_low = flare_spectrum_function.keywords['temp']
             flare_temp_high = flare_spectrum_function.keywords['temp']

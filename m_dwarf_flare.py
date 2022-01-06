@@ -2,7 +2,7 @@ import pickle
 import matplotlib.pyplot as plt
 from pygit2 import Repository
 
-class mDwarfFlare:
+class MDwarfFlare:
 
     def __init__(self, index, lightcurves, coordinates, galactic_coordinates, distance, kic_id, start_time, end_time, star_spectrum_function, flare_spectrum_function, extinction):
         self.index = index
@@ -19,7 +19,7 @@ class mDwarfFlare:
 
         self.star_temp = star_spectrum_function.keywords['temp']
 
-        if 'temp' in flare_spectrum_function.keywords.keys():
+        if 'temp' in flare_spectrum_function.keywords:
             # Assigning the same high and low temps for a simple blacbody mmodel
             self.flare_temp_low = flare_spectrum_function.keywords['temp']
             self.flare_temp_high = flare_spectrum_function.keywords['temp']
