@@ -8,8 +8,9 @@ import astropy
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import os
 
-def save_simulation_plots(coordinates, flares, rng):
+def save_simulation_plots(coordinates, flares, dir_path, rng):
     """
     Generates and saves the plots for the simulated flares that are saved to the LCLIB file.
 
@@ -19,14 +20,17 @@ def save_simulation_plots(coordinates, flares, rng):
         rng (numpy rng): Random number generator
     """
 
-    save_peak_mag_distribution(flares)
-    save_mag_amp_distribution(flares)
-    save_simulated_distance_distribution(coordinates, rng)
-    save_simulated_l_distribution(coordinates, rng)
-    save_simulated_b_distribution(coordinates, rng)
-    save_sky_map_with_distances(coordinates)
+    plots__dir = os.path.join(dir_path, 'simulation_stats')
+    os.makedirs(plots__dir, exist_ok=True)
 
-def save_peak_mag_distribution(flares):
+    save_peak_mag_distribution(flares, plots__dir)
+    save_mag_amp_distribution(flares, plots__dir)
+    save_simulated_distance_distribution(coordinates, plots__dir, rng)
+    save_simulated_l_distribution(coordinates, plots__dir, rng)
+    save_simulated_b_distribution(coordinates, plots__dir, rng)
+    save_sky_map_with_distances(coordinates, plots__dir)
+
+def save_peak_mag_distribution(flares, plots__dir):
     """
     Generatres and saves a plot for distribution of the Peak magnitudes in all 6 LSST passbands 
 
@@ -69,9 +73,9 @@ def save_peak_mag_distribution(flares):
     ax.set_xlabel('Peak Magnitude')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
-    plt.savefig("simulation_stats/peak_mag_distribution.pdf")
+    plt.savefig(os.path.join(plots__dir,"peak_mag_distribution.pdf"))
 
-def save_mag_amp_distribution(flares):
+def save_mag_amp_distribution(flares, plots__dir):
     """
     Generatres and saves a plot for distribution of the magnitude amplitudes in all 6 LSST passbands 
 
@@ -114,10 +118,10 @@ def save_mag_amp_distribution(flares):
     ax.set_xlabel('Magnitude amplitude')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
-    plt.savefig("simulation_stats/mag_amp_distribution.pdf")
+    plt.savefig(os.path.join(plots__dir,"mag_amp_distribution.pdf"))
 
 
-def save_simulated_distance_distribution(coordinates, rng):
+def save_simulated_distance_distribution(coordinates, plots__dir, rng):
     """
     Generatres and saves a plot for distribution of the simulated distances vs the MW modelled distances.
 
@@ -146,9 +150,9 @@ def save_simulated_distance_distribution(coordinates, rng):
     ax.set_xlabel('Distance in kpc')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
-    plt.savefig("simulation_stats/dist_distribution.pdf")
+    plt.savefig(os.path.join(plots__dir,"dist_distribution.pdf"))
 
-def save_simulated_l_distribution(coordinates, rng):
+def save_simulated_l_distribution(coordinates, plots__dir, rng):
     """
     Generatres and saves a plot for distribution of the simulated galactic longitude vs the MW modelled galactic longitude.
 
@@ -177,9 +181,9 @@ def save_simulated_l_distribution(coordinates, rng):
     ax.set_xlabel('Galactic longitude in degrees')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
-    plt.savefig("simulation_stats/l_distribution.pdf")
+    plt.savefig(os.path.join(plots__dir, "l_distribution.pdf"))
 
-def save_simulated_b_distribution(coordinates, rng):
+def save_simulated_b_distribution(coordinates, plots__dir, rng):
     """
     Generatres and saves a plot for distribution of the simulated galactic latitude vs the MW modelled galactic latitude.
 
@@ -208,9 +212,9 @@ def save_simulated_b_distribution(coordinates, rng):
     ax.set_xlabel('Galactic latitude in degrees')
     ax.set_ylabel('Number of m dwarfs')
     plt.legend(loc='upper right')
-    plt.savefig("simulation_stats/b_distribution.pdf")
+    plt.savefig(os.path.join(plots__dir, 'b_distribution.pdf'))
 
-def save_sky_map_with_distances(coordinates):
+def save_sky_map_with_distances(coordinates, plots__dir):
     """
     Plots the sky map fo simulated m dwarfs with distances which are written to the LCLIB
 
@@ -225,7 +229,7 @@ def save_sky_map_with_distances(coordinates):
     ax.grid(True)
     ax.set_xticklabels(['10h', '8h', '6h', '4h', '2h', '0h', '22h', '20h', '18h', '16h', '14h'])
     plt.colorbar(scatter, label = "Distance in kpc")
-    plt.savefig("simulation_stats/sky_map.pdf")
+    plt.savefig(os.path.join(plots__dir,"sky_map.pdf"))
 
 def plotSkyMapFromSUPERBLINK():
     """

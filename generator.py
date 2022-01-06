@@ -10,6 +10,7 @@ import time
 import argparse
 import sys
 import progressbar
+import os
 
 from lc_tools import  load_light_curve, get_flare_lc_from_time, get_normalized_lc, dump_modeled_data_to_LCLIB, add_LCLIB_header
 from spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_luminosities_in_lsst_passbands, fit_flare_on_base
@@ -44,7 +45,9 @@ BAND_AMPLITUDE_THRESHOLD = 0.2
 # Generating new parameters is an expernsive process. One way to speed it up is 
 PARAMETER_COUNT_MULTIPLIER = 75
 
-def run_generator(flare_count, file_path, start_index, remove_header, to_plot, use_dpf, spectrum_type, pickle_path):
+# run_generator(args.flare_count, args.spectrum_class, args.dir_name, args.file_name, args.use_dpf, args.pickle_sims, args.generate_plots, args.start_index, args.remove_header)
+
+def run_generator(flare_count, spectrum_type, dir_path, file_path, use_dpf, pickle_sims, generate_plots, start_index, remove_header):
     """
     Runs the generator functions. Samples the respective distributions for the parameters and writes
     simulated flare instances to an LCLIB file. 
@@ -61,7 +64,9 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
     rng = np.random.default_rng(start_index)
     parameter_count = PARAMETER_COUNT_MULTIPLIER * flare_count # Generating more parameters to avoid reloading of dust map and other files
 
-    with open(file_path, 'w') as output_file:
+    output_file_path = os.path.join(dir_path, file_path)
+
+    with open(output_file_path, 'w') as output_file:
 
         # Adding lc lib to header
         if not remove_header:
@@ -107,19 +112,19 @@ def run_generator(flare_count, file_path, start_index, remove_header, to_plot, u
                     }
                     is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction, output_file, use_dpf)
                     if is_valid_flare:
-                        if pickle_path != '':
+                        if pickle_sims:
                             flare = MDwarfFlare(start_index + number_of_nominal_flares, modeled_flare, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction)
-                            flare.pickle_flare_instance(pickle_path)
-                        if to_plot:
+                            flare.pickle_flare_instance(dir_path)
+                        if generate_plots:
                             nominal_flare_indices.append(i)
                             nominal_flare_instance.append(modeled_flare)
                         number_of_nominal_flares += 1
     output_file.close()
     print(int((flare_count * 100) / number_of_simulated_flares),'%','of the simulated flares passed the threshold cuts')
-    if to_plot:
+    if generate_plots:
         nominal_coordinates = coord.SkyCoord(coordinates[nominal_flare_indices])
         print("7. Generating plots ...")
-        save_simulation_plots(nominal_coordinates, nominal_flare_instance, rng)
+        save_simulation_plots(nominal_coordinates, nominal_flare_instance, dir_path, rng)
 
 
 def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_spectrun_function, flare_spectrum_function, extinction, output_file, use_dpf):
@@ -416,25 +421,29 @@ def get_normally_distributed_flare_temp_high(count, rng):
     return rng.normal(35000, 3000, count)
 
 if __name__ == "__main__":
+
     # Getting Arguments
     argparser = argparse.ArgumentParser(
     description='Generates a LCLIB file with simulated flare instances')
-    argparser.add_argument('flare_count', type = int,
-                            help = 'Number of flares to be generated')
-    argparser.add_argument('flare_spectrum_type', type = str,
+
+    argparser.add_argument('--flare_count', type = int, required = True,
+                            help = 'Number of flares to be generated.')
+    argparser.add_argument('--spectrum_class', type = str, required = True,
                             help = 'Type of model used for flare spectral modeling. bb_simple or bb_balmer_jump are currently supported.')
-    argparser.add_argument('--file_name', type = str, required = False, default = 'LCLIB_Mdwarf-flare-LSST.TEXT',
+    argparser.add_argument('--dir_name', type = str, required = True, default = 'sample',
+                            help = 'Path to the directory to store all the simulation data. Directory will be created if it does not exist (Default: sample)')
+    argparser.add_argument('--file_name', type = str, required = True, default = 'sample.TEXT',
                             help = 'Name of the output LCLIB file. Should have a .TEXT extension (Default: LCLIB_Mdwarf-flare-LSST.TEXT)')
     argparser.add_argument('--use_dpf', required = False, action = 'store_true',
                             help = 'Use this if you want to use differential photometry for filtering. Standard filtering is used by default. (Default: False)')
-    argparser.add_argument('--pickle_flare_instances', type = str, required = False, default='',
-                            help = 'Path of directory where you want to store all the nominal flare simulations. (Default: Write to LCLIB only)')
+    argparser.add_argument('--pickle_sims', required = False, action = 'store_true',
+                            help = 'Use this if you want to store all the nominal flare simulation objects. (Default: Write to LCLIB only)')
+    argparser.add_argument('--generate_plots', required = False, action = 'store_true',
+                            help = 'Use this if you want to save plots based on the simulations. Please note that this might have memory implications. Plotting is disabled by default (Default: False)')
     argparser.add_argument('--start_index', type = int, required = False, default = 0,
                             help = 'Use this if you want to start your file with an event number other than 0. LCLIB header is not added for start indices other than 0 (Default: 0)')
     argparser.add_argument('--remove_header', required = False, action = 'store_true',
                             help = 'Use this if you want to remove the LCLIB header. (Default: False)')
-    argparser.add_argument('--generate_plots', required = False, action = 'store_true',
-                            help = 'Use this if you want to save plots based on the simulations. Please note that this might have memory implications. Plotting is disabled by default (Default: False)')
     argparser.add_argument('--header_only', required = False, action = 'store_true',
                             help = 'Use this if you want only want to generate a LCLIB header. This does not generate any flares and thus cannot be used with --generate_plots to save plots. (Default: False)')
 
@@ -446,18 +455,22 @@ if __name__ == "__main__":
         sys.exit(1)
     
     # Checking if the spectral model is supported.
-    if args.flare_spectrum_type not in ['bb_simple', 'bb_balmer_jump']:
+    if args.spectrum_class not in ['bb_simple', 'bb_balmer_jump']:
         print('The spectrum model passed is not supported. Aborting simulation process.')    
         sys.exit(1)
-    
+
+    # Creating a directory to store everything
+    os.makedirs(args.dir_name, exist_ok=True)
+
     if args.header_only:
-        with open(args.file_name, 'w') as output_file:
+        path = os.path.join(args.dir_name, args.file_name)
+        with open(path, 'w') as output_file:
             add_LCLIB_header(args.flare_count, output_file)
         print('Created a header file. Exiting without flare simulation')
         sys.exit(1)
     else:
         # Starting flare modelling process
         start_time = time.time()
-        run_generator(args.flare_count, args.file_name, args.start_index, args.remove_header, args.generate_plots, args.use_dpf,  args.flare_spectrum_type, args.pickle_flare_instances)
+        run_generator(args.flare_count, args.spectrum_class, args.dir_name, args.file_name, args.use_dpf, args.pickle_sims, args.generate_plots, args.start_index, args.remove_header)
         print("--- Simulations completed in %s seconds. File(s) saved. ---" % (int(time.time() - start_time)))
     
