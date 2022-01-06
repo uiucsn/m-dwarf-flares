@@ -1,6 +1,9 @@
 import pickle
 import matplotlib.pyplot as plt
 from pygit2 import Repository
+import os
+
+PICKLE_PROTOCOL = 4
 
 class MDwarfFlare:
 
@@ -30,15 +33,18 @@ class MDwarfFlare:
         
         self.git_commit = Repository('.git').head.peel().hex
 
-    def pickle_flare_instance(self, path):
-        filename = path + '/flare_sim_' + str(self.index) + '.pkl'
+    def pickle_flare_instance(self, dir_path):
+        
+        # Making a directory if it does not already exist
+        os.makedirs(dir_path, exist_ok=True)
+        filename = os.path.join(f'flare_sim_{self.index}.pkl')
         with open(filename, 'wb') as outp:  # Overwrites any existing file.
-            pickle.dump(self, outp, pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self, outp, PICKLE_PROTOCOL)
 
 
     def plot_flare_instance(self):
-        for passband in self.lightcurves.keys():
-            plt.plot(self.lightcurves[passband].time, self.lightcurves[passband].flux, label=passband)
 
+        for passband, lc in self.lightcurves.items():
+            plt.plot(lc.time, lc.flux, label=passband)
         plt.legend('Passband')
         plt.show()
