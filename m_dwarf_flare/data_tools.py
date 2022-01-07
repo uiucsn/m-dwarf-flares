@@ -1,19 +1,18 @@
-from astropy.io import fits
 import astropy
+import lightkurve as lk
 import numpy as np
 import pandas as pd
 from astropy.table import QTable
 from pyvo.dal import TAPService
-import lightkurve as lk
-import matplotlib.pyplot as plt
-from lc_tools import load_light_curve, get_flare_lc_from_time, get_normalized_lc
+
+from m_dwarf_flare.lc_tools import load_light_curve, get_flare_lc_from_time, get_normalized_lc
 
 
 def save_effective_kepler_temps():
     """
     Function to save the effective temp for the the 541 kic objects from the kepler input catalogue
     """
-    mag = pd.read_csv('data_files/mag.csv')
+    mag = pd.read_csv('../data_files/mag.csv')
     kepler_cataloug = pd.read_csv('data_files/kepler_kic_v10.csv.gz')
     
     df = pd.DataFrame()
@@ -26,7 +25,7 @@ def remove_incomplete_entries_from_flare_data():
     """
     Removes flares for which Gaia distance data does not exist
     """
-    dist = pd.read_csv('data_files/dist_new.csv')
+    dist = pd.read_csv('../data_files/dist_new.csv')
     flare_data = astropy.io.ascii.read('data_files/apjaa8ea2t3_mrt.txt', quotechar="\s")
     df = flare_data.to_pandas()
 
@@ -38,7 +37,7 @@ def fetch_Gaia_Data():
     Function to query Gaia Data
     """
 
-    FLARE_DATA_PATH = 'data_files/apjaa8ea2t3_mrt.txt'
+    FLARE_DATA_PATH = '../data_files/apjaa8ea2t3_mrt.txt'
 
     flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
     kic = np.array(flare_data['KIC'])
@@ -78,7 +77,7 @@ def save_flare_flux_amps():
     """
     Function to save flare's relative flux ampslitude in the filtered flares file
     """
-    df = pd.read_csv('data_files/filtered_flares.csv')
+    df = pd.read_csv('../data_files/filtered_flares.csv')
     print(df)
     amps = []
     for i in range(len(df)):
@@ -95,7 +94,7 @@ def filter_out_flares_with_nans():
     """
     Removes all flares that contain nan values in their flux arrays
     """
-    df = pd.read_csv('data_files/filtered_flares.csv')
+    df = pd.read_csv('../data_files/filtered_flares.csv')
     count = 0
     indices = []
     for i in range(len(df)):

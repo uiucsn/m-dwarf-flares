@@ -1,6 +1,5 @@
+import os
 from functools import lru_cache, partial
-from astropy import units as u
-from astropy.modeling.models import BlackBody
 
 import astropy.coordinates as coord
 import numpy as np
@@ -10,15 +9,16 @@ import time
 import argparse
 import sys
 import progressbar
-import os
-
-from lc_tools import  load_light_curve, get_flare_lc_from_time, get_normalized_lc, dump_modeled_data_to_LCLIB, add_LCLIB_header
-from spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_luminosities_in_lsst_passbands, fit_flare_on_base
-from distance import get_stellar_luminosity, get_mags_in_lsst_passbands
+from astropy import units as u
+from astropy.modeling.models import BlackBody
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
-from plotting_tools import save_simulation_plots
-from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
-from m_dwarf_flare import MDwarfFlare
+
+from m_dwarf_flare.m_dwarf_flare import MDwarfFlare
+from m_dwarf_flare.lc_tools import  load_light_curve, get_flare_lc_from_time, get_normalized_lc, dump_modeled_data_to_LCLIB, add_LCLIB_header
+from m_dwarf_flare.spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_luminosities_in_lsst_passbands, fit_flare_on_base
+from m_dwarf_flare.distance import get_stellar_luminosity, get_mags_in_lsst_passbands
+from m_dwarf_flare.plotting_tools import save_simulation_plots
+from m_dwarf_flare.extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
 
 FLARE_DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'data_files','filtered_flares.csv')
 

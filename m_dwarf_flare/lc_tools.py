@@ -1,4 +1,3 @@
-import datetime
 import os.path
 from functools import lru_cache
 
@@ -7,12 +6,11 @@ import lightkurve as lk
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from astropy.io import ascii
 from lightkurve import search_lightcurvefile
 from lightkurve import LightCurveFileCollection
 
 LC_DATA_PATH = 'lc_data/KIC-{}.csv'
-FLARE_DATA_PATH = 'data_files/apjaa8ea2t3_mrt.txt'
+FLARE_DATA_PATH = '../data_files/apjaa8ea2t3_mrt.txt'
 FLARE_INSTANCES_PATH = 'flare_instances/KIC-{}/'
 FLARE_INSTANCE = 'flare_instances/KIC-{kic}/{start}-{end}.csv'
 

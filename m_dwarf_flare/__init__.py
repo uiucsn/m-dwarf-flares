@@ -1,0 +1,1 @@
+from .m_dwarf_flare import MDwarfFlare

@@ -3,7 +3,6 @@ from functools import lru_cache
 import lightkurve as lk
 import numpy as np
 from astropy import units as u
-from astropy.modeling.blackbody import blackbody_lambda as bb
 from scipy.integrate import simps
 
 passband_props = dict(

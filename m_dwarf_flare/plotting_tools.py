@@ -1,5 +1,3 @@
-from astropy.io import fits
-from astropy.table import Table
 from astropy.coordinates import SkyCoord, CylindricalRepresentation
 from astropy import units as u
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
@@ -324,7 +322,7 @@ def plot_effective_kepler_temps():
     541 flaring m dwarfs form the Yang 2017 paper.
     """
 
-    df = pd.read_csv('data_files/eff_temp.csv')
+    df = pd.read_csv('../data_files/eff_temp.csv')
     print(np.mean(df['teff']))
     print(np.std(df['teff']))
     count, bins, ignored = plt.hist(df['teff'], bins=10, alpha = 0.5) 
@@ -394,7 +392,7 @@ def plotFlareFluxAmplitude():
     Plots the distribution for the reletive flux amplitude of all the flares in filtered_flares.csv
     """
 
-    df = pd.read_csv('data_files/filtered_flares.csv')
+    df = pd.read_csv('../data_files/filtered_flares.csv')
     amp = df['flux_amp']
     fig1, ax = plt.subplots(1,1)
     N_amplitude, bins_amplitude, patches_amplitude = ax.hist(amp, bins=10, alpha = 0.5) 
