@@ -1,12 +1,10 @@
-import astropy
 from astropy import units as u
 import lightkurve as lk
 import math
 import numpy as np
-import os
 
-dist_data = astropy.io.ascii.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data_files','dist_new.csv'))
-mag_data = astropy.io.ascii.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data_files','mag.csv'))
+from m_dwarf_flare.data import dist, mag
+
 
 def get_stellar_luminosity(KIC):
     """
@@ -20,16 +18,16 @@ def get_stellar_luminosity(KIC):
         luminosity: Estimated luminosity value based on Kepler and Gaia Data.
     """
 
-    for row in dist_data:
+    for row in dist():
         if row['KIC ID'] == int(KIC):
             if row['r_med_photogeo'] != 0 and not np.isnan(row['r_med_photogeo']):
                 distance = row['r_med_photogeo']
             else:
                 distance = row['r_med_geo']
     
-    for row in mag_data:
+    for row in mag():
         if row['KIC ID'] == int(KIC):
-            ab_magnitude = row['kic_kepmag'] 
+            ab_magnitude = row['kic_kepmag']
 
     flux = (ab_magnitude * u.ABmag).to(u.Jy)
     luminosity = flux * 4 * math.pi * (distance * u.pc) ** 2

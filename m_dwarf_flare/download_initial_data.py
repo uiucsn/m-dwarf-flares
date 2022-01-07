@@ -12,7 +12,7 @@ from lightkurve import search_lightcurvefile
 from lightkurve import LightCurveFileCollection
 
 LC_DATA_PATH = 'lc_data/KIC-{}.csv'
-FLARE_DATA_PATH = '../data_files/filtered_flares.csv'
+FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
 def download_light_curve(KIC_ID):
     """
@@ -37,7 +37,7 @@ def download_dust_maps():
 
 
 def download_kic():
-    dir_path = '../data_files'
+    dir_path = 'data_files'
     if not os.path.exists(dir_path):
         raise ValueError('{} is not found, run from the project root or create a folder'.format(dir_path))
     file_path = os.path.join(dir_path, 'kepler_kic_v10.csv.gz')
@@ -69,9 +69,5 @@ def download_all():
     # 2. Downloading dust maps and storing them
     print('Downloading dust maps')
     download_dust_maps()
-
-    # 3. Downloading KIC file if it doesn't exist
-    print('Downloading KIC')
-    download_kic()
 
     print('Data downloaded!')

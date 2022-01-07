@@ -8,6 +8,9 @@ import numpy as np
 import pandas as pd
 import os
 
+from m_dwarf_flare.data import lepine_gaidos_table1, filtered_flares
+
+
 def save_simulation_plots(coordinates, flares, dir_path, rng):
     """
     Generates and saves the plots for the simulated flares that are saved to the LCLIB file.
@@ -234,7 +237,7 @@ def plotSkyMapFromSUPERBLINK():
     Plots the Sky Map for m dwarf population based on SUPERBLINK Survey
     """
 
-    df = astropy.io.ascii.read('data_files/aj403664t1_mrt.txt', quotechar="\s")
+    df = lepine_gaidos_table1()
     coords = SkyCoord(ra = df['RAdeg'], dec = df['DEdeg'])
     distance = 1.0 / df['plx']
 
@@ -252,7 +255,7 @@ def plotLBDistributionSUPERBLINK():
     and a 2D histogram heat map based on data from the SUPERBLINK survey.
     """
 
-    df = astropy.io.ascii.read('data_files/aj403664t1_mrt.txt', quotechar="\s")
+    df = lepine_gaidos_table1()
     coord = SkyCoord(df['RAdeg'], df['DEdeg'], frame='icrs', unit='deg')
     galactic = coord.transform_to('galactic')
 
@@ -280,7 +283,7 @@ def plotRaDecDistributionSUPERBLINK():
     and a 2D histogram heat map based on data from the SUPERBLINK survey.
     """
 
-    df = astropy.io.ascii.read('data_files/aj403664t1_mrt.txt', quotechar="\s")
+    df = lepine_gaidos_table1()
     coord = SkyCoord(df['RAdeg'], df['DEdeg'], frame='icrs', unit='deg')
 
     fig1, ax1, ax2, ax3 = plt.subplots(1,3)
@@ -305,8 +308,8 @@ def plotDistanceDistributionSUPERBLINK():
     """
     Plots ditance distribution based on data form the SUPERBLINK survey.
     """
-    
-    table = astropy.io.ascii.read('data_files/aj403664t1_mrt.txt')
+
+    table = lepine_gaidos_table1()
     distance = np.sort(1.0 / table[(table['plx'] < 9) & (~table['plx'].mask)]['plx'])
 
     fig1, ax1 = plt.subplots(1,1)
@@ -322,7 +325,8 @@ def plot_effective_kepler_temps():
     541 flaring m dwarfs form the Yang 2017 paper.
     """
 
-    df = pd.read_csv('../data_files/eff_temp.csv')
+    # TODO: get it from .data
+    df = pd.read_csv('data_files/eff_temp.csv')
     print(np.mean(df['teff']))
     print(np.std(df['teff']))
     count, bins, ignored = plt.hist(df['teff'], bins=10, alpha = 0.5) 
@@ -392,7 +396,7 @@ def plotFlareFluxAmplitude():
     Plots the distribution for the reletive flux amplitude of all the flares in filtered_flares.csv
     """
 
-    df = pd.read_csv('../data_files/filtered_flares.csv')
+    df = filtered_flares()
     amp = df['flux_amp']
     fig1, ax = plt.subplots(1,1)
     N_amplitude, bins_amplitude, patches_amplitude = ax.hist(amp, bins=10, alpha = 0.5) 

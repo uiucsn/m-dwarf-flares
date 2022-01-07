@@ -1,0 +1,3 @@
+include m_dwarf_flare/data/*.txt
+include m_dwarf_flare/data/*.csv
+include m_dwarf_flare/filters/*.dat
