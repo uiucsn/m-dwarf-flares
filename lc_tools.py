@@ -432,7 +432,7 @@ def add_LCLIB_header(count, output_file):
     """
     Function to write the header of the lclib file.
     """
-    
+
     header = ('SURVEY: LSST\n'
               'FILTERS: ugrizY\n'
               'MODEL: m-Dwarf-Flare-Model\n'
@@ -449,7 +449,8 @@ def add_LCLIB_header(count, output_file):
               '  - Distance data was taken from A Bailer Jones et al. (2021)\n'
               '  PARAMS:\n'  
               '  - KIC_ID - Kepler Input Catalogue ID\n'
-              '  - flare_temp - Temperature of the flare for spectral modelling (in K)\n'
+              '  - flare_temp_low - Temperature of the flare for spectral modelling with wavelength > balmer (in K)\n'
+              '  - flare_temp_high - Temperature of the flare for spectral modelling with wavelength < balmer (in K)\n'
               '  - star_temp - Temperature of the star for spectral modelling (in K)\n'
               '  - distance - Distance to the star (in kpc)\n'
               '  - start_time - Start time of the reference flare (in BKJD)\n'
