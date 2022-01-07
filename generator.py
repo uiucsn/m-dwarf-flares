@@ -20,7 +20,7 @@ from plotting_tools import save_simulation_plots
 from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
 from m_dwarf_flare import MDwarfFlare
 
-FLARE_DATA_PATH = os.path.join('data_files','filtered_flares.csv')
+FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
 
 # Do not change these values
 KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
