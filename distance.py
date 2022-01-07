@@ -3,9 +3,10 @@ from astropy import units as u
 import lightkurve as lk
 import math
 import numpy as np
+import os
 
-dist_data = astropy.io.ascii.read('data_files/dist_new.csv')
-mag_data = astropy.io.ascii.read('data_files/mag.csv')
+dist_data = astropy.io.ascii.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data_files','dist_new.csv'))
+mag_data = astropy.io.ascii.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data_files','mag.csv'))
 
 def get_stellar_luminosity(KIC):
     """
