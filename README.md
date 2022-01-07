@@ -72,19 +72,10 @@ ___
 
 If you want to create 10 simulations and save them to a file, you can run:
 
-`python generator.py 10`
+`python generator.py --flare_count 10 --spectrum_class bb_balmer_jump --dir_name sample --file_name sample.TEXT`
 
-This will save the modeled data to a file named `LCLIB_Mdwarf-flare-LSST.TEXT`
-
-____
-
-If you want to create simulations and save them to a file with a particular name, you can run: 
-
-`python generator.py 10 --file_name custom_name.TEXT`
-
-This will save the modeled data to a file named `custom_name.TEXT`.
-
-____
+This will save the modeled data to a file named `sample.TEXT` in a directory named sample.
+___
 
 If you want to tweak the thresholds for the flare filtering, you can do so in `generator.py`.
 
