@@ -2,6 +2,8 @@ import pickle
 import matplotlib.pyplot as plt
 import os
 
+# 4 is the highest pickle protocol for Python 3.7, which is the minimum Python version we support. 
+# This is to ensure that future python versions can make use of the pickled objects.
 PICKLE_PROTOCOL = 4
 
 class MDwarfFlare:

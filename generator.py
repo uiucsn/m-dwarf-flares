@@ -20,7 +20,7 @@ from plotting_tools import save_simulation_plots
 from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
 from m_dwarf_flare import MDwarfFlare
 
-FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
+FLARE_DATA_PATH = os.path.join('data_files','filtered_flares.csv')
 
 # Do not change these values
 KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
@@ -428,7 +428,7 @@ if __name__ == "__main__":
 
     argparser.add_argument('--flare_count', type = int, required = True,
                             help = 'Number of flares to be generated.')
-    argparser.add_argument('--spectrum_class', type = str, required = True,
+    argparser.add_argument('--spectrum_class', type = str, required = True, choices = ['bb_simple', 'bb_balmer_jump'],
                             help = 'Type of model used for flare spectral modeling. bb_simple or bb_balmer_jump are currently supported.')
     argparser.add_argument('--dir_name', type = str, required = True, default = 'sample',
                             help = 'Path to the directory to store all the simulation data. Directory will be created if it does not exist (Default: sample)')
@@ -454,11 +454,6 @@ if __name__ == "__main__":
         print('Output file must be a .TEXT file. Aborting simulation process.')
         sys.exit(1)
     
-    # Checking if the spectral model is supported.
-    if args.spectrum_class not in ['bb_simple', 'bb_balmer_jump']:
-        print('The spectrum model passed is not supported. Aborting simulation process.')    
-        sys.exit(1)
-
     # Creating a directory to store everything
     os.makedirs(args.dir_name, exist_ok=True)
 
@@ -471,6 +466,13 @@ if __name__ == "__main__":
     else:
         # Starting flare modelling process
         start_time = time.time()
-        run_generator(args.flare_count, args.spectrum_class, args.dir_name, args.file_name, args.use_dpf, args.pickle_sims, args.generate_plots, args.start_index, args.remove_header)
+        run_generator(flare_count=args.flare_count, 
+                    spectrum_type=args.spectrum_class, 
+                    dir_path=args.dir_name, file_path=args.file_name, 
+                    use_dpf=args.use_dpf, 
+                    pickle_sims=args.pickle_sims, 
+                    generate_plots=args.generate_plots, 
+                    start_index=args.start_index, 
+                    remove_header=args.remove_header)
         print("--- Simulations completed in %s seconds. File(s) saved. ---" % (int(time.time() - start_time)))
     
