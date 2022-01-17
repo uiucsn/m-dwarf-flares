@@ -1,4 +1,3 @@
-
 import os
 from multiprocessing import Pool
 
@@ -8,11 +7,13 @@ import numpy as np
 import pandas as pd
 import progressbar
 import requests
+
 from lightkurve import search_lightcurvefile
 from lightkurve import LightCurveFileCollection
 
-LC_DATA_PATH = 'lc_data/KIC-{}.csv'
-FLARE_DATA_PATH = 'data_files/filtered_flares.csv'
+from m_dwarf_flare.data import filtered_flares
+
+LC_DATA_PATH = os.path.join('..','lc_data','KIC-{}.csv')
 
 def download_light_curve(KIC_ID):
     """
@@ -37,7 +38,7 @@ def download_dust_maps():
 
 
 def download_kic():
-    dir_path = 'data_files'
+    dir_path = 'data'
     if not os.path.exists(dir_path):
         raise ValueError('{} is not found, run from the project root or create a folder'.format(dir_path))
     file_path = os.path.join(dir_path, 'kepler_kic_v10.csv.gz')
@@ -56,15 +57,15 @@ def download_kic():
 def download_all():
     # 1. Downloading light curves and storing them
     print('Downloading light curves')
-    df = pd.read_csv(FLARE_DATA_PATH)
+    df = filtered_flares()
     kic_id_array = np.unique(df['KIC'])
     index = 0
 
     with progressbar.ProgressBar(max_value = len(kic_id_array)) as bar:
-            for kic_id in kic_id_array:
-                download_light_curve(kic_id)
-                index += 1
-                bar.update(index)
+        for kic_id in kic_id_array:
+            download_light_curve(kic_id)
+            index += 1
+            bar.update(index)
 
     # 2. Downloading dust maps and storing them
     print('Downloading dust maps')
