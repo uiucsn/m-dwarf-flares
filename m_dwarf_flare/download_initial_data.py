@@ -13,7 +13,7 @@ from lightkurve import LightCurveFileCollection
 
 from m_dwarf_flare.data import filtered_flares
 
-LC_DATA_PATH = os.path.join('..','lc_data','KIC-{}.csv')
+LC_DATA_PATH = os.path.join('lc_data','KIC-{}.csv')
 
 def download_light_curve(KIC_ID):
     """
