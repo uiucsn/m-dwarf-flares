@@ -3,11 +3,13 @@ from functools import lru_cache
 import astropy.units as u
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from astropy.coordinates import SkyCoord
 from dustmaps.bayestar import BayestarQuery
 from dustmaps.sfd import SFDQuery
-import os
+
+
+from m_dwarf_flare.data import get_LSST_extinction
+
 
 @lru_cache()
 def bayestar_query():
@@ -68,11 +70,6 @@ def get_extinction_after_symmetric_interpolation_with_sfd_factor(coordinates):
 
     return reddening_interpolated
 
-@lru_cache()
-def get_LSST_extinction():
-    df = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data_files','LSST_rv_3_1.csv'))
-    rv = pd.Series(df['value'].values,index=df['lsst_passband']).to_dict()
-    return rv
 
 def get_extinction_in_lsst_passbands(coordinates):
     """

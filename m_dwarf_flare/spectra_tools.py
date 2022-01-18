@@ -1,10 +1,9 @@
-from functools import lru_cache
-
 import lightkurve as lk
-import numpy as np
 from astropy import units as u
-from astropy.modeling.blackbody import blackbody_lambda as bb
 from scipy.integrate import simps
+
+from m_dwarf_flare.filters import get_transmission, get_kepler_transmission
+
 
 passband_props = dict(
     u=dict(eff=3751.36, min=3205.54, max=4081.24, width=473.19),
@@ -156,34 +155,3 @@ def compute_band_intensity(band, spectrum):
     lmbd, t = get_transmission(band)
     intensity = simps(x=lmbd, y=spectrum(lmbd * u.AA).value * t) / simps(x=lmbd, y=t)
     return intensity
-
-@lru_cache()
-def get_transmission(band, n_grid=200):
-    """
-    Returns the transmission for a given lsst passband.
-
-    Args:
-        band (char): Letter corresponding to an lsst passband.
-        n_grid (int): Number of grid points
-
-    Returns:
-        [type]: [description]
-    """
-    lmbd, t = np.genfromtxt(f'filters/LSST_LSST.{band}.dat', unpack=True)
-    step = lmbd.size // n_grid or 1
-    return lmbd[::step], t[::step]
-
-@lru_cache()
-def get_kepler_transmission(n_grid=200):
-    """
-    Returns the transmission for the kepler passband.
-
-    Args:
-        n_grid (int): Number of grid points
-
-    Returns:
-        [type]: [description]
-    """
-    lmbd, t = np.genfromtxt('filters/Kepler_Kepler.K.dat', unpack=True)
-    step = lmbd.size // n_grid or 1
-    return lmbd[::step], t[::step]

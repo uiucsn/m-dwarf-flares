@@ -1,4 +1,3 @@
-import datetime
 import os.path
 from functools import lru_cache
 
@@ -7,18 +6,15 @@ import lightkurve as lk
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from astropy.io import ascii
 from lightkurve import search_lightcurvefile
 from lightkurve import LightCurveFileCollection
 
-LC_DATA_PATH = 'lc_data/KIC-{}.csv'
-FLARE_DATA_PATH = 'data_files/apjaa8ea2t3_mrt.txt'
-FLARE_INSTANCES_PATH = 'flare_instances/KIC-{}/'
-FLARE_INSTANCE = 'flare_instances/KIC-{kic}/{start}-{end}.csv'
+from m_dwarf_flare._version import version
+from m_dwarf_flare.data import yang_table3
 
 
 @lru_cache(maxsize=512)
-def load_light_curve(KIC_ID):
+def load_light_curve(lc_data_path, KIC_ID):
     """
     Function for loading light curve data and constructing a kepler light curve.
     This function uses local data to construct the LightCurve, if possible. If 
@@ -30,41 +26,17 @@ def load_light_curve(KIC_ID):
     """
 
     KIC = "KIC {}".format(KIC_ID)
-    if os.path.isfile(LC_DATA_PATH.format(KIC_ID)):
-        df = pd.read_csv(LC_DATA_PATH.format(KIC_ID))
+    lc_path = os.path.join(lc_data_path, f'KIC-{KIC_ID}.csv')
+    if os.path.isfile(lc_path):
+        df = pd.read_csv(lc_path)
         lc = lk.LightCurve(time = df['time'], flux = df['flux'], flux_err = df['flux_err'])
     else:
         lcf = search_lightcurvefile(KIC, mission = 'Kepler').download_all()
         new_lcf =  LightCurveFileCollection([x for x in lcf if x.targetid == int(KIC_ID)])
         lc = new_lcf.SAP_FLUX.stitch()
-        lc.to_csv(LC_DATA_PATH.format(KIC_ID))
+        lc.to_csv(lc_path)
     return lc
 
-def save_flare_instances(lc, KIC_ID):
-    """
-    This function saves every instance of a flare for a given Kepler Input Catalog 
-    object in csv form.  It looks at flare instances from the apjaa8ea2t3_mrt.txt file.
-    Args:
-        lc (Kepler Light Curve Object): A light curve for the object from Kepler.
-        KIC_ID (int): The ID for the object from the Kepler survey. 
-    """
-
-    # Reading flare data file.
-    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
-
-    #Plotting points identified as flares.
-    for flare in flare_data:
-        if flare['KIC'] != int(KIC_ID):
-            continue
-            
-        # Obtaining start and end indices for flare instances
-        flare_lc = get_flare_lc(lc,flare)
-
-        if not os.path.isdir(FLARE_INSTANCES_PATH.format(KIC_ID)):
-            os.mkdir(FLARE_INSTANCES_PATH.format(KIC_ID))
-
-        # Saving indiviual flare instances as csv files
-        flare_lc.to_csv(FLARE_INSTANCE.format(kic = KIC_ID, start = str(flare['St-BKJD']), end = str(flare['St-BKJD'])))
 
 def all_flare_stats(lc, KIC_ID):
     """
@@ -78,7 +50,7 @@ def all_flare_stats(lc, KIC_ID):
         tuple : tuple contatining the list of amplitude, area, duration, data for all the flares in a particular KIC object
     """
 
-    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
+    flare_data = yang_table3()
     duration = []
     area = []
     amplitude = []
@@ -108,7 +80,7 @@ def display_flare_plots(lc, KIC_ID):
     """
 
     # Reading flare data file.
-    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
+    flare_data = yang_table3()
 
     #Plotting points identified as flares.
     for flare in flare_data:
@@ -150,7 +122,7 @@ def save_flare_stats(lc, KIC_ID):
         KIC_ID (int): The ID for the object from the Kepler survey. 
     """
 
-    flare_data = astropy.io.ascii.read(FLARE_DATA_PATH, quotechar="\s")
+    flare_data = yang_table3()
     
     duration = []
     flareArea = []
@@ -447,6 +419,7 @@ def add_LCLIB_header(count, output_file):
               '  NOTES:\n'
               '  - Flare instances were taken from Yang et al. (2017)\n'
               '  - Distance data was taken from A Bailer Jones et al. (2021)\n'
+              '  - Model Version number: {version_no}\n'
               '  PARAMS:\n'  
               '  - KIC_ID - Kepler Input Catalogue ID\n'
               '  - flare_temp_low - Temperature of the flare for spectral modelling with wavelength > balmer (in K)\n'
@@ -455,5 +428,5 @@ def add_LCLIB_header(count, output_file):
               '  - distance - Distance to the star (in kpc)\n'
               '  - start_time - Start time of the reference flare (in BKJD)\n'
               '  - end_time - End time of the reference flare (in BKJD)\n'
-              'DOCUMENTATION_END:\n\n').format(count = count)
+              'DOCUMENTATION_END:\n\n').format(count = count, version_no = version)
     output_file.write(header)

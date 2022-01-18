@@ -1,6 +1,5 @@
+import os
 from functools import lru_cache, partial
-from astropy import units as u
-from astropy.modeling.models import BlackBody
 
 import astropy.coordinates as coord
 import numpy as np
@@ -10,17 +9,17 @@ import time
 import argparse
 import sys
 import progressbar
-import os
-
-from lc_tools import  load_light_curve, get_flare_lc_from_time, get_normalized_lc, dump_modeled_data_to_LCLIB, add_LCLIB_header
-from spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_luminosities_in_lsst_passbands, fit_flare_on_base
-from distance import get_stellar_luminosity, get_mags_in_lsst_passbands
+from astropy import units as u
+from astropy.modeling.models import BlackBody
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
-from plotting_tools import save_simulation_plots
-from extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
-from m_dwarf_flare import MDwarfFlare
 
-FLARE_DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'data_files','filtered_flares.csv')
+from m_dwarf_flare.m_dwarf_flare import MDwarfFlare
+from m_dwarf_flare.lc_tools import  load_light_curve, get_flare_lc_from_time, get_normalized_lc, dump_modeled_data_to_LCLIB, add_LCLIB_header
+from m_dwarf_flare.spectra_tools import get_baseline_luminosity_in_lsst_passband, get_flare_luminosities_in_lsst_passbands, fit_flare_on_base
+from m_dwarf_flare.distance import get_stellar_luminosity, get_mags_in_lsst_passbands
+from m_dwarf_flare.plotting_tools import save_simulation_plots
+from m_dwarf_flare.extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
+from m_dwarf_flare.data import filtered_flares
 
 # Do not change these values
 KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
@@ -50,7 +49,7 @@ PARAMETER_COUNT_MULTIPLIER = 75
 
 # run_generator(args.flare_count, args.spectrum_class, args.dir_name, args.file_name, args.use_dpf, args.pickle_sims, args.generate_plots, args.start_index, args.remove_header)
 
-def run_generator(flare_count, spectrum_type, dir_path, file_path, use_dpf, pickle_sims, generate_plots, start_index, remove_header):
+def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path, use_dpf, pickle_sims, generate_plots, start_index, remove_header):
     """
     Runs the generator functions. Samples the respective distributions for the parameters and writes
     simulated flare instances to an LCLIB file. 
@@ -113,7 +112,7 @@ def run_generator(flare_count, spectrum_type, dir_path, file_path, use_dpf, pick
                         'z': extinction_values['z'][i],
                         'y': extinction_values['y'][i],
                     }
-                    is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction, output_file, use_dpf)
+                    is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction, output_file, lc_data_path, use_dpf)
                     if is_valid_flare:
                         if pickle_sims:
                             flare = MDwarfFlare(start_index + number_of_nominal_flares, modeled_flare, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction)
@@ -130,7 +129,7 @@ def run_generator(flare_count, spectrum_type, dir_path, file_path, use_dpf, pick
         save_simulation_plots(nominal_coordinates, nominal_flare_instance, dir_path, rng)
 
 
-def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_spectrun_function, flare_spectrum_function, extinction, output_file, use_dpf):
+def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_spectrun_function, flare_spectrum_function, extinction, output_file, lc_data_path, use_dpf):
     """
     Generates the model flare based on the parameters and saves to the LCLIB file if it makes the threshold cuts.
 
@@ -152,7 +151,7 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
     """
 
     # Loading the orignal flare light curve and normalizing it
-    lc = load_light_curve(KIC_ID)
+    lc = load_light_curve(lc_data_path, KIC_ID)
     flare_lc = get_flare_lc_from_time(lc, start_time, end_time)
     new_lc = get_normalized_lc(flare_lc)
 
@@ -365,9 +364,6 @@ def get_uniformly_distributed_spherical_coordinates(radius, count, rng, chunk_si
     coordinates = coord.SkyCoord(ra=ra, dec=dec)
     return coordinates
 
-@lru_cache()
-def get_flare_data():
-    return pd.read_csv(FLARE_DATA_PATH)
 
 def get_random_flare_events(count, rng, threshold = 0):
     """
@@ -385,7 +381,7 @@ def get_random_flare_events(count, rng, threshold = 0):
     St_time = []
     End_time = []
 
-    df = get_flare_data()
+    df = filtered_flares()
     # Filtering flares with fluxes below the threshold
     df_filtered = df[df['flux_amp'] >= threshold]
     df_filtered.reset_index(drop=True, inplace = True)
@@ -440,60 +436,3 @@ def get_normally_distributed_flare_temp_high(count, rng):
     """
 
     return rng.normal(35000, 3000, count)
-
-if __name__ == "__main__":
-
-    # Getting Arguments
-    argparser = argparse.ArgumentParser(
-    description='Generates a LCLIB file with simulated flare instances')
-
-    argparser.add_argument('--flare_count', type = int, required = True,
-                            help = 'Number of flares to be generated.')
-    argparser.add_argument('--spectrum_class', type = str, required = True, choices = ['bb_simple', 'bb_balmer_jump'],
-                            help = 'Type of model used for flare spectral modeling. bb_simple or bb_balmer_jump are currently supported.')
-    argparser.add_argument('--dir_name', type = str, required = True, default = 'sample',
-                            help = 'Path to the directory to store all the simulation data. Directory will be created if it does not exist (Default: sample)')
-    argparser.add_argument('--file_name', type = str, required = True, default = 'sample.TEXT',
-                            help = 'Name of the output LCLIB file. Should have a .TEXT extension (Default: LCLIB_Mdwarf-flare-LSST.TEXT)')
-    argparser.add_argument('--use_dpf', required = False, action = 'store_true',
-                            help = 'Use this if you want to use differential photometry for filtering. Standard filtering is used by default. (Default: False)')
-    argparser.add_argument('--pickle_sims', required = False, action = 'store_true',
-                            help = 'Use this if you want to store all the nominal flare simulation objects. (Default: Write to LCLIB only)')
-    argparser.add_argument('--generate_plots', required = False, action = 'store_true',
-                            help = 'Use this if you want to save plots based on the simulations. Please note that this might have memory implications. Plotting is disabled by default (Default: False)')
-    argparser.add_argument('--start_index', type = int, required = False, default = 0,
-                            help = 'Use this if you want to start your file with an event number other than 0. LCLIB header is not added for start indices other than 0 (Default: 0)')
-    argparser.add_argument('--remove_header', required = False, action = 'store_true',
-                            help = 'Use this if you want to remove the LCLIB header. (Default: False)')
-    argparser.add_argument('--header_only', required = False, action = 'store_true',
-                            help = 'Use this if you want only want to generate a LCLIB header. This does not generate any flares and thus cannot be used with --generate_plots to save plots. (Default: False)')
-
-    args = argparser.parse_args()
-
-    # Checking file name
-    if not args.file_name.endswith(".TEXT"):
-        print('Output file must be a .TEXT file. Aborting simulation process.')
-        sys.exit(1)
-    
-    # Creating a directory to store everything
-    os.makedirs(args.dir_name, exist_ok=True)
-
-    if args.header_only:
-        path = os.path.join(args.dir_name, args.file_name)
-        with open(path, 'w') as output_file:
-            add_LCLIB_header(args.flare_count, output_file)
-        print('Created a header file. Exiting without flare simulation')
-        sys.exit(1)
-    else:
-        # Starting flare modelling process
-        start_time = time.time()
-        run_generator(flare_count=args.flare_count, 
-                    spectrum_type=args.spectrum_class, 
-                    dir_path=args.dir_name, file_path=args.file_name, 
-                    use_dpf=args.use_dpf, 
-                    pickle_sims=args.pickle_sims, 
-                    generate_plots=args.generate_plots, 
-                    start_index=args.start_index, 
-                    remove_header=args.remove_header)
-        print("--- Simulations completed in %s seconds. File(s) saved. ---" % (int(time.time() - start_time)))
-    
