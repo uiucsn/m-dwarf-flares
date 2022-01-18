@@ -9,6 +9,7 @@ import pandas as pd
 from lightkurve import search_lightcurvefile
 from lightkurve import LightCurveFileCollection
 
+from m_dwarf_flare._version import version
 from m_dwarf_flare.data import yang_table3
 
 
@@ -418,6 +419,7 @@ def add_LCLIB_header(count, output_file):
               '  NOTES:\n'
               '  - Flare instances were taken from Yang et al. (2017)\n'
               '  - Distance data was taken from A Bailer Jones et al. (2021)\n'
+              '  - Model Version number: {version_no}\n'
               '  PARAMS:\n'  
               '  - KIC_ID - Kepler Input Catalogue ID\n'
               '  - flare_temp_low - Temperature of the flare for spectral modelling with wavelength > balmer (in K)\n'
@@ -426,5 +428,5 @@ def add_LCLIB_header(count, output_file):
               '  - distance - Distance to the star (in kpc)\n'
               '  - start_time - Start time of the reference flare (in BKJD)\n'
               '  - end_time - End time of the reference flare (in BKJD)\n'
-              'DOCUMENTATION_END:\n\n').format(count = count)
+              'DOCUMENTATION_END:\n\n').format(count = count, version_no = version)
     output_file.write(header)
