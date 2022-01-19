@@ -59,12 +59,17 @@ ___
 The LSST filter data is already included in the repo. They can be found here:
 
 http://svo2.cab.inta-csic.es/svo/theory/fps3/index.php?mode=browse&gname=LSST&asttype=
+## Installation :
+
+Inside the repo, run
+
+`python -m pip install -e .`
 
 ## Running :
 
 Run 
 
-`python generator.py -h`
+`python -m m_dwarf_flare -h`
 
 To see the arguments for the LCLIB file generator. 
 
@@ -72,7 +77,7 @@ ___
 
 If you want to create 10 simulations and save them to a file, you can run:
 
-`python generator.py --flare_count 10 --spectrum_class bb_balmer_jump --dir_name sample --file_name sample.TEXT`
+`python -m m_dwarf_flare --flare_count 10 --spectrum_class bb_balmer_jump --dir_name sample --file_name sample.TEXT`
 
 This will save the modeled data to a file named `sample.TEXT` in a directory named sample.
 ___
