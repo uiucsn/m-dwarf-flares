@@ -1,3 +1,5 @@
 lc_data/
 *.egg-info/
 __pycache__
+sample/flare_objects
+sample/simulation_stats
