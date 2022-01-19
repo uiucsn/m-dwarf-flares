@@ -64,6 +64,11 @@ http://svo2.cab.inta-csic.es/svo/theory/fps3/index.php?mode=browse&gname=LSST&as
 Inside the repo, run
 
 `python -m pip install -e .`
+## Downloading relevant data :
+
+To download all the light curve and dustmap data, run:
+
+`mdwarf-download-data`
 
 ## Running :
 
