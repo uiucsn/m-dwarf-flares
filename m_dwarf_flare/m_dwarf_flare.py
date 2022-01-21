@@ -1,6 +1,8 @@
 import pickle
 import matplotlib.pyplot as plt
 import os
+import numpy as np
+import sqlite3
 
 # 4 is the highest pickle protocol for Python 3.7, which is the minimum Python version we support. 
 # This is to ensure that future python versions can make use of the pickled objects.
@@ -8,7 +10,7 @@ PICKLE_PROTOCOL = 4
 
 class MDwarfFlare:
 
-    def __init__(self, index, lightcurves, coordinates, galactic_coordinates, distance, kic_id, start_time, end_time, star_spectrum_function, flare_spectrum_function, extinction):
+    def __init__(self, index, lightcurves, coordinates, galactic_coordinates, hp_index, distance, kic_id, start_time, end_time, star_spectrum_function, flare_spectrum_function, extinction):
         self.index = index
         self.lightcurves = lightcurves
         self.coordinates = coordinates
@@ -17,7 +19,7 @@ class MDwarfFlare:
         self.kic_id = kic_id
         self.start_time = start_time
         self.end_time = end_time
-
+        self.heal_pix_index = hp_index
         self.extinction = extinction
 
 
@@ -49,3 +51,45 @@ class MDwarfFlare:
             plt.plot(lc.time, lc.flux, label=passband)
         plt.legend('Passband')
         plt.show()
+
+    def dump_flare_to_LCLIB(self, output_file):
+
+        event_marker = "#------------------------------\n"
+        start = "START_EVENT: {}\n".format(self.index)
+        end = "END_EVENT: {}\n".format(self.index)
+        nrow = "NROW: {nrow} l: {l:.5f} b: {b:.5f}.\n".format(nrow = len(self.lightcurves['kep'].time), 
+                                                                l = self.galactic_coordinate.l.value, 
+                                                                b = self.galactic_coordinate.b.value)
+        parameters = "PARVAL: {KIC_ID} {start} {end} {f_temp_low:.2f} {f_temp_high:.2f} {s_temp:.2f} {dist:.7f}\n".format(KIC_ID = self.kic_id, 
+                                                                                        f_temp_low = self.flare_temp_low,
+                                                                                        f_temp_high = self.flare_temp_high,  
+                                                                                        s_temp = self.star_temp, 
+                                                                                        dist = self.distance.value, 
+                                                                                        start = self.start_time, 
+                                                                                        end = self.end_time)
+        angle_match = "ANGLEMATCH_b: {angle_match:.3f}\n".format(angle_match = np.max([5, 0.5 * np.abs(self.galactic_coordinate.b.value)]))                                                                                    
+        readings = ""
+
+        # For loop to add readings of the simulations to the text file
+        for i in range(len(self.lightcurves['kep'].flux)):
+            if i == 0:
+                readings += "T: "
+            else:
+                readings += "S: "
+            readings += "{time:>10.5f} {u:>10.3f} {g:>10.3f} {r:>10.3f} {i:>10.3f} {z:>10.3f} {y:>10.3f}\n".format(time = self.lightcurves['kep'].time[i], 
+                                                                                                                    kep = self.lightcurves['kep'].flux[i], 
+                                                                                                                    u = self.lightcurves['u'].flux[i], 
+                                                                                                                    g = self.lightcurves['g'].flux[i], 
+                                                                                                                    r = self.lightcurves['r'].flux[i], 
+                                                                                                                    i = self.lightcurves['i'].flux[i], 
+                                                                                                                    z = self.lightcurves['z'].flux[i], 
+                                                                                                                    y = self.lightcurves['y'].flux[i]) 
+
+        simulation = event_marker + start + nrow + parameters + angle_match + readings + end
+        output_file.write(simulation)
+    
+    def save_flare_to_db(self, db):
+        # obj = sqlite3.Binary(self)
+        db.execute("INSERT INTO flares VALUES ({flare_index},{healpix_index},{flare_obj})".format(flare_index = self.index,
+                                                                                                healpix_index = self.heal_pix_index,
+                                                                                                flare_obj = self.index))

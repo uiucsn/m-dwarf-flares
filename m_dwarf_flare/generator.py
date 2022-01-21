@@ -9,6 +9,11 @@ import time
 import argparse
 import sys
 import progressbar
+import astropy_healpix
+import healpy as hp
+import sqlite3
+
+from astropy.coordinates import ICRS, Galactic
 from astropy import units as u
 from astropy.modeling.models import BlackBody
 from ch_vars.spatial_distr import MilkyWayDensityJuric2008 as MWDensity
@@ -47,9 +52,10 @@ BAND_AMPLITUDE_THRESHOLD = 0.2
 # Generating new parameters is an expernsive process. One way to speed it up is 
 PARAMETER_COUNT_MULTIPLIER = 75
 
-# run_generator(args.flare_count, args.spectrum_class, args.dir_name, args.file_name, args.use_dpf, args.pickle_sims, args.generate_plots, args.start_index, args.remove_header)
+# N side for the healpix pixelization
+NSIDE = 32
 
-def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path, use_dpf, pickle_sims, generate_plots, start_index, remove_header):
+def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path, use_dpf, pickle_sims, generate_plots, start_index, remove_header, save_db):
     """
     Runs the generator functions. Samples the respective distributions for the parameters and writes
     simulated flare instances to an LCLIB file. 
@@ -67,6 +73,12 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
     parameter_count = PARAMETER_COUNT_MULTIPLIER * flare_count # Generating more parameters to avoid reloading of dust map and other files
 
     output_file_path = os.path.join(dir_path, file_path)
+    db_file_path = os.path.join(dir_path, 'flares.db')
+
+    if save_db:
+        db = sqlite3.connect(db_file_path)
+        db.execute('''CREATE TABLE flares
+                (flare_index, healpix_index, flare_object)''')
 
     with open(output_file_path, 'w') as output_file:
 
@@ -84,7 +96,11 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
                 coordinates = get_realistically_distributed_spherical_coordinates(parameter_count, rng)
                 galactic_coordinates = coord.SkyCoord(coordinates).galactic
                 distances = coordinates.distance
-                
+
+                # Converting coordinates to HEALPIX indices
+                map = astropy_healpix.HEALPix(NSIDE, frame=ICRS)
+                hp_indices = map.skycoord_to_healpix(coordinates, return_offsets=False)
+
                 print("2. Computing extinction values in lsst passbands ...")
                 extinction_values = get_extinction_in_lsst_passbands(coord.SkyCoord(coordinates))
 
@@ -114,9 +130,12 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
                     }
                     is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction, output_file, lc_data_path, use_dpf)
                     if is_valid_flare:
-                        if pickle_sims:
-                            flare = MDwarfFlare(start_index + number_of_nominal_flares, modeled_flare, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction)
-                            flare.pickle_flare_instance(dir_path)
+                        if pickle_sims or save_db:
+                            flare = MDwarfFlare(start_index + number_of_nominal_flares, modeled_flare, coordinates[i], galactic_coordinates[i], hp_indices[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction)
+                            if pickle_sims:
+                                flare.pickle_flare_instance(dir_path)
+                            if save_db:
+                                flare.save_flare_to_db(db)
                         if generate_plots:
                             nominal_flare_indices.append(i)
                             nominal_flare_instance.append(modeled_flare)
@@ -125,9 +144,12 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
     print(int((flare_count * 100) / number_of_simulated_flares),'%','of the simulated flares passed the threshold cuts')
     if generate_plots:
         nominal_coordinates = coord.SkyCoord(coordinates[nominal_flare_indices])
-        print("7. Generating plots ...")
+        print("Generating plots ...")
         save_simulation_plots(nominal_coordinates, nominal_flare_instance, dir_path, rng)
-
+    if save_db:
+        print("Saving database ...")
+        db.commit()
+        db.close()
 
 def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_spectrun_function, flare_spectrum_function, extinction, output_file, lc_data_path, use_dpf):
     """
