@@ -78,7 +78,7 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
     if save_db:
         db = sqlite3.connect(db_file_path)
         db.execute('''CREATE TABLE flares
-                (flare_index, healpix_index, flare_object)''')
+                (flare_index INTEGER, healpix_index INTEGER, flare_object BLOB)''')
 
     with open(output_file_path, 'w') as output_file:
 
@@ -150,7 +150,7 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
         print("Saving database ...")
         db.commit()
         db.close()
-
+        
 def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_spectrun_function, flare_spectrum_function, extinction, output_file, lc_data_path, use_dpf):
     """
     Generates the model flare based on the parameters and saves to the LCLIB file if it makes the threshold cuts.

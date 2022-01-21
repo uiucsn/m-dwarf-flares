@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 import sqlite3
+import json
 
 # 4 is the highest pickle protocol for Python 3.7, which is the minimum Python version we support. 
 # This is to ensure that future python versions can make use of the pickled objects.
@@ -89,7 +90,7 @@ class MDwarfFlare:
         output_file.write(simulation)
     
     def save_flare_to_db(self, db):
-        # obj = sqlite3.Binary(self)
-        db.execute("INSERT INTO flares VALUES ({flare_index},{healpix_index},{flare_obj})".format(flare_index = self.index,
-                                                                                                healpix_index = self.heal_pix_index,
-                                                                                                flare_obj = self.index))
+        obj = sqlite3.Binary(pickle.dumps(self, protocol=PICKLE_PROTOCOL))
+        db.execute("INSERT INTO flares VALUES (?,?,?)", ( self.index,
+                                                        int(self.heal_pix_index),
+                                                        obj))
