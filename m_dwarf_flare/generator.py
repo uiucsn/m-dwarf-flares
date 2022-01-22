@@ -55,7 +55,7 @@ PARAMETER_COUNT_MULTIPLIER = 75
 # N side for the healpix pixelization
 NSIDE = 32
 
-def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path, use_dpf, pickle_sims, generate_plots, start_index, remove_header, save_db):
+def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path, use_dpf, pickle_sims, generate_plots, start_index, remove_header, save_sqlite_db):
     """
     Runs the generator functions. Samples the respective distributions for the parameters and writes
     simulated flare instances to an LCLIB file. 
@@ -75,10 +75,14 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
     output_file_path = os.path.join(dir_path, file_path)
     db_file_path = os.path.join(dir_path, 'flares.db')
 
-    if save_db:
+    if save_sqlite_db:
+        # @todo
+        # with sqlite3.connect:
         db = sqlite3.connect(db_file_path)
-        db.execute('''CREATE TABLE flares
-                (flare_index INTEGER, healpix_index INTEGER, flare_object BLOB)''')
+        db.execute('''CREATE TABLE IF NOT EXISTS flares
+                (flare_index INTEGER PRIMARY KEY, 
+                healpix_index INTEGER, 
+                flare_object BLOB)''')
 
     with open(output_file_path, 'w') as output_file:
 
@@ -130,12 +134,12 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
                     }
                     is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction, output_file, lc_data_path, use_dpf)
                     if is_valid_flare:
-                        if pickle_sims or save_db:
+                        if pickle_sims or save_sqlite_db:
                             flare = MDwarfFlare(start_index + number_of_nominal_flares, modeled_flare, coordinates[i], galactic_coordinates[i], hp_indices[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction)
                             if pickle_sims:
                                 flare.pickle_flare_instance(dir_path)
-                            if save_db:
-                                flare.save_flare_to_db(db)
+                            if save_sqlite_db:
+                                flare.save_flare_to_sqlite_db(db)
                         if generate_plots:
                             nominal_flare_indices.append(i)
                             nominal_flare_instance.append(modeled_flare)
@@ -146,9 +150,8 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
         nominal_coordinates = coord.SkyCoord(coordinates[nominal_flare_indices])
         print("Generating plots ...")
         save_simulation_plots(nominal_coordinates, nominal_flare_instance, dir_path, rng)
-    if save_db:
+    if save_sqlite_db:
         print("Saving database ...")
-        db.commit()
         db.close()
         
 def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_spectrun_function, flare_spectrum_function, extinction, output_file, lc_data_path, use_dpf):

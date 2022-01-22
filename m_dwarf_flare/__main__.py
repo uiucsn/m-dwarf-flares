@@ -35,7 +35,7 @@ def parse_args():
                            help='Use this if you want to remove the LCLIB header. (Default: False)')
     argparser.add_argument('--header_only', required=False, action='store_true',
                            help='Use this if you want only want to generate a LCLIB header. This does not generate any flares and thus cannot be used with --generate_plots to save plots. (Default: False)')
-    argparser.add_argument('--save_db', required=False, action='store_true',
+    argparser.add_argument('--save_sqlite_db', required=False, action='store_true',
                            help='Use this if you want want to store your flare objects in a sqlite3 database (Default: False)')
 
     args = argparser.parse_args()
@@ -71,7 +71,7 @@ def main():
                       generate_plots=args.generate_plots,
                       start_index=args.start_index,
                       remove_header=args.remove_header,
-                      save_db=args.save_db)
+                      save_sqlite_db=args.save_sqlite_db)
         print("--- Simulations completed in %s seconds. File(s) saved. ---" % (int(time.time() - start_time)))
 
 

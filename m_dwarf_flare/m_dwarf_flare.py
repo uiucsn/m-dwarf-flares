@@ -89,8 +89,13 @@ class MDwarfFlare:
         simulation = event_marker + start + nrow + parameters + angle_match + readings + end
         output_file.write(simulation)
     
-    def save_flare_to_db(self, db):
-        obj = sqlite3.Binary(pickle.dumps(self, protocol=PICKLE_PROTOCOL))
-        db.execute("INSERT INTO flares VALUES (?,?,?)", ( self.index,
-                                                        int(self.heal_pix_index),
-                                                        obj))
+    def save_flare_to_sqlite_db(self, db):
+
+        bytes = pickle.dumps(self, protocol=PICKLE_PROTOCOL)
+        obj = sqlite3.Binary(bytes)
+
+        # Typecasting healpix index to int since it is orignally np.int64 which gets stored as b string
+        db.execute("INSERT INTO flares VALUES (?,?,?)", 
+        (self.index, int(self.heal_pix_index), obj))
+
+        db.commit()        
