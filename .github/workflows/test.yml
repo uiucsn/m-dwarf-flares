@@ -25,5 +25,5 @@ jobs:
       run: mdwarf-download-data
     - name: Run generator
       run: python -m m_dwarf_flare --flare_count 10 --spectrum_class bb_balmer_jump --dir_name sample --file_name test.TEXT --remove_header
-    - name: Check if sample.TEXT matches
-      run: git diff --word-diff --exit-code -- sample/sample.TEXT
+    - name: Check if test.TEXT matches
+      run: git diff --word-diff --exit-code -- sample/test.TEXT
