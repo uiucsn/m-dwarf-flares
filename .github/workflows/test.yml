@@ -1,0 +1,29 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: self-hosted
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version: ['3.7', '3.8', '3.9']
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python_version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: "${{ matrix.python_version }}"
+    - name: Install the package
+      run: pip install .
+    - name: Download lc-data
+      run: curl https://static.rubin.science/lc_data.tar.bz2 | tar -xjv
+    - name: Download suplimentary data
+      run: mdwarf-download-data
+    - name: Run generator
+      run: python -m m_dwarf_flare --flare_count 10 --spectrum_class bb_balmer_jump --dir_name sample --file_name test.TEXT --remove_header
+    - name: Check if test.TEXT matches
+      run: git diff --word-diff --exit-code -- sample/test.TEXT
