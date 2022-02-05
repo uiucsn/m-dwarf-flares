@@ -1,7 +1,18 @@
+from curses.ascii import NUL
+from distutils import core
 import sqlite3
 import pickle
 import argparse
 import sys
+from tkinter import Frame
+import numpy as np
+import healpy as hp
+from astropy.table import Table
+from astropy.coordinates import SkyCoord
+from astropy.coordinates import ICRS
+import astropy_healpix
+from astropy import units as u
+import matplotlib.pyplot as plt
 
 class MDwarfFlareDB:
 
@@ -23,6 +34,52 @@ class MDwarfFlareDB:
                 flare.dump_flare_to_LCLIB(output_file)
 
 
+    def get_confidence_interval_mask(self, skymap, confidence_interval):
+
+        prob = skymap["PROB"]
+        sorted_prob_index = np.argsort(prob)
+
+        # Finding the cumulative probability distribution for sorted prob values
+        cum_sorted_prob = np.cumsum(prob[sorted_prob_index])
+
+        # Searching for the min probability pixel such that cumulatibe proba is still CI
+        threshold_index = np.searchsorted(cum_sorted_prob, 1 - confidence_interval)
+
+        # Setting all pixels to 0
+        mask = np.zeros(len(skymap))
+        
+        # If the pixels lie in high probability region, we set them to 1
+        mask[sorted_prob_index[threshold_index:]] = 1
+
+        return mask, sorted_prob_index[threshold_index:]
+
+    def get_flare_healpix_indices(self, nside):
+    
+        ra = list(self.cur.execute('SELECT ra FROM flares')) * u.deg
+        dec = list(self.cur.execute('SELECT dec FROM flares')) * u.deg
+
+        coordinates = SkyCoord(ra = ra, dec = dec, frame=ICRS)
+
+        map = astropy_healpix.HEALPix(nside, frame=ICRS, order="nested")
+        hp_index = map.skycoord_to_healpix(coordinates, return_offsets=False)
+
+        return hp_index
+
+    def get_flares_in_skymap_ci(self, skymap_path, confidence_interval, lclib_path, pic_path):
+
+        skymap = Table.read(skymap_path)
+        nside = hp.npix2nside(len(skymap))
+
+        mask, high_prob_flare_indices = self.get_confidence_interval_mask(skymap, confidence_interval)
+        healpix_indices = self.get_flare_healpix_indices(nside)
+
+        coordinates = []
+        with open(lclib_path, 'w') as output_file:
+            for i in range(len(healpix_indices)):
+                if (healpix_indices[i] in high_prob_flare_indices):
+                    for row in self.cur.execute('SELECT flare_object FROM flares WHERE flare_index = {}'.format(i)):
+                        flare = pickle.loads(row[0])
+                        flare.dump_flare_to_LCLIB(output_file)
 
 
 
@@ -33,24 +90,58 @@ def main():
         argparser = argparse.ArgumentParser(
             description='Load a SQLite3 database file with simulated flare instances')
 
-        argparser.add_argument('--db_path', type=str, required=True,
+        argparser.add_argument('db_path', type=str,
                             help='Path to the DB file.')
-        argparser.add_argument('--output_file_path', type=str, required=True,
+        argparser.add_argument('output_file_path', type=str,
                             help='Name of the output LCLIB file. Should have a .TEXT extension')
 
         args = argparser.parse_args()
+
+        if not args.output_file_path.endswith(".TEXT"):
+            print('Output file must be a .TEXT file. Aborting process.')
+            sys.exit(1)
+
         return args
 
     # Arguments
     args = parse_args_main()
-
-    if not args.output_file_path.endswith(".TEXT"):
-        print('Output file must be a .TEXT file. Aborting process.')
-        sys.exit(1)
 
     # Loading the database
     flare_db = MDwarfFlareDB(args.db_path)
 
     # Writing flares to the LCLIB
     flare_db.write_all_flares_to_LCLIB(args.output_file_path)
+
+def gw_event_localized_flares():
+    def parse_args():
+    
+        # Getting Arguments
+        argparser = argparse.ArgumentParser(
+            description='Write files from db that lie within the CI of the skymap to a LCLIB file')
+
+        argparser.add_argument('--db_path', type=str, required=True,
+                            help='Path to the DB file.')
+        argparser.add_argument('--output_file_path', type=str, required=True,
+                            help='Path of the output LCLIB file. Should have a .TEXT extension')
+        argparser.add_argument('--fits_file_path', type=str, required=True,
+                            help='Path to the fits file of the GW event. Should be a single order fits file. Uses the same nside value as fit file for picking the flares using healpix')
+        argparser.add_argument('--con_int', type=float, required=True,
+                            help='Confidence interval of the area from which the flares are picked. CI should be between 0 and 1 inclusive')
+        argparser.add_argument('--picture_path', type=str, required=False, default=None,
+                            help='Save an image of the CI area mask and the flare objects skymap next to it')
+        args = argparser.parse_args()
+
+        if not args.output_file_path.endswith(".TEXT"):
+            print('Output file must be a .TEXT file. Aborting process.')
+            sys.exit(1)
+        if args.con_int < 0 or args.con_int > 1:
+            print('CI should be between 0 and 1 inclusive. Aborting process.')
+            sys.exit(1)
+        return args
+
+    # Arguments
+    args = parse_args()
+
+    flare_db = MDwarfFlareDB(args.db_path)
+    flare_db.get_flares_in_skymap_ci(args.fits_file_path, args.con_int, args.output_file_path, args.picture_path)
 
