@@ -25,6 +25,7 @@ from m_dwarf_flare.distance import get_stellar_luminosity, get_mags_in_lsst_pass
 from m_dwarf_flare.plotting_tools import save_simulation_plots
 from m_dwarf_flare.extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
 from m_dwarf_flare.data import filtered_flares
+from m_dwarf_flare.m_dwarf_flare_db import MDwarfFlareDB
 
 # Do not change these values
 KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
@@ -76,14 +77,7 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
     db_file_path = os.path.join(dir_path, 'flares.db')
 
     if save_sqlite_db:
-        # @todo
-        # with sqlite3.connect:
-        db = sqlite3.connect(db_file_path)
-        db.execute('''CREATE TABLE IF NOT EXISTS flares
-                (flare_index INTEGER PRIMARY KEY, 
-                ra REAL,
-                dec REAL,
-                flare_object BLOB)''')
+        m_dwarf_db = MDwarfFlareDB(db_file_path)
 
     with open(output_file_path, 'w') as output_file:
 
@@ -136,7 +130,7 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
                             if pickle_sims:
                                 flare.pickle_flare_instance(dir_path)
                             if save_sqlite_db:
-                                flare.save_flare_to_sqlite_db(db)
+                                flare.save_flare_to_sqlite_db(m_dwarf_db.db)
                         if generate_plots:
                             nominal_flare_indices.append(i)
                             nominal_flare_instance.append(modeled_flare)
@@ -149,7 +143,7 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
         save_simulation_plots(nominal_coordinates, nominal_flare_instance, dir_path, rng)
     if save_sqlite_db:
         print("Saving database ...")
-        db.close()
+        m_dwarf_db.db.close()
         
 def generate_model_flare_file(index, coordinates, galactic_coordinates, distance, KIC_ID, start_time, end_time, star_spectrun_function, flare_spectrum_function, extinction, output_file, lc_data_path, use_dpf):
     """

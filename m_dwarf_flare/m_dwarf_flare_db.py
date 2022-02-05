@@ -8,6 +8,11 @@ class MDwarfFlareDB:
     def __init__(self, db_path):
 
         self.db = sqlite3.connect(db_path)
+        self.db.execute('''CREATE TABLE IF NOT EXISTS flares
+        (flare_index INTEGER PRIMARY KEY, 
+        ra REAL,
+        dec REAL,
+        flare_object BLOB)''')
         self.cur = self.db.cursor()
 
     def write_all_flares_to_LCLIB(self, lclib_path):
@@ -19,24 +24,25 @@ class MDwarfFlareDB:
 
 
 
-def parse_args():
-    
-    # Getting Arguments
-    argparser = argparse.ArgumentParser(
-        description='Load a SQLite3 database file with simulated flare instances')
 
-    argparser.add_argument('--db_path', type=str, required=True,
-                        help='Path to the DB file.')
-    argparser.add_argument('--output_file_path', type=str, required=True,
-                        help='Name of the output LCLIB file. Should have a .TEXT extension')
-
-    args = argparser.parse_args()
-    return args
 
 def main():
+    def parse_args_main():
+    
+        # Getting Arguments
+        argparser = argparse.ArgumentParser(
+            description='Load a SQLite3 database file with simulated flare instances')
+
+        argparser.add_argument('--db_path', type=str, required=True,
+                            help='Path to the DB file.')
+        argparser.add_argument('--output_file_path', type=str, required=True,
+                            help='Name of the output LCLIB file. Should have a .TEXT extension')
+
+        args = argparser.parse_args()
+        return args
 
     # Arguments
-    args = parse_args()
+    args = parse_args_main()
 
     if not args.output_file_path.endswith(".TEXT"):
         print('Output file must be a .TEXT file. Aborting process.')
