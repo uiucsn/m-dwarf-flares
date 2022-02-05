@@ -81,7 +81,8 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
         db = sqlite3.connect(db_file_path)
         db.execute('''CREATE TABLE IF NOT EXISTS flares
                 (flare_index INTEGER PRIMARY KEY, 
-                healpix_index INTEGER, 
+                ra REAL,
+                dec REAL,
                 flare_object BLOB)''')
 
     with open(output_file_path, 'w') as output_file:
@@ -100,10 +101,6 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
                 coordinates = get_realistically_distributed_spherical_coordinates(parameter_count, rng)
                 galactic_coordinates = coord.SkyCoord(coordinates).galactic
                 distances = coordinates.distance
-
-                # Converting coordinates to HEALPIX indices
-                map = astropy_healpix.HEALPix(NSIDE, frame=ICRS)
-                hp_indices = map.skycoord_to_healpix(coordinates, return_offsets=False)
 
                 print("2. Computing extinction values in lsst passbands ...")
                 extinction_values = get_extinction_in_lsst_passbands(coord.SkyCoord(coordinates))
@@ -135,7 +132,7 @@ def run_generator(flare_count, spectrum_type, lc_data_path, dir_path, file_path,
                     is_valid_flare, modeled_flare = generate_model_flare_file(start_index + number_of_nominal_flares, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction, output_file, lc_data_path, use_dpf)
                     if is_valid_flare:
                         if pickle_sims or save_sqlite_db:
-                            flare = MDwarfFlare(start_index + number_of_nominal_flares, modeled_flare, coordinates[i], galactic_coordinates[i], hp_indices[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction)
+                            flare = MDwarfFlare(start_index + number_of_nominal_flares, modeled_flare, coordinates[i], galactic_coordinates[i], distances[i], kic_id[i], start_time[i], end_time[i], star_spectrum_functions[i], flare_spectrum_functions[i], extinction)
                             if pickle_sims:
                                 flare.pickle_flare_instance(dir_path)
                             if save_sqlite_db:

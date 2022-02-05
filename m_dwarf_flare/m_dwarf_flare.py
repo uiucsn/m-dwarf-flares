@@ -11,7 +11,7 @@ PICKLE_PROTOCOL = 4
 
 class MDwarfFlare:
 
-    def __init__(self, index, lightcurves, coordinates, galactic_coordinates, hp_index, distance, kic_id, start_time, end_time, star_spectrum_function, flare_spectrum_function, extinction):
+    def __init__(self, index, lightcurves, coordinates, galactic_coordinates, distance, kic_id, start_time, end_time, star_spectrum_function, flare_spectrum_function, extinction):
         self.index = index
         self.lightcurves = lightcurves
         self.coordinates = coordinates
@@ -20,7 +20,6 @@ class MDwarfFlare:
         self.kic_id = kic_id
         self.start_time = start_time
         self.end_time = end_time
-        self.heal_pix_index = hp_index
         self.extinction = extinction
 
 
@@ -94,8 +93,7 @@ class MDwarfFlare:
         bytes = pickle.dumps(self, protocol=PICKLE_PROTOCOL)
         obj = sqlite3.Binary(bytes)
 
-        # Typecasting healpix index to int since it is orignally np.int64 which gets stored as b string
-        db.execute("INSERT INTO flares VALUES (?,?,?)", 
-        (self.index, int(self.heal_pix_index), obj))
+        db.execute("INSERT INTO flares VALUES (?,?,?,?)", 
+        (self.index, self.coordinates.ra.deg, self.coordinates.dec.deg, obj))
 
         db.commit()        

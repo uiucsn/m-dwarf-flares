@@ -10,7 +10,7 @@ class MDwarfFlareDB:
         self.db = sqlite3.connect(db_path)
         self.cur = self.db.cursor()
 
-    def write_flares_to_LCLIB(self, lclib_path):
+    def write_all_flares_to_LCLIB(self, lclib_path):
 
         with open(lclib_path, 'w') as output_file:
             for row in self.cur.execute('SELECT flare_object FROM flares'):
@@ -46,5 +46,5 @@ def main():
     flare_db = MDwarfFlareDB(args.db_path)
 
     # Writing flares to the LCLIB
-    flare_db.write_flares_to_LCLIB(args.output_file_path)
+    flare_db.write_all_flares_to_LCLIB(args.output_file_path)
 
