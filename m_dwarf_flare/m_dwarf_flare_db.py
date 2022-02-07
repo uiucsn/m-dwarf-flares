@@ -1,5 +1,6 @@
 from curses.ascii import NUL
 from distutils import core
+from itertools import count
 import sqlite3
 import pickle
 import argparse
@@ -161,3 +162,32 @@ def gw_event_localized_flares():
     flare_db = MDwarfFlareDB(args.db_path)
     flare_db.get_flares_in_skymap_ci(args.fits_file_path, args.con_int, args.output_file_path, args.make_plots)
 
+def db_to_density_map():
+    def parse_args():
+    
+        # Getting Arguments
+        argparser = argparse.ArgumentParser(
+            description='Use the DB to build a density distribution map stored as a fits file.')
+
+        argparser.add_argument('db_path', type=str,
+                            help='Path to the DB file.')
+        argparser.add_argument('output_path', type=str,
+                            help='Path of the output FITS file. Should have a .fits extension')
+        argparser.add_argument('nside', type=int, 
+                            help='Healpix NSIDE resolution that should be used to render the density map')
+        args = argparser.parse_args()
+
+        return args
+
+    # Arguments
+    args = parse_args()
+    nside = args.nside
+
+    flare_db = MDwarfFlareDB(args.db_path)
+    healpix_indices = flare_db.get_flare_healpix_indices(nside)
+
+    counts = np.zeros(hp.nside2npix(nside))
+    for pixel in healpix_indices:
+        counts[pixel] += 1
+
+    hp.fitsfunc.write_map(args.output_path, counts, column_names=['PROB'], nest=True, coord='C')
