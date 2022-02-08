@@ -189,5 +189,7 @@ def db_to_density_map():
     counts = np.zeros(hp.nside2npix(nside))
     for pixel in healpix_indices:
         counts[pixel] += 1
-
-    hp.fitsfunc.write_map(args.output_path, counts, column_names=['PROB'], nest=True, coord='C')
+    prob = counts / np.sum(counts)
+    print("Writing density map to FITS file...")
+    hp.fitsfunc.write_map(args.output_path, prob, column_names=['PROB'], nest=True, coord='C', overwrite=True)
+    print("Saved!")
