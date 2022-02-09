@@ -20,9 +20,9 @@ class MDwarfFlareDB:
 
     def __init__(self, db_path):
 
-        self.db = sqlite3.connect(db_path)
+        self.db = sqlite3.connect(db_path, timeout=10)
         self.db.execute('''CREATE TABLE IF NOT EXISTS flares
-        (flare_index INTEGER PRIMARY KEY, 
+        (flare_index INTEGER, 
         ra REAL,
         dec REAL,
         flare_object BLOB)''')
