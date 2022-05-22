@@ -37,6 +37,18 @@ class MDwarfFlareDB:
 
 
     def get_confidence_interval_mask(self, skymap, confidence_interval):
+        """
+        Create a mask for the region of the skymap that lies withing the 
+        the mentioned confidence interval. 
+
+        Args:
+            skymap (fits Table): The sky map for the KN. Order must be nested. Any N side is allowed.
+            confidence_interval (float): Confidence interval for which the map needs to be built.
+
+        Returns:
+            mask: If the healpix pixel lies inside the CI region, it is marked with a 1, else it's a 0.
+            pixel indices: Healpix indices of the pixels lying in the Confidence interval region
+        """
 
         prob = skymap["PROB"]
         sorted_prob_index = np.argsort(prob)
@@ -56,11 +68,18 @@ class MDwarfFlareDB:
         return mask, sorted_prob_index[threshold_index:]
 
     def get_flare_healpix_indices(self, nside):
-    
-        ra = list(self.cur.execute('SELECT ra FROM flares')) * u.deg
-        dec = list(self.cur.execute('SELECT dec FROM flares')) * u.deg
+        """
+        Get the nested order healpix indices for all the flares for the given nside.
 
-        coordinates = SkyCoord(ra = ra, dec = dec, frame=ICRS)
+        Args:
+            nside (int): The nside for which the flare indices should be calculated.
+
+        Returns:
+            flare indices: The index of the healpix pixel in which that flare lies.
+        """
+    
+        ra, dec = zip(*self.cur.execute('SELECT ra, dec FROM flares'))
+        coordinates = SkyCoord(ra=list(ra), dec=list(dec), frame=ICRS, unit='deg')
 
         map = astropy_healpix.HEALPix(nside, frame=ICRS, order="nested")
         hp_index = map.skycoord_to_healpix(coordinates, return_offsets=False)
@@ -141,7 +160,7 @@ def gw_event_localized_flares():
         argparser.add_argument('--output_file_path', type=str, required=True,
                             help='Path of the output LCLIB file. Should have a .TEXT extension')
         argparser.add_argument('--fits_file_path', type=str, required=True,
-                            help='Path to the fits file of the GW event. Should be a single order fits file. Uses the same nside value as fit file for picking the flares using healpix')
+                            help='Path to the fits file of the GW event. Should be a single order fits file. Uses the same nside value as fit file for picking the flares using healpix. Nested, single order sky maps only')
         argparser.add_argument('--con_int', type=float, required=True,
                             help='Confidence interval of the area from which the flares are picked. CI should be between 0 and 1 inclusive')
         argparser.add_argument('--make_plots',  required=False, action='store_true',
