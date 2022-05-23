@@ -99,7 +99,10 @@ class MDwarfFlareDB:
 
             plt.show()
 
-    def get_flares_for_KN(self, skymap_path, confidence_interval, lclib_path, gw_trigger_time, survey_start_time, survey_end_time, to_plot):
+    def get_flares_for_KN(self, skymap_path, confidence_interval, lclib_path, gw_trigger_time, survey_start_time, survey_end_time, window, to_plot):
+        
+        rng = np.random.default_rng(42)
+        offsets = rng.uniform(low=0, high=window, size=1000000)
 
         skymap = Table.read(skymap_path)
         nside = hp.npix2nside(len(skymap))
@@ -114,7 +117,7 @@ class MDwarfFlareDB:
                 if (healpix_indices[i] in high_prob_flare_indices):
                     for row in self.cur.execute('SELECT flare_object FROM flares WHERE flare_index = {}'.format(i)):
                         flare = pickle.loads(row[0])
-                        flare.relocate_flare_near_GW_trigger(gw_trigger_time, 0)
+                        flare.relocate_flare_near_GW_trigger(gw_trigger_time, offsets[i])
                         flare.add_survey_start_and_end_obsv(survey_start_time, survey_end_time)
                         flare.dump_flare_to_LCLIB(output_file)
                         if to_plot:
@@ -217,6 +220,8 @@ def localize_flares_for_KN():
                             help='The survey start time in mjd.')
         argparser.add_argument('--survey_end', type=float, required=True,
                             help='The survey end time in mjd.')
+        argparser.add_argument('--window', type=float, required=False, default=1.0,
+                            help='The flares will start within window number of days of the GW trigger [Default is 1 day].')
         argparser.add_argument('--make_plots',  required=False, action='store_true',
                             help='Construct plots for GW events, the CI area mask and the flare objects skymap')
         args = argparser.parse_args()
@@ -232,8 +237,9 @@ def localize_flares_for_KN():
     # Arguments
     args = parse_args()
 
+    print("Connecting to the DB.")
     flare_db = MDwarfFlareDB(args.db_path)
-    flare_db.get_flares_for_KN(args.fits_file_path, args.con_int, args.output_file_path, args.gw_trigger, args.survey_start, args.survey_end, args.make_plots)
+    flare_db.get_flares_for_KN(args.fits_file_path, args.con_int, args.output_file_path, args.gw_trigger, args.survey_start, args.survey_end, args.window, args.make_plots)
 
 def db_to_density_map():
     def parse_args():
