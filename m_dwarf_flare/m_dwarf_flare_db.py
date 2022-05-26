@@ -86,7 +86,7 @@ class MDwarfFlareDB:
 
         return hp_index
 
-    def get_flares_in_skymap_ci(self, skymap_path, confidence_interval, lclib_path, to_plot):
+    def dump_flares_in_skymap_ci(self, skymap_path, confidence_interval, lclib_path, to_plot):
 
         skymap = Table.read(skymap_path)
         nside = hp.npix2nside(len(skymap))
@@ -180,7 +180,7 @@ def gw_event_localized_flares():
     args = parse_args()
 
     flare_db = MDwarfFlareDB(args.db_path)
-    flare_db.get_flares_in_skymap_ci(args.fits_file_path, args.con_int, args.output_file_path, args.make_plots)
+    flare_db.dump_flares_in_skymap_ci(args.fits_file_path, args.con_int, args.output_file_path, args.make_plots)
 
 def db_to_density_map():
     def parse_args():
