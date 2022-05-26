@@ -99,7 +99,7 @@ class MDwarfFlareDB:
         with open(lclib_path, 'w') as output_file:
             for i in range(len(healpix_indices)):
                 if (healpix_indices[i] in high_prob_flare_indices):
-                    for row in self.cur.execute('SELECT flare_object FROM flares WHERE flare_index = {}'.format(i)):
+                    for row in self.cur.execute('SELECT flare_object FROM flares WHERE flare_index = {} ORDER BY flare_index'.format(i)):
                         flare = pickle.loads(row[0])
                         flare.dump_flare_to_LCLIB(output_file)
                         if to_plot:
