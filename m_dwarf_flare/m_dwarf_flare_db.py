@@ -92,6 +92,7 @@ class MDwarfFlareDB:
         nside = hp.npix2nside(len(skymap))
 
         mask, high_prob_flare_indices = self.get_confidence_interval_mask(skymap, confidence_interval)
+        high_prob_flare_indices = frozenset(high_prob_flare_indices)
         healpix_indices = self.get_flare_healpix_indices(nside)
 
         ra = []
