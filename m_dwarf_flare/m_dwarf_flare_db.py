@@ -31,9 +31,12 @@ class MDwarfFlareDB:
     def write_all_flares_to_LCLIB(self, lclib_path):
 
         with open(lclib_path, 'w') as output_file:
+            i = 0
             for row in self.cur.execute('SELECT flare_object FROM flares'):
                 flare = pickle.loads(row[0])
                 flare.dump_flare_to_LCLIB(output_file)
+                print(i)
+                i += 1
 
 
     def get_confidence_interval_mask(self, skymap, confidence_interval):

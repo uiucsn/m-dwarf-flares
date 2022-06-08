@@ -26,6 +26,7 @@ from m_dwarf_flare.plotting_tools import save_simulation_plots
 from m_dwarf_flare.extinction_tools import get_extinction_in_lsst_passbands, apply_extinction_to_lsst_mags
 from m_dwarf_flare.data import filtered_flares
 from m_dwarf_flare.m_dwarf_flare_db import MDwarfFlareDB
+from m_dwarf_flare.data import get_LSST_extinction
 
 # Do not change these values
 KEPLER_MEAN_EFFECTIVE_TEMP_FOR_M_DWARFS = 3743.4117647058824
@@ -183,6 +184,10 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
     model_mags = get_mags_in_lsst_passbands(model_luminosities, distance)
     model_mags_with_extinction = apply_extinction_to_lsst_mags(model_mags, extinction)
 
+    # Find the milky way extinction value
+    rv = get_LSST_extinction()
+    e_bv = extinction['u'] / rv['u']
+
     if is_nominal_flare(model_mags_with_extinction, use_dpf) and flare_has_nominal_cadence(model_mags_with_extinction):
         # Writing modelled data to LCLIB file if the flare is nominal
 
@@ -197,7 +202,7 @@ def generate_model_flare_file(index, coordinates, galactic_coordinates, distance
             flare_temp_low = flare_spectrum_function.keywords['temp_low']
             flare_temp_high = flare_spectrum_function.keywords['temp_high']
 
-        dump_modeled_data_to_LCLIB(index, galactic_coordinates.l, galactic_coordinates.b, KIC_ID, start_time, end_time, star_temp, flare_temp_low, flare_temp_high, distance, model_mags_with_extinction, output_file)
+        dump_modeled_data_to_LCLIB(index, galactic_coordinates.l, galactic_coordinates.b, KIC_ID, start_time, end_time, star_temp, flare_temp_low, flare_temp_high, distance, model_mags_with_extinction, e_bv, output_file)
         return True, model_mags_with_extinction
     else:
         return False, model_mags_with_extinction
