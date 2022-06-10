@@ -379,7 +379,7 @@ def dump_modeled_data_to_LCLIB(index, l, b, KIC_ID, start_time, end_time, star_t
     nrow = "NROW: {nrow} l: {l:.5f} b: {b:.5f}.\n".format(nrow = len(mags['kep'].time), 
                                                             l = l.value, 
                                                             b = b.value)
-    parameters = "PARVAL: {ebv} {KIC_ID} {start} {end} {f_temp_low:.2f} {f_temp_high:.2f} {s_temp:.2f} {dist:.7f}\n".format( ebv = ebv,
+    parameters = "PARVAL: {ebv:.3f} {KIC_ID} {start} {end} {f_temp_low:.2f} {f_temp_high:.2f} {s_temp:.2f} {dist:.4f}\n".format( ebv = ebv,
                                                                                     KIC_ID = KIC_ID, 
                                                                                     f_temp_low = flare_temp_low,
                                                                                     f_temp_high = flare_temp_high,  
@@ -418,11 +418,12 @@ def add_LCLIB_header(count, output_file):
               '  - AUTHOR: Ved Shah\n'
               '  USAGE_KEY: GENMODEL\n'
               '  NOTES:\n'
+              '  - M dwarf flare simulation based on Kepler data extrapolated for LSST\n'
               '  - Flare instances were taken from Yang et al. (2017)\n'
               '  - Distance data was taken from A Bailer Jones et al. (2021)\n'
               '  - Model Version number: {version_no}\n'
               '  PARAMS:\n'  
-              '  - MWEBV - Milky way extinction\n'
+              '  - MWEBV - Milkyway E(B-V) from 3D dust model\n'
               '  - KIC_ID - Kepler Input Catalogue ID\n'
               '  - flare_temp_low - Temperature of the flare for spectral modelling with wavelength > balmer (in K)\n'
               '  - flare_temp_high - Temperature of the flare for spectral modelling with wavelength < balmer (in K)\n'

@@ -65,7 +65,7 @@ class MDwarfFlare:
         nrow = "NROW: {nrow} l: {l:.5f} b: {b:.5f}.\n".format(nrow = len(self.lightcurves['kep'].time), 
                                                                 l = self.galactic_coordinate.l.value, 
                                                                 b = self.galactic_coordinate.b.value)
-        parameters = "PARVAL: {ebv} {KIC_ID} {start} {end} {f_temp_low:.2f} {f_temp_high:.2f} {s_temp:.2f} {dist:.7f}\n".format( ebv=e_bv,
+        parameters = "PARVAL: {ebv:.3f} {KIC_ID} {start} {end} {f_temp_low:.2f} {f_temp_high:.2f} {s_temp:.2f} {dist:.4f}\n".format( ebv=e_bv,
                                                                                         KIC_ID = self.kic_id, 
                                                                                         f_temp_low = self.flare_temp_low,
                                                                                         f_temp_high = self.flare_temp_high,  
