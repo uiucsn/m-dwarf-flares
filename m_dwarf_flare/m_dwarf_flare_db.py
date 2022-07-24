@@ -15,6 +15,7 @@ import astropy_healpix
 from astropy import units as u
 import matplotlib.pyplot as plt
 from m_dwarf_flare.plotting_tools import plotGenricSkyMap
+from m_dwarf_flare._version import version
 
 class MDwarfFlareDB:
 
@@ -31,7 +32,7 @@ class MDwarfFlareDB:
     def write_all_flares_to_LCLIB(self, lclib_path):
 
         with open(lclib_path, 'w') as output_file:
-            for row in self.cur.execute('SELECT flare_object FROM flares'):
+            for row in self.cur.execute('SELECT flare_object FROM flares ORDER BY flare_index'):
                 flare = pickle.loads(row[0])
                 flare.dump_flare_to_LCLIB(output_file)
 
@@ -55,13 +56,47 @@ class MDwarfFlareDB:
 
         return mask, sorted_prob_index[threshold_index:]
 
+    def add_NON_PERIODIC_LCLIB_header(self, count, output_file):
+        """
+        Function to write the header of the lclib file.
+        """
+
+        header = ('DOCUMENTATION:\n'
+                '  PURPOSE: m Dwarf Flare model, Based on Kepler light curves and estimated distances from Gaia\n'
+                '  REF:\n'
+                '  - AUTHOR: Ved Shah\n'
+                '  USAGE_KEY: GENMODEL\n'
+                '  NOTES:\n'
+                '  - M dwarf flare simulation based on Kepler data extrapolated for LSST\n'
+                '  - Flare instances were taken from Yang et al. (2017)\n'
+                '  - Distance data was taken from A Bailer Jones et al. (2021)\n'
+                '  - Model Version number: {version_no}\n'
+                '  PARAMS:\n'  
+                '  - MWEBV - Milkyway E(B-V) from 3D dust model\n'
+                '  - KIC_ID - Kepler Input Catalogue ID\n'
+                '  - flare_temp_low - Temperature of the flare for spectral modelling with wavelength > balmer (in K)\n'
+                '  - flare_temp_high - Temperature of the flare for spectral modelling with wavelength < balmer (in K)\n'
+                '  - star_temp - Temperature of the star for spectral modelling (in K)\n'
+                '  - distance - Distance to the star (in kpc)\n'
+                '  - start_time - Start time of the reference flare (in BKJD)\n'
+                '  - end_time - End time of the reference flare (in BKJD)\n'
+                'DOCUMENTATION_END:\n\n'
+                'SURVEY: LSST\n'
+                'FILTERS: ugrizY\n'
+                'MODEL: m-Dwarf-Flare-Model\n'
+                'RECUR_TYPE: RECUR-NONPERIODIC\n'
+                'MODEL_PARNAMES: MWEBV,KIC_ID,start_time,end_time,flare_temp_low,flare_temp_high,star_temp,distance.\n'
+                'NEVENT: {count}\n\n').format(count = count, version_no = version)
+        output_file.write(header)
+
     def get_flare_healpix_indices(self, nside):
-    
-        ra = list(self.cur.execute('SELECT ra FROM flares')) * u.deg
-        dec = list(self.cur.execute('SELECT dec FROM flares')) * u.deg
+        
+        print('Getting coordinates from the DB....')
+        ra, dec = zip(*self.cur.execute('SELECT ra, dec FROM flares'))
+        print('Making coordinates objects....')
+        coordinates = SkyCoord(ra=list(ra), dec=list(dec), frame=ICRS, unit='deg')
 
-        coordinates = SkyCoord(ra = ra, dec = dec, frame=ICRS)
-
+        print('Converting coordinates to helpix')
         map = astropy_healpix.HEALPix(nside, frame=ICRS, order="nested")
         hp_index = map.skycoord_to_healpix(coordinates, return_offsets=False)
 
@@ -80,7 +115,7 @@ class MDwarfFlareDB:
         with open(lclib_path, 'w') as output_file:
             for i in range(len(healpix_indices)):
                 if (healpix_indices[i] in high_prob_flare_indices):
-                    for row in self.cur.execute('SELECT flare_object FROM flares WHERE flare_index = {}'.format(i)):
+                    for row in self.cur.execute('SELECT flare_object FROM flares WHERE flare_index = {} ORDER BY flare_index'.format(i)):
                         flare = pickle.loads(row[0])
                         flare.dump_flare_to_LCLIB(output_file)
                         if to_plot:
@@ -104,36 +139,59 @@ class MDwarfFlareDB:
         rng = np.random.default_rng(42)
         offsets = rng.uniform(low=0, high=window, size=1000000)
 
-        skymap = Table.read(skymap_path)
+        skymap = Table.read(skymap_path, format='fits')
         nside = hp.npix2nside(len(skymap))
 
+        print('Finding high CI healpix indices')
         mask, high_prob_flare_indices = self.get_confidence_interval_mask(skymap, confidence_interval)
-        high_prob_flare_indices = frozenset(high_prob_flare_indices)
+        #high_prob_flare_indices = frozenset(high_prob_flare_indices)
+
+        print('Getting the flare helpix indices')
         healpix_indices = self.get_flare_healpix_indices(nside)
 
         ra = []
         dec = []
+        local_flare_count = 0
+
         with open(lclib_path, 'w') as output_file:
+            
+            print('Isolating Flares...')
+
             for i in range(len(healpix_indices)):
                 if (healpix_indices[i] in high_prob_flare_indices):
                     for row in self.cur.execute('SELECT flare_object FROM flares WHERE flare_index = {} ORDER BY flare_index'.format(i)):
                         flare = pickle.loads(row[0])
+
+                        # Relocating the flare to fall withing a certain period after the GW trigger
                         flare.relocate_flare_near_GW_trigger(gw_trigger_time, offsets[i])
-                        flare.add_survey_start_and_end_obsv(survey_start_time, survey_end_time)
+
+                        # the -0.1 is a hack to make sure the flare starts before teh survey start
+                        flare.add_survey_start_and_end_obsv(survey_start_time - 0.1, survey_end_time)
+                        
                         flare.dump_flare_to_LCLIB(output_file)
+
+                        local_flare_count += 1
+
                         if to_plot:
                             ra.append(flare.coordinates.ra)
                             dec.append(flare.coordinates.dec)
 
+        header_name = lclib_path.split('.')[0] + '_HEADER.TEXT'
+        print('Saving the header as' + header_name)
+        # Write the LCLIB header
+        with open(header_name, 'w') as header_file:
+            self.add_NON_PERIODIC_LCLIB_header(local_flare_count, header_file)
+
+
         if to_plot:
 
-            plotGenricSkyMap(SkyCoord(ra=ra*u.deg, dec=dec*u.deg))
-
-            hp.mollview(np.log10(skymap['PROB']), nest=True, min = -3, max = 0, title="Log Prob for GW event")
+            hp.mollview(skymap['PROB'], nest=True, title="Prob for GW event")
             hp.graticule(coord="E")
 
             hp.mollview(mask , nest=True, cmap='Greys',title="{}% Confidence interval healpix mask".format(confidence_interval * 100))
             hp.graticule(coord="E")
+
+            plotGenricSkyMap(SkyCoord(ra=ra*u.deg, dec=dec*u.deg))
 
             plt.show()
 

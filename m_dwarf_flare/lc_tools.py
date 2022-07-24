@@ -405,22 +405,18 @@ def add_LCLIB_header(count, output_file):
     Function to write the header of the lclib file.
     """
 
-    header = ('SURVEY: LSST\n'
-              'FILTERS: ugrizY\n'
-              'MODEL: m-Dwarf-Flare-Model\n'
-              'RECUR_TYPE: NON-RECUR\n'
-              'MODEL_PARNAMES: KIC_ID,start_time,end_time,flare_temp_low,flare_temp_high,star_temp,distance.\n'
-              'NEVENT: {count}\n\n'
-              'DOCUMENTATION:\n'
+    header = ('DOCUMENTATION:\n'
               '  PURPOSE: m Dwarf Flare model, Based on Kepler light curves and estimated distances from Gaia\n'
               '  REF:\n'
               '  - AUTHOR: Ved Shah\n'
               '  USAGE_KEY: GENMODEL\n'
               '  NOTES:\n'
+              '  - M dwarf flare simulation based on Kepler data extrapolated for LSST\n'
               '  - Flare instances were taken from Yang et al. (2017)\n'
               '  - Distance data was taken from A Bailer Jones et al. (2021)\n'
               '  - Model Version number: {version_no}\n'
               '  PARAMS:\n'  
+              '  - MWEBV - Milkyway E(B-V) from 3D dust model\n'
               '  - KIC_ID - Kepler Input Catalogue ID\n'
               '  - flare_temp_low - Temperature of the flare for spectral modelling with wavelength > balmer (in K)\n'
               '  - flare_temp_high - Temperature of the flare for spectral modelling with wavelength < balmer (in K)\n'
@@ -428,5 +424,11 @@ def add_LCLIB_header(count, output_file):
               '  - distance - Distance to the star (in kpc)\n'
               '  - start_time - Start time of the reference flare (in BKJD)\n'
               '  - end_time - End time of the reference flare (in BKJD)\n'
-              'DOCUMENTATION_END:\n\n').format(count = count, version_no = version)
+              'DOCUMENTATION_END:\n\n'
+              'SURVEY: LSST\n'
+              'FILTERS: ugrizY\n'
+              'MODEL: m-Dwarf-Flare-Model\n'
+              'RECUR_TYPE: NON-RECUR\n'
+              'MODEL_PARNAMES: MWEBV,KIC_ID,start_time,end_time,flare_temp_low,flare_temp_high,star_temp,distance.\n'
+              'NEVENT: {count}\n\n').format(count = count, version_no = version)
     output_file.write(header)
