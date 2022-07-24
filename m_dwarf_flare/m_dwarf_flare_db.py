@@ -16,6 +16,7 @@ from astropy import units as u
 import matplotlib.pyplot as plt
 from m_dwarf_flare.plotting_tools import plotGenricSkyMap
 from m_dwarf_flare._version import version
+from m_dwarf_flare.simlib import SIMLIB_OBJ, SIMLIB_OBS
 
 class MDwarfFlareDB:
 
@@ -195,7 +196,76 @@ class MDwarfFlareDB:
 
             plt.show()
 
+    def sub_sample_simlib(self, args):
 
+        simlib_path = args.input_simlib
+        sub_sampled_simlib_path = args.output_simlib
+        skymap_path = args.skymap
+
+        GW_trigger_time = args.trigger_time
+        before_trigger = args.time_before_trigger
+        after_trigger = args.time_after_trigger
+        confidence_interval = args.ci
+
+        skymap = Table.read(skymap_path, format='fits')
+        nside = hp.npix2nside(len(skymap))
+
+        print('Finding high CI healpix indices')
+        mask, high_prob_flare_indices = self.get_confidence_interval_mask(skymap, confidence_interval)
+
+        with open(simlib_path, 'r') as simlib:
+
+            with open(sub_sampled_simlib_path, 'w') as output:
+
+                SIMLIB_INSTANCE = None
+                data = ""
+                count = 0
+                valid_count = 0
+
+                for line in simlib:
+                    
+                    if line == "# --------------------------------------------\n":
+
+                        if count == 0:
+
+                            # If it is the first observation, this is the header
+                            SIMLIB_INSTANCE = SIMLIB_OBJ(data)
+
+                        else:
+
+                            # If it is not the first observation, this is an obs
+                            obs = SIMLIB_INSTANCE.getObservation(data)
+
+
+                            if obs.isInCIPixel(nside, high_prob_flare_indices):
+                                
+                                start_time = GW_trigger_time - before_trigger
+                                end_time = GW_trigger_time + after_trigger
+
+                                # Number of instances in the time range
+                                ncount = obs.countInTimeRange(start_time, end_time)
+
+                                if ncount > 0:
+                                    
+                                    # Writing the header
+                                    if valid_count == 0:
+                                        output.write(SIMLIB_INSTANCE.header + '\n')
+                                        output.write("# --------------------------------------------\n")
+
+                                    # Write the sampled SIMILIB obs to file
+                                    obs.writeSubSampledObs(start_time, end_time, ncount, valid_count, output)
+
+                                    valid_count += 1
+
+                        data = ""
+                        count += 1
+            
+
+                    else:
+                        data += line
+                
+                print('{}: Sub sampled {} out of {} observations'.format(simlib_path, valid_count, count))
+        
 def main():
     def parse_args_main():
     
@@ -331,3 +401,41 @@ def db_to_density_map():
     print("Writing density map to FITS file...")
     hp.fitsfunc.write_map(args.output_path, prob, column_names=['PROB'], nest=True, coord='C', overwrite=True)
     print("Saved!")
+
+def sub_sample_simlib():
+    def parse_args():
+    
+        # Getting Arguments
+        argparser = argparse.ArgumentParser(
+            description='Sub sample the simlib based on the GW sky map, GW trigger time, and the time interval \
+                        within which the observations must occur')
+
+        argparser.add_argument('input_simlib', type=str,
+                            help='Path to original simlib which needs to be sub sampled')
+        argparser.add_argument('output_simlib', type=str,
+                            help='Path to output simlib')
+        argparser.add_argument('skymap', type=str,
+                            help='Path to GW skymap fits file used for sub sampling')
+        argparser.add_argument('ci', type=float,
+                            help='The confidence interval to use for subsampling the simlib. Must be in [0,1]')
+        argparser.add_argument('trigger_time', type=float,
+                            help='The trigger time for the GW event in MJD')
+        argparser.add_argument('time_before_trigger', type=float,
+                            help='Interval before the GW trigger time till which to sub sample the simlib. \
+                                All values that lie within the CI and [GW trigger - time_before_trigger, GW trigger + time_after_trigger]\
+                                will be sampled from the input simlib')
+        argparser.add_argument('time_after_trigger', type=float,
+                            help='Interval after the GW trigger time till which to sub sample the simlib. \
+                                All values that lie within the CI and [GW trigger - time_before_trigger, GW trigger + time_after_trigger]\
+                                will be sampled from the input simlib')
+
+
+        args = argparser.parse_args()
+
+        return args
+
+    # Arguments
+    args = parse_args()
+
+    flare_db = MDwarfFlareDB('flares_1M.db')
+    flare_db.sub_sample_simlib(args)
