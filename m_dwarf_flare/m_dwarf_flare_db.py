@@ -246,11 +246,6 @@ class MDwarfFlareDB:
                                 ncount = obs.countInTimeRange(start_time, end_time)
 
                                 if ncount > 0:
-                                    
-                                    # Writing the header
-                                    if valid_count == 0:
-                                        output.write(SIMLIB_INSTANCE.header + '\n')
-                                        output.write("# --------------------------------------------\n")
 
                                     # Write the sampled SIMILIB obs to file
                                     obs.writeSubSampledObs(start_time, end_time, ncount, valid_count, output)
@@ -263,9 +258,16 @@ class MDwarfFlareDB:
 
                     else:
                         data += line
-                
+
+                output.write('END_OF_SIMLIB: {} ENTRIES%\n'.format(valid_count))
                 print('{}: Sub sampled {} out of {} observations'.format(simlib_path, valid_count, count))
         
+                with open(sub_sampled_simlib_path.split('.')[0] + 'SIMLIB_HEADER.TEXT', 'w') as header:
+
+                    SIMLIB_INSTANCE.writeCustomHeader(header, valid_count)
+
+
+
 def main():
     def parse_args_main():
     
