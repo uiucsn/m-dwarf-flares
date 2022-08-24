@@ -94,10 +94,7 @@ class SIMLIB_OBS:
 
             vals = self.obs_rows[i].split(' ')
             MJD = float(vals[1])
-
-            # If any observation lies within the range, return true
-            if  MJD >= timeStart and MJD <= timeEnd:
-                file.write(self.obs_rows[i]+'\n')
+            file.write(self.obs_rows[i]+'\n')
 
         file.write('END_LIBID: {}\n'.format(libid))
 
