@@ -36,9 +36,23 @@ class MDwarfFlareDB:
             for row in self.cur.execute('SELECT flare_object FROM flares ORDER BY flare_index'):
                 flare = pickle.loads(row[0])
                 flare.dump_flare_to_LCLIB(output_file)
+                print(i)
+                i += 1
 
 
     def get_confidence_interval_mask(self, skymap, confidence_interval):
+        """
+        Create a mask for the region of the skymap that lies withing the 
+        the mentioned confidence interval. 
+
+        Args:
+            skymap (fits Table): The sky map for the KN. Order must be nested. Any N side is allowed.
+            confidence_interval (float): Confidence interval for which the map needs to be built.
+
+        Returns:
+            mask: If the healpix pixel lies inside the CI region, it is marked with a 1, else it's a 0.
+            pixel indices: Healpix indices of the pixels lying in the Confidence interval region
+        """
 
         prob = skymap["PROB"]
         sorted_prob_index = np.argsort(prob)
@@ -56,6 +70,7 @@ class MDwarfFlareDB:
         mask[sorted_prob_index[threshold_index:]] = 1
 
         return mask, sorted_prob_index[threshold_index:]
+
 
     def add_NON_PERIODIC_LCLIB_header(self, count, output_file):
         """
@@ -103,12 +118,13 @@ class MDwarfFlareDB:
 
         return hp_index
 
-    def get_flares_in_skymap_ci(self, skymap_path, confidence_interval, lclib_path, to_plot):
+    def dump_flares_in_skymap_ci(self, skymap_path, confidence_interval, lclib_path, to_plot):
 
         skymap = Table.read(skymap_path)
         nside = hp.npix2nside(len(skymap))
 
         mask, high_prob_flare_indices = self.get_confidence_interval_mask(skymap, confidence_interval)
+        high_prob_flare_indices = frozenset(high_prob_flare_indices)
         healpix_indices = self.get_flare_healpix_indices(nside)
 
         ra = []
@@ -309,7 +325,7 @@ def gw_event_localized_flares():
         argparser.add_argument('--output_file_path', type=str, required=True,
                             help='Path of the output LCLIB file. Should have a .TEXT extension')
         argparser.add_argument('--fits_file_path', type=str, required=True,
-                            help='Path to the fits file of the GW event. Should be a single order fits file. Uses the same nside value as fit file for picking the flares using healpix')
+                            help='Path to the fits file of the GW event. Should be a single order fits file. Uses the same nside value as fit file for picking the flares using healpix. Nested, single order sky maps only')
         argparser.add_argument('--con_int', type=float, required=True,
                             help='Confidence interval of the area from which the flares are picked. CI should be between 0 and 1 inclusive')
         argparser.add_argument('--make_plots',  required=False, action='store_true',
@@ -328,7 +344,7 @@ def gw_event_localized_flares():
     args = parse_args()
 
     flare_db = MDwarfFlareDB(args.db_path)
-    flare_db.get_flares_in_skymap_ci(args.fits_file_path, args.con_int, args.output_file_path, args.make_plots)
+    flare_db.dump_flares_in_skymap_ci(args.fits_file_path, args.con_int, args.output_file_path, args.make_plots)
 
 def localize_flares_for_KN():
     def parse_args():

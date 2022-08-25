@@ -4,6 +4,7 @@ import os
 import numpy as np
 import sqlite3
 import json
+from m_dwarf_flare.data import get_LSST_extinction
 
 # 4 is the highest pickle protocol for Python 3.7, which is the minimum Python version we support. 
 # This is to ensure that future python versions can make use of the pickled objects.
@@ -54,13 +55,18 @@ class MDwarfFlare:
 
     def dump_flare_to_LCLIB(self, output_file):
 
+        # Calculating the MW extinction value
+        rv = get_LSST_extinction()
+        e_bv = self.extinction['u'] / rv['u']
+
         event_marker = "#------------------------------\n"
         start = "START_EVENT: {}\n".format(self.index)
         end = "END_EVENT: {}\n".format(self.index)
         nrow = "NROW: {nrow} l: {l:.5f} b: {b:.5f}.\n".format(nrow = len(self.lightcurves['kep'].time), 
                                                                 l = self.galactic_coordinate.l.value, 
                                                                 b = self.galactic_coordinate.b.value)
-        parameters = "PARVAL: {KIC_ID} {start} {end} {f_temp_low:.2f} {f_temp_high:.2f} {s_temp:.2f} {dist:.7f}\n".format(KIC_ID = self.kic_id, 
+        parameters = "PARVAL: {ebv:.3f} {KIC_ID} {start} {end} {f_temp_low:.2f} {f_temp_high:.2f} {s_temp:.2f} {dist:.4f}\n".format( ebv=e_bv,
+                                                                                        KIC_ID = self.kic_id, 
                                                                                         f_temp_low = self.flare_temp_low,
                                                                                         f_temp_high = self.flare_temp_high,  
                                                                                         s_temp = self.star_temp, 

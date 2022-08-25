@@ -356,7 +356,7 @@ def find_nearest_index(lc_time, value):
     else:
         return index
 
-def dump_modeled_data_to_LCLIB(index, l, b, KIC_ID, start_time, end_time, star_temp, flare_temp_low, flare_temp_high, distance, mags, output_file):
+def dump_modeled_data_to_LCLIB(index, l, b, KIC_ID, start_time, end_time, star_temp, flare_temp_low, flare_temp_high, distance, mags, ebv, output_file):
     """
     Function to write generated model magnitudes to lclib entries.
 
@@ -379,7 +379,8 @@ def dump_modeled_data_to_LCLIB(index, l, b, KIC_ID, start_time, end_time, star_t
     nrow = "NROW: {nrow} l: {l:.5f} b: {b:.5f}.\n".format(nrow = len(mags['kep'].time), 
                                                             l = l.value, 
                                                             b = b.value)
-    parameters = "PARVAL: {KIC_ID} {start} {end} {f_temp_low:.2f} {f_temp_high:.2f} {s_temp:.2f} {dist:.7f}\n".format(KIC_ID = KIC_ID, 
+    parameters = "PARVAL: {ebv:.3f} {KIC_ID} {start} {end} {f_temp_low:.2f} {f_temp_high:.2f} {s_temp:.2f} {dist:.4f}\n".format( ebv = ebv,
+                                                                                    KIC_ID = KIC_ID, 
                                                                                     f_temp_low = flare_temp_low,
                                                                                     f_temp_high = flare_temp_high,  
                                                                                     s_temp = star_temp, 
@@ -404,6 +405,7 @@ def add_LCLIB_header(count, output_file):
     """
     Function to write the header of the lclib file.
     """
+
 
     header = ('DOCUMENTATION:\n'
               '  PURPOSE: m Dwarf Flare model, Based on Kepler light curves and estimated distances from Gaia\n'
