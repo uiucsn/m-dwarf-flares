@@ -94,6 +94,43 @@ class MDwarfFlare:
         simulation = event_marker + start + nrow + parameters + angle_match + readings + end
         output_file.write(simulation)
     
+    def relocate_flare_near_GW_trigger(self, GW_trigger_time, offset):
+
+        for passband in self.lightcurves:
+
+            lc = self.lightcurves[passband]
+
+            # Translating the flare to start 
+            lc.time -= lc.time[0]
+
+            # Flare starts exactly at the GW trigger time
+            lc.time += GW_trigger_time
+
+            # Adding an offset, such that the flare starts at
+            # 'offset' days after the GW trigger time.
+            lc.time += offset
+
+            # Replacing the lc
+            self.lightcurves[passband] = lc
+
+    def add_survey_start_and_end_obsv(self, survey_start_time, survey_end_time):
+
+        for passband in self.lightcurves:
+
+            lc = self.lightcurves[passband]
+
+            # Adding observation before the flare at survey_start_time
+            lc.time = np.insert(lc.time, 0, survey_start_time, axis=0)
+            lc.flux = np.insert(lc.flux, 0, lc.flux[0], axis=0)
+
+            # Adding observation after the flare at survey_end_time
+            lc.time = np.append(lc.time, survey_end_time)
+            lc.flux = np.append(lc.flux, lc.flux[-1])
+
+            # Replacing the lc
+            self.lightcurves[passband] = lc
+            
+
     def save_flare_to_sqlite_db(self, db):
 
         bytes = pickle.dumps(self, protocol=PICKLE_PROTOCOL)

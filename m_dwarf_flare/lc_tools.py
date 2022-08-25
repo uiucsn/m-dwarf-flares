@@ -406,13 +406,8 @@ def add_LCLIB_header(count, output_file):
     Function to write the header of the lclib file.
     """
 
-    header = ('SURVEY: LSST\n'
-              'FILTERS: ugrizY\n'
-              'MODEL: m-Dwarf-Flare-Model\n'
-              'RECUR_TYPE: NON-RECUR\n'
-              'MODEL_PARNAMES: MWEBV,KIC_ID,start_time,end_time,flare_temp_low,flare_temp_high,star_temp,distance.\n'
-              'NEVENT: {count}\n\n'
-              'DOCUMENTATION:\n'
+
+    header = ('DOCUMENTATION:\n'
               '  PURPOSE: m Dwarf Flare model, Based on Kepler light curves and estimated distances from Gaia\n'
               '  REF:\n'
               '  - AUTHOR: Ved Shah\n'
@@ -431,5 +426,11 @@ def add_LCLIB_header(count, output_file):
               '  - distance - Distance to the star (in kpc)\n'
               '  - start_time - Start time of the reference flare (in BKJD)\n'
               '  - end_time - End time of the reference flare (in BKJD)\n'
-              'DOCUMENTATION_END:\n\n').format(count = count, version_no = version)
+              'DOCUMENTATION_END:\n\n'
+              'SURVEY: LSST\n'
+              'FILTERS: ugrizY\n'
+              'MODEL: m-Dwarf-Flare-Model\n'
+              'RECUR_TYPE: NON-RECUR\n'
+              'MODEL_PARNAMES: MWEBV,KIC_ID,start_time,end_time,flare_temp_low,flare_temp_high,star_temp,distance.\n'
+              'NEVENT: {count}\n\n').format(count = count, version_no = version)
     output_file.write(header)

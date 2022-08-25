@@ -15,6 +15,8 @@ import astropy_healpix
 from astropy import units as u
 import matplotlib.pyplot as plt
 from m_dwarf_flare.plotting_tools import plotGenricSkyMap
+from m_dwarf_flare._version import version
+from m_dwarf_flare.simlib import SIMLIB_OBJ, SIMLIB_OBS
 
 class MDwarfFlareDB:
 
@@ -31,8 +33,7 @@ class MDwarfFlareDB:
     def write_all_flares_to_LCLIB(self, lclib_path):
 
         with open(lclib_path, 'w') as output_file:
-            i = 0
-            for row in self.cur.execute('SELECT flare_object FROM flares'):
+            for row in self.cur.execute('SELECT flare_object FROM flares ORDER BY flare_index'):
                 flare = pickle.loads(row[0])
                 flare.dump_flare_to_LCLIB(output_file)
                 print(i)
@@ -70,20 +71,48 @@ class MDwarfFlareDB:
 
         return mask, sorted_prob_index[threshold_index:]
 
+
+    def add_NON_PERIODIC_LCLIB_header(self, count, output_file):
+        """
+        Function to write the header of the lclib file.
+        """
+
+        header = ('DOCUMENTATION:\n'
+                '  PURPOSE: m Dwarf Flare model, Based on Kepler light curves and estimated distances from Gaia\n'
+                '  REF:\n'
+                '  - AUTHOR: Ved Shah\n'
+                '  USAGE_KEY: GENMODEL\n'
+                '  NOTES:\n'
+                '  - M dwarf flare simulation based on Kepler data extrapolated for LSST\n'
+                '  - Flare instances were taken from Yang et al. (2017)\n'
+                '  - Distance data was taken from A Bailer Jones et al. (2021)\n'
+                '  - Model Version number: {version_no}\n'
+                '  PARAMS:\n'  
+                '  - MWEBV - Milkyway E(B-V) from 3D dust model\n'
+                '  - KIC_ID - Kepler Input Catalogue ID\n'
+                '  - flare_temp_low - Temperature of the flare for spectral modelling with wavelength > balmer (in K)\n'
+                '  - flare_temp_high - Temperature of the flare for spectral modelling with wavelength < balmer (in K)\n'
+                '  - star_temp - Temperature of the star for spectral modelling (in K)\n'
+                '  - distance - Distance to the star (in kpc)\n'
+                '  - start_time - Start time of the reference flare (in BKJD)\n'
+                '  - end_time - End time of the reference flare (in BKJD)\n'
+                'DOCUMENTATION_END:\n\n'
+                'SURVEY: LSST\n'
+                'FILTERS: ugrizY\n'
+                'MODEL: m-Dwarf-Flare-Model\n'
+                'RECUR_TYPE: RECUR-NONPERIODIC\n'
+                'MODEL_PARNAMES: MWEBV,KIC_ID,start_time,end_time,flare_temp_low,flare_temp_high,star_temp,distance.\n'
+                'NEVENT: {count}\n\n').format(count = count, version_no = version)
+        output_file.write(header)
+
     def get_flare_healpix_indices(self, nside):
-        """
-        Get the nested order healpix indices for all the flares for the given nside.
-
-        Args:
-            nside (int): The nside for which the flare indices should be calculated.
-
-        Returns:
-            flare indices: The index of the healpix pixel in which that flare lies.
-        """
-    
+        
+        print('Getting coordinates from the DB....')
         ra, dec = zip(*self.cur.execute('SELECT ra, dec FROM flares'))
+        print('Making coordinates objects....')
         coordinates = SkyCoord(ra=list(ra), dec=list(dec), frame=ICRS, unit='deg')
 
+        print('Converting coordinates to helpix')
         map = astropy_healpix.HEALPix(nside, frame=ICRS, order="nested")
         hp_index = map.skycoord_to_healpix(coordinates, return_offsets=False)
 
@@ -121,6 +150,138 @@ class MDwarfFlareDB:
             hp.graticule(coord="E")
 
             plt.show()
+
+    def get_flares_for_KN(self, skymap_path, confidence_interval, lclib_path, gw_trigger_time, survey_start_time, survey_end_time, window, to_plot):
+        
+        rng = np.random.default_rng(42)
+        offsets = rng.uniform(low=0, high=window, size=1000000)
+
+        skymap = Table.read(skymap_path, format='fits')
+        nside = hp.npix2nside(len(skymap))
+
+        print('Finding high CI healpix indices')
+        mask, high_prob_flare_indices = self.get_confidence_interval_mask(skymap, confidence_interval)
+        #high_prob_flare_indices = frozenset(high_prob_flare_indices)
+
+        print('Getting the flare helpix indices')
+        healpix_indices = self.get_flare_healpix_indices(nside)
+
+        ra = []
+        dec = []
+        local_flare_count = 0
+
+        with open(lclib_path, 'w') as output_file:
+            
+            print('Isolating Flares...')
+
+            for i in range(len(healpix_indices)):
+                if (healpix_indices[i] in high_prob_flare_indices):
+                    for row in self.cur.execute('SELECT flare_object FROM flares WHERE flare_index = {} ORDER BY flare_index'.format(i)):
+                        flare = pickle.loads(row[0])
+
+                        # Relocating the flare to fall withing a certain period after the GW trigger
+                        flare.relocate_flare_near_GW_trigger(gw_trigger_time, offsets[i])
+
+                        # the -0.1 is a hack to make sure the flare starts before teh survey start
+                        flare.add_survey_start_and_end_obsv(survey_start_time - 0.1, survey_end_time)
+                        
+                        flare.dump_flare_to_LCLIB(output_file)
+
+                        local_flare_count += 1
+
+                        if to_plot:
+                            ra.append(flare.coordinates.ra)
+                            dec.append(flare.coordinates.dec)
+
+        header_name = lclib_path.split('.')[0] + '_HEADER.TEXT'
+        print('Saving the header as' + header_name)
+        # Write the LCLIB header
+        with open(header_name, 'w') as header_file:
+            self.add_NON_PERIODIC_LCLIB_header(local_flare_count, header_file)
+
+
+        if to_plot:
+
+            hp.mollview(skymap['PROB'], nest=True, title="Prob for GW event")
+            hp.graticule(coord="E")
+
+            hp.mollview(mask , nest=True, cmap='Greys',title="{}% Confidence interval healpix mask".format(confidence_interval * 100))
+            hp.graticule(coord="E")
+
+            plotGenricSkyMap(SkyCoord(ra=ra*u.deg, dec=dec*u.deg))
+
+            plt.show()
+
+    def sub_sample_simlib(self, args):
+
+        simlib_path = args.input_simlib
+        sub_sampled_simlib_path = args.output_simlib
+        skymap_path = args.skymap
+
+        GW_trigger_time = args.trigger_time
+        before_trigger = args.time_before_trigger
+        after_trigger = args.time_after_trigger
+        confidence_interval = args.ci
+
+        skymap = Table.read(skymap_path, format='fits')
+        nside = hp.npix2nside(len(skymap))
+
+        print('Finding high CI healpix indices')
+        mask, high_prob_flare_indices = self.get_confidence_interval_mask(skymap, confidence_interval)
+
+        with open(simlib_path, 'r') as simlib:
+
+            with open(sub_sampled_simlib_path, 'w') as output:
+
+                SIMLIB_INSTANCE = None
+                data = ""
+                count = 0
+                valid_count = 0
+
+                for line in simlib:
+                    
+                    if line == "# --------------------------------------------\n":
+
+                        if count == 0:
+
+                            # If it is the first observation, this is the header
+                            SIMLIB_INSTANCE = SIMLIB_OBJ(data)
+
+                        else:
+
+                            # If it is not the first observation, this is an obs
+                            obs = SIMLIB_INSTANCE.getObservation(data)
+
+
+                            if obs.isInCIPixel(nside, high_prob_flare_indices):
+                                
+                                start_time = GW_trigger_time - before_trigger
+                                end_time = GW_trigger_time + after_trigger
+
+                                # Number of instances in the time range
+                                ncount = obs.countInTimeRange(start_time, end_time)
+
+                                if ncount > 0:
+
+                                    # Write the sampled SIMILIB obs to file
+                                    obs.writeSubSampledObs(start_time, end_time, ncount, valid_count, output)
+
+                                    valid_count += 1
+
+                        data = ""
+                        count += 1
+            
+
+                    else:
+                        data += line
+
+                output.write('END_OF_SIMLIB: {} ENTRIES%\n'.format(valid_count))
+                print('{}: Sub sampled {} out of {} observations'.format(simlib_path, valid_count, count))
+        
+                with open(sub_sampled_simlib_path.split('.')[0] + 'SIMLIB_HEADER.TEXT', 'w') as header:
+
+                    SIMLIB_INSTANCE.writeCustomHeader(header, valid_count)
+
 
 
 def main():
@@ -185,6 +346,48 @@ def gw_event_localized_flares():
     flare_db = MDwarfFlareDB(args.db_path)
     flare_db.dump_flares_in_skymap_ci(args.fits_file_path, args.con_int, args.output_file_path, args.make_plots)
 
+def localize_flares_for_KN():
+    def parse_args():
+    
+        # Getting Arguments
+        argparser = argparse.ArgumentParser(
+            description='Write files from db that lie within the CI of the skymap to a LCLIB file')
+
+        argparser.add_argument('--db_path', type=str, required=True,
+                            help='Path to the DB file.')
+        argparser.add_argument('--output_file_path', type=str, required=True,
+                            help='Path of the output LCLIB file. Should have a .TEXT extension')
+        argparser.add_argument('--fits_file_path', type=str, required=True,
+                            help='Path to the fits file of the GW (KN) event. Should be a single order fits file. Uses the same nside value as fit file for picking the flares using healpix')
+        argparser.add_argument('--con_int', type=float, required=True,
+                            help='Confidence interval of the area from which the flares are picked. CI should be between 0 and 1 inclusive')
+        argparser.add_argument('--gw_trigger', type=float, required=True,
+                            help='The gravitational trigger time in mjd.')
+        argparser.add_argument('--survey_start', type=float, required=True,
+                            help='The survey start time in mjd.')
+        argparser.add_argument('--survey_end', type=float, required=True,
+                            help='The survey end time in mjd.')
+        argparser.add_argument('--window', type=float, required=False, default=1.0,
+                            help='The flares will start within window number of days of the GW trigger [Default is 1 day].')
+        argparser.add_argument('--make_plots',  required=False, action='store_true',
+                            help='Construct plots for GW events, the CI area mask and the flare objects skymap')
+        args = argparser.parse_args()
+
+        if not args.output_file_path.endswith(".TEXT"):
+            print('Output file must be a .TEXT file. Aborting process.')
+            sys.exit(1)
+        if args.con_int < 0 or args.con_int > 1:
+            print('CI should be between 0 and 1 inclusive. Aborting process.')
+            sys.exit(1)
+        return args
+
+    # Arguments
+    args = parse_args()
+
+    print("Connecting to the DB.")
+    flare_db = MDwarfFlareDB(args.db_path)
+    flare_db.get_flares_for_KN(args.fits_file_path, args.con_int, args.output_file_path, args.gw_trigger, args.survey_start, args.survey_end, args.window, args.make_plots)
+
 def db_to_density_map():
     def parse_args():
     
@@ -216,3 +419,41 @@ def db_to_density_map():
     print("Writing density map to FITS file...")
     hp.fitsfunc.write_map(args.output_path, prob, column_names=['PROB'], nest=True, coord='C', overwrite=True)
     print("Saved!")
+
+def sub_sample_simlib():
+    def parse_args():
+    
+        # Getting Arguments
+        argparser = argparse.ArgumentParser(
+            description='Sub sample the simlib based on the GW sky map, GW trigger time, and the time interval \
+                        within which the observations must occur')
+
+        argparser.add_argument('input_simlib', type=str,
+                            help='Path to original simlib which needs to be sub sampled')
+        argparser.add_argument('output_simlib', type=str,
+                            help='Path to output simlib')
+        argparser.add_argument('skymap', type=str,
+                            help='Path to GW skymap fits file used for sub sampling')
+        argparser.add_argument('ci', type=float,
+                            help='The confidence interval to use for subsampling the simlib. Must be in [0,1]')
+        argparser.add_argument('trigger_time', type=float,
+                            help='The trigger time for the GW event in MJD')
+        argparser.add_argument('time_before_trigger', type=float,
+                            help='Interval before the GW trigger time till which to sub sample the simlib. \
+                                All values that lie within the CI and [GW trigger - time_before_trigger, GW trigger + time_after_trigger]\
+                                will be sampled from the input simlib')
+        argparser.add_argument('time_after_trigger', type=float,
+                            help='Interval after the GW trigger time till which to sub sample the simlib. \
+                                All values that lie within the CI and [GW trigger - time_before_trigger, GW trigger + time_after_trigger]\
+                                will be sampled from the input simlib')
+
+
+        args = argparser.parse_args()
+
+        return args
+
+    # Arguments
+    args = parse_args()
+
+    flare_db = MDwarfFlareDB('flares_1M.db')
+    flare_db.sub_sample_simlib(args)
